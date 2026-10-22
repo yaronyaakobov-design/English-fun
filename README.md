@@ -2,4 +2,4 @@
 
 לומדים אנגלית בכיף. Design by Yaron Y.
 
-https://tinyurl.com/English-Fun-by-YY
+https://yaronyaakobov-design.github.io/English-fun/
