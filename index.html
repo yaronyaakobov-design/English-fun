@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Fun · Design by Yaron Y</title>
+<meta name="description" content="English Fun – לומדים אנגלית בכיף. Design by Yaron Y">
+<meta name="author" content="Yaron Y">
+<meta property="og:title" content="English Fun · Design by Yaron Y">
+<meta property="og:description" content="לומדים אנגלית בכיף – אותיות, מספרים, צבעים ומילים">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Varela+Round&display=swap">
+<style>
+/* Layout: one-column "school notebook" app. Sticky header with stars, tab bar, one section visible at a time. */
+:root{
+  --bg:#EAF4FA;          /* sky paper */
+  --paper:#FFFFFF;
+  --ink:#1E2A44;
+  --muted:#5B6782;
+  --line:#CFE0EC;
+  --tomato:#F2603F;      /* main accent */
+  --sun:#FFC23D;
+  --grass:#2FA36B;
+  --berry:#8C5BD6;
+  --sky:#3B86D9;
+  --good-bg:#DDF5E8;
+  --bad-bg:#FDE3DC;
+  --shadow:0 3px 0 rgba(30,42,68,.12);
+  --f-display:"Fredoka","Varela Round",system-ui,sans-serif;
+  --f-body:"Varela Round","Fredoka",system-ui,"Arial Hebrew",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13202E;--paper:#1C2C3E;--ink:#EAF1F8;--muted:#A3B3C6;--line:#2C4157;
+  --tomato:#FF7A5C;--sun:#FFCD5C;--grass:#46C186;--berry:#A783EA;--sky:#5FA2EC;
+  --good-bg:#1D4433;--bad-bg:#4A2A24;--shadow:0 3px 0 rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13202E;--paper:#1C2C3E;--ink:#EAF1F8;--muted:#A3B3C6;--line:#2C4157;
+  --tomato:#FF7A5C;--sun:#FFCD5C;--grass:#46C186;--berry:#A783EA;--sky:#5FA2EC;
+  --good-bg:#1D4433;--bad-bg:#4A2A24;--shadow:0 3px 0 rgba(0,0,0,.35);color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px);background-size:100% 34px}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
+.en{font-family:var(--f-display);direction:ltr;unicode-bidi:isolate}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+  padding-block:12px 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;flex:1;min-width:0}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;color:var(--tomato);letter-spacing:.5px}
+.brand span{color:var(--muted);font-size:15px}
+.stars{display:flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--sun);border-radius:999px;padding:4px 14px;font-family:var(--f-display);font-weight:600;font-size:18px}
+.stars b{color:var(--sun);font-size:22px;line-height:1}
+
+nav.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-block:4px 18px}
+nav.tabs button{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 6px;font-size:17px;font-weight:600;box-shadow:var(--shadow)}
+nav.tabs button[aria-selected="true"]{background:var(--tomato);border-color:var(--tomato);color:#fff}
+
+.today{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--paper);border-radius:18px;padding:12px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
+.today .say{margin-inline-start:auto}
+.today .big{font-family:var(--f-display);font-size:24px;font-weight:600}
+.today .big em{font-style:normal;color:var(--tomato)}
+
+.say{border:none;background:var(--sky);color:#fff;border-radius:999px;padding:8px 14px;font-size:16px;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow)}
+.say.alt{background:var(--berry)}
+.say:active{transform:translateY(2px);box-shadow:none}
+
+h2{font-family:var(--f-display);font-size:24px;margin:0 0 10px;text-wrap:balance}
+.hint{color:var(--muted);margin:0 0 14px}
+
+/* Letters */
+.focus{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:var(--paper);border-radius:22px;padding:18px;margin-bottom:18px;box-shadow:var(--shadow)}
+.focus .glyph{font-family:var(--f-display);font-weight:700;font-size:96px;line-height:1;color:var(--tomato);direction:ltr;min-width:170px;text-align:center}
+.focus .glyph small{font-size:72px;color:var(--sky);margin-inline-start:6px}
+.focus .info{display:flex;flex-direction:column;gap:8px;min-width:0}
+.focus .name{font-size:18px}.focus .name b{font-size:22px}
+.focus .word{font-family:var(--f-display);font-size:30px;font-weight:600;direction:ltr;text-align:right}
+.focus .word mark{background:none;color:var(--tomato)}
+.focus .emoji{font-size:40px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pager{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:8px;direction:ltr}
+.tile{position:relative;aspect-ratio:1;max-width:100%;border:2px solid var(--line);background:var(--paper);border-radius:16px;font-family:var(--f-display);font-weight:600;font-size:28px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:2px}
+.tile small{font-size:20px;color:var(--muted)}
+.tile.seen::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--grass)}
+.tile[aria-current="true"]{border-color:var(--tomato);background:var(--tomato);color:#fff}
+.tile[aria-current="true"] small{color:#fff}
+.progress{margin-top:12px;color:var(--muted);font-size:15px}
+
+/* Days */
+.days{display:flex;flex-direction:column;gap:10px}
+.day{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:var(--paper);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);border-inline-start:8px solid var(--c)}
+.day .num{font-family:var(--f-display);font-weight:700;font-size:26px;color:var(--c);text-align:center}
+.day .txt{min-width:0}
+.day .eng{font-family:var(--f-display);font-size:26px;font-weight:600;direction:ltr;display:inline-block}
+.day .he{color:var(--muted);font-size:15px}
+.day .tip{font-size:14px;color:var(--muted)}
+.day.is-today{outline:3px solid var(--sun)}
+.badge{display:inline-block;background:var(--sun);color:#1E2A44;border-radius:999px;font-size:13px;padding:1px 10px;margin-inline-start:8px;vertical-align:middle}
+.yt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.yt div{min-width:0;overflow-wrap:anywhere;background:var(--paper);border-radius:16px;padding:10px;text-align:center;box-shadow:var(--shadow)}
+.yt .lbl{font-family:var(--f-display);font-size:17px;color:var(--tomato);direction:ltr}
+.yt .val{font-family:var(--f-display);font-size:20px;font-weight:600;direction:ltr}
+.yt .he{font-size:13px;color:var(--muted)}
+
+/* Numbers */
+.dotsrow{font-size:22px;line-height:1.3;direction:ltr;text-align:right;letter-spacing:2px;overflow-wrap:anywhere}
+.ntip{background:var(--paper);border-radius:16px;padding:10px 14px;margin-top:14px;box-shadow:var(--shadow);font-size:15px}
+.ntip b{font-family:var(--f-display);direction:ltr;unicode-bidi:isolate}
+.grid.nums .tile{font-size:26px}
+
+/* Colors */
+.colors{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.ccard{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;background:var(--paper);border-radius:18px;padding:10px 12px;box-shadow:var(--shadow);min-width:0}
+.sw{width:56px;height:56px;border-radius:50%;background:var(--sw);border:3px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px}
+.ccard .eng{font-family:var(--f-display);font-size:24px;font-weight:600;direction:ltr;display:block}
+.ccard .he{color:var(--muted);font-size:14px}
+.sentence{background:var(--paper);border-radius:18px;padding:12px 16px;margin-top:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sentence .s{font-family:var(--f-display);font-size:22px;direction:ltr;flex:1;min-width:0}
+.opt.swatch{background:var(--sw);min-height:86px}
+.opt.swatch.right{background:var(--sw);box-shadow:0 0 0 4px var(--grass)}
+.opt.swatch.wrong{background:var(--sw);box-shadow:0 0 0 4px var(--tomato)}
+.opt.swatch.right::after{content:"✓";font-size:34px;color:#fff;text-shadow:0 0 4px #000}
+
+/* Words */
+.words{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.wcard{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;background:var(--paper);border-radius:18px;padding:10px 12px;box-shadow:var(--shadow);min-width:0}
+.wcard .emo{font-size:34px;text-align:center;line-height:1}
+.wcard .eng{font-family:var(--f-display);font-size:24px;font-weight:600;direction:ltr;display:block;overflow-wrap:anywhere}
+.wcard .he{color:var(--muted);font-size:14px}
+.wtools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.words.hide-he .wcard .he{visibility:hidden}
+.wgroup{grid-column:1/-1;font-family:var(--f-display);font-size:20px;margin:10px 0 0}
+.wgroup:first-child{margin-top:0}
+.ex{display:block;border:none;background:none;padding:2px 0 0;font-size:15px;color:var(--sky);text-align:left;direction:ltr;max-width:100%}
+
+/* Games */
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.gcard{text-align:start;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px}
+.gcard .tag{font-size:13px;font-weight:600;color:var(--c)}
+.gcard .t{font-size:19px;font-weight:600}
+.gcard .d{font-size:14px;color:var(--muted)}
+.gcard .best{font-size:13px;color:var(--muted);margin-top:4px}
+
+.quiz{background:var(--paper);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.qhead .title{font-weight:600;flex:1;min-width:0}
+.dots{display:flex;gap:4px;flex-wrap:wrap}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.dots i.ok{background:var(--grass)}.dots i.no{background:var(--tomato)}.dots i.now{outline:2px solid var(--sky)}
+.prompt{text-align:center;padding-block:14px;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.prompt .q{font-size:20px}
+.prompt .bigq{font-family:var(--f-display);font-weight:700;font-size:64px;line-height:1.1;direction:ltr;color:var(--tomato)}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.opt{border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:16px 8px;font-family:var(--f-display);font-weight:600;font-size:30px;direction:ltr;min-height:76px}
+.opt.he{font-family:var(--f-body);direction:rtl;font-size:22px}
+.opt.right{border-color:var(--grass);background:var(--good-bg)}
+.opt.wrong{border-color:var(--tomato);background:var(--bad-bg);animation:shake .35s}
+.opt:disabled{cursor:default}
+.feedback{min-height:32px;text-align:center;font-weight:600;margin-top:12px;font-size:19px}
+.feedback.ok{color:var(--grass)}.feedback.no{color:var(--tomato)}
+.qfoot{display:flex;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap}
+.btn{border:none;border-radius:999px;padding:10px 20px;font-size:17px;font-weight:600;background:var(--grass);color:#fff;box-shadow:var(--shadow)}
+.btn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--line)}
+.result{text-align:center;padding-block:18px}
+.result .score{font-family:var(--f-display);font-size:56px;font-weight:700;color:var(--tomato)}
+.result .st{font-size:34px;letter-spacing:4px;color:var(--sun)}
+.notice{background:var(--bad-bg);border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:15px}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.pop{animation:pop .3s}
+@media (prefers-reduced-motion: reduce){.opt.wrong,.pop{animation:none}}
+
+@media (max-width:560px){
+  .focus{grid-template-columns:1fr;text-align:center}
+  .focus .glyph{min-width:0;font-size:84px}
+  .focus .word{text-align:center}
+  .focus .row{justify-content:center}
+  .brand span{display:none}
+  .day{grid-template-columns:40px 1fr auto;gap:8px}
+  .day .eng{font-size:22px}
+  .opt{font-size:26px}
+  .yt .val{font-size:16px}.yt .lbl{font-size:14px}
+  nav.tabs{grid-template-columns:repeat(3,1fr)}
+  nav.tabs button{font-size:15px;padding:8px 2px;border-radius:12px}
+  .wcard .eng{font-size:22px}
+  .dotsrow{text-align:center}
+}
+.credit{margin-top:32px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+
+</head>
+<body>
+<div class="wrap" dir="rtl" lang="he">
+  <header class="top">
+    <div class="brand"><h1 class="en">English Fun</h1><span>לומדים אנגלית בכיף</span></div>
+    <div class="stars" title="כוכבים שאספת"><b>★</b><span id="starCount">0</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-letters" aria-selected="true" data-tab="letters">אותיות</button>
+    <button role="tab" id="tab-days" aria-selected="false" data-tab="days">ימים</button>
+    <button role="tab" id="tab-numbers" aria-selected="false" data-tab="numbers">מספרים</button>
+    <button role="tab" id="tab-colors" aria-selected="false" data-tab="colors">צבעים</button>
+    <button role="tab" id="tab-words" aria-selected="false" data-tab="words">מילים</button>
+    <button role="tab" id="tab-games" aria-selected="false" data-tab="games">משחקים</button>
+  </nav>
+
+  <div class="notice" id="noVoice" hidden>הדפדפן הזה לא משמיע קול. אפשר ללמוד בלי צליל, או לפתוח בכרום או ספארי.</div>
+
+  <div class="today">
+    <div>
+      <div class="big en">Today is <em id="todayEn">Monday</em></div>
+      <div class="he" id="todayHe">היום יום שני</div>
+    </div>
+    <button class="say" id="sayToday">🔊 שמעי</button>
+  </div>
+
+  <!-- LETTERS -->
+  <section id="sec-letters">
+    <h2>האותיות באנגלית</h2>
+    <p class="hint">לחצי על אות כדי לשמוע אותה ולראות מילה שמתחילה בה.</p>
+    <div class="focus" id="focus">
+      <div class="glyph" id="fGlyph">A<small>a</small></div>
+      <div class="info">
+        <div class="name">קוראים לה: <b id="fName">אֵיי</b></div>
+        <div class="row"><span class="emoji" id="fEmoji">🍎</span><span class="word" id="fWord">Apple</span></div>
+        <div class="hint" style="margin:0" id="fHe">תפוח</div>
+        <div class="row">
+          <button class="say" id="sayLetter">🔊 האות</button>
+          <button class="say alt" id="sayWord">🔊 המילה</button>
+          <button class="pager" id="prevL" aria-label="האות הקודמת">→</button>
+          <button class="pager" id="nextL" aria-label="האות הבאה">←</button>
+        </div>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="progress" id="lProgress"></div>
+  </section>
+
+  <!-- DAYS -->
+  <section id="sec-days" hidden>
+    <h2>ימי השבוע</h2>
+    <p class="hint">השבוע מתחיל ביום ראשון, Sunday. לחצי על הרמקול כדי לשמוע.</p>
+    <div class="days" id="days"></div>
+    <div class="yt" id="yt"></div>
+  </section>
+
+  <!-- NUMBERS -->
+  <section id="sec-numbers" hidden>
+    <h2>המספרים 1 עד 20</h2>
+    <p class="hint">לחצי על מספר כדי לשמוע אותו ולראות איך כותבים אותו.</p>
+    <div class="focus">
+      <div class="glyph" id="nGlyph">1</div>
+      <div class="info">
+        <div class="word" id="nWord">one</div>
+        <div class="name">אומרים: <b id="nSay">וָואן</b></div>
+        <div class="dotsrow" id="nDots" aria-hidden="true">⭐</div>
+        <div class="row">
+          <button class="say" id="sayNum">🔊 שמעי</button>
+          <button class="pager" id="prevN" aria-label="המספר הקודם">→</button>
+          <button class="pager" id="nextN" aria-label="המספר הבא">←</button>
+        </div>
+      </div>
+    </div>
+    <div class="grid nums" id="nGrid"></div>
+    <div class="ntip">טיפ: המספרים 13 עד 19 נגמרים ב-<b>teen</b>. למשל <b>six</b> + <b>teen</b> = <b>sixteen</b> (16). ו-20 הוא <b>twenty</b>.</div>
+  </section>
+
+  <!-- COLORS -->
+  <section id="sec-colors" hidden>
+    <h2>הצבעים</h2>
+    <p class="hint">לחצי על צבע כדי לשמוע אותו ומשפט קצר.</p>
+    <div class="colors" id="colors"></div>
+    <div class="sentence"><span class="s" id="cSentence">The strawberry is red.</span><button class="say alt" id="saySent">🔊 המשפט</button></div>
+  </section>
+
+  <!-- WORDS -->
+  <section id="sec-words" hidden>
+    <h2>מילים</h2>
+    <p class="hint">מילים שזוכרים מלראות. לחצי על 🔊 כדי לשמוע מילה, ועל 💬 כדי לשמוע משפט. אפשר להסתיר את התרגום ולבדוק את עצמך.</p>
+    <div class="wtools">
+      <button class="pager" id="toggleHe">🙈 הסתירי תרגום</button>
+      <button class="say alt" id="sayAll">🔊 כל מילות הכיתה</button>
+    </div>
+    <div class="words" id="words"></div>
+  </section>
+
+  <!-- GAMES -->
+  <section id="sec-games" hidden>
+    <div id="gameMenu">
+      <h2>משחקים</h2>
+      <p class="hint">כל משחק הוא 10 שאלות. כל תשובה נכונה שווה כוכב.</p>
+      <div class="games" id="games"></div>
+    </div>
+    <div id="gamePlay" hidden></div>
+  </section>
+
+  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span></footer>
+</div>
+
+<script>
+const LETTERS = [
+ ["A","אֵיי","Apple","🍎","תפוח"],["B","בִּי","Ball","⚽","כדור"],["C","סִי","Cat","🐱","חתול"],
+ ["D","דִי","Dog","🐶","כלב"],["E","אִי","Egg","🥚","ביצה"],["F","אֶף","Fish","🐟","דג"],
+ ["G","ג'ִי","Grapes","🍇","ענבים"],["H","אֵייץ'","Hat","🎩","כובע"],["I","אַיי","Ice cream","🍦","גלידה"],
+ ["J","ג'ֵיי","Juice","🧃","מיץ"],["K","קֵיי","Key","🔑","מפתח"],["L","אֶל","Lion","🦁","אריה"],
+ ["M","אֶם","Moon","🌙","ירח"],["N","אֶן","Nose","👃","אף"],["O","אוֹ","Orange","🍊","תפוז"],
+ ["P","פִּי","Pizza","🍕","פיצה"],["Q","קְיוּ","Queen","👸","מלכה"],["R","אַר","Rabbit","🐰","ארנב"],
+ ["S","אֶס","Sun","☀️","שמש"],["T","טִי","Tree","🌳","עץ"],["U","יוּ","Umbrella","☂️","מטרייה"],
+ ["V","וִי","Violin","🎻","כינור"],["W","דַאבֶּל יוּ","Watch","⌚","שעון"],["X","אֶקְס","Fox","🦊","שועל (האות x בסוף המילה)"],
+ ["Y","וַאי","Yo-yo","🪀","יו-יו"],["Z","זִי","Zebra","🦓","זברה"]
+];
+const DAYS = [
+ {en:"Sunday",he:"יום ראשון",say:"סַנְדֵיי",tip:"Sun = שמש. יום השמש",c:"var(--sun)"},
+ {en:"Monday",he:"יום שני",say:"מַנְדֵיי",tip:"Mon נשמע כמו Moon = ירח",c:"var(--sky)"},
+ {en:"Tuesday",he:"יום שלישי",say:"טְיוּזְדֵיי",tip:"Tue נשמע כמו two, אבל זה היום השלישי",c:"var(--grass)"},
+ {en:"Wednesday",he:"יום רביעי",say:"וֶנְזְדֵיי",tip:"כותבים Wed-nes-day אבל לא אומרים את ה-d הראשונה",c:"var(--berry)"},
+ {en:"Thursday",he:"יום חמישי",say:"ת'ֶרְזְדֵיי",tip:"Thor, אל הרעם. יום של ת'ור",c:"var(--tomato)"},
+ {en:"Friday",he:"יום שישי",say:"פְרַיידֵיי",tip:"Fri נשמע כמו free = חופשי. סוף שבוע!",c:"var(--sky)"},
+ {en:"Saturday",he:"שבת",say:"סֶטֶרְדֵיי",tip:"Saturn = שבתאי, כמו שבת!",c:"var(--grass)"}
+];
+
+const NUMS=[
+ ["one","וָואן"],["two","טוּ"],["three","ת'ְרִי"],["four","פוֹר"],["five","פַייב"],
+ ["six","סִיקְס"],["seven","סֶבֶן"],["eight","אֵייט"],["nine","נַיין"],["ten","טֶן"],
+ ["eleven","אִילֶבֶן"],["twelve","טְוֶלְב"],["thirteen","ת'ֶרְטִין"],["fourteen","פוֹרְטִין"],["fifteen","פִיפְטִין"],
+ ["sixteen","סִיקְסְטִין"],["seventeen","סֶבֶנְטִין"],["eighteen","אֵייטִין"],["nineteen","נַיינְטִין"],["twenty","טְוֶנְטִי"]
+];
+// [english, hebrew, say, swatch, emoji, object for sentence]
+const COLORS=[
+ ["red","אדום","רֶד","#E53935","🍓","The strawberry"],["orange","כתום","אוֹרֶנְג'","#FB8C00","🍊","The orange"],
+ ["yellow","צהוב","יֶלוֹ","#FDD835","🍌","The banana"],["green","ירוק","גְרִין","#43A047","🐸","The frog"],
+ ["blue","כחול","בְּלוּ","#1E88E5","🐳","The whale"],["purple","סגול","פֶּרְפֶּל","#8E24AA","🍇","The grapes are"],
+ ["pink","ורוד","פִּינְק","#F06292","🌸","The flower"],["brown","חום","בְּרַאוּן","#795548","🐻","The bear"],
+ ["black","שחור","בְּלֶק","#212121","🐈‍⬛","The cat"],["white","לבן","וַוייט","#FFFFFF","☁️","The cloud"],
+ ["gray","אפור","גְרֵיי","#9E9E9E","🐘","The elephant"]
+];
+// Vocabulary. To add a word: {en, he, emoji (optional), say (optional Hebrew pronunciation), ex (optional example sentence), cls:true if from the class list}
+const WORDS=[
+ {cls:1,en:"look",he:"להסתכל",emoji:"👀",say:"לוּק",ex:"Look at the dog!"},
+ {cls:1,en:"have",he:"יש לי / יש ל...",emoji:"🤲",say:"הֶב",ex:"I have a cat."},
+ {cls:1,en:"I am",he:"אני",emoji:"🙋‍♀️",say:"אַיי אֶם",ex:"I am happy."},
+ {cls:1,en:"the",he:"ה' הידיעה",emoji:"👉",say:"דֶה",ex:"The sun is big."},
+ {cls:1,en:"like",he:"אוהב / אוהבת",emoji:"❤️",say:"לַייק",ex:"I like pizza."},
+ {cls:1,en:"my",he:"שלי",emoji:"🧸",say:"מַאי",ex:"This is my bag."},
+ {cls:1,en:"he",he:"הוא",emoji:"👦",say:"הִי",ex:"He is a boy."},
+ {cls:1,en:"she",he:"היא",emoji:"👧",say:"שִׁי",ex:"She is a girl."},
+ {cls:1,en:"want",he:"רוצה",emoji:"🙏",say:"וַונְט",ex:"I want ice cream."},
+ {cls:1,en:"is",he:"הוא/היא (ליחיד)",emoji:"☝️",say:"אִיז",ex:"The cat is black."},
+ {cls:1,en:"are",he:"הם/הן (לרבים)",emoji:"✌️",say:"אַר",ex:"The cats are black."},
+ {cls:1,en:"girl",he:"ילדה",emoji:"👧",say:"גֶרְל",ex:"The girl is happy."},
+ {cls:1,en:"boy",he:"ילד",emoji:"👦",say:"בּוֹי",ex:"The boy can run."},
+ {en:"you",he:"אתה / את",emoji:"🫵",say:"יוּ",ex:"You are my friend."},
+ {en:"it",he:"זה (לדבר)",emoji:"📦",say:"אִט",ex:"It is big."},
+ {en:"we",he:"אנחנו",emoji:"👨‍👩‍👧",say:"וִוי",ex:"We are happy."},
+ {en:"they",he:"הם / הן",emoji:"👥",say:"דֵיי",ex:"They are boys."},
+ {en:"this",he:"זה / זאת",emoji:"👇",say:"דִיס",ex:"This is my book."},
+ {en:"a",he:"(מילה לפני דבר אחד)",emoji:"1️⃣",say:"אַ",ex:"I have a dog."},
+ {en:"and",he:"וְ...",emoji:"➕",say:"אֶנְד",ex:"a boy and a girl"},
+ {en:"can",he:"יכול / יכולה",emoji:"💪",say:"קֶן",ex:"I can swim."},
+ {en:"go",he:"ללכת / הולך",emoji:"🚶",say:"גוֹ",ex:"I go to school."},
+ {en:"see",he:"לראות",emoji:"👁️",say:"סִי",ex:"I see a bird."},
+ {en:"play",he:"לשחק",emoji:"⚽",say:"פְּלֵיי",ex:"We play ball."},
+ {en:"eat",he:"לאכול",emoji:"🍽️",say:"אִיט",ex:"I eat an apple."},
+ {en:"yes",he:"כן",emoji:"👍",say:"יֶס"},
+ {en:"no",he:"לא",emoji:"👎",say:"נוֹ"},
+ {en:"what",he:"מה",emoji:"❓",say:"ווֹט",ex:"What is it?"},
+ {en:"in",he:"בתוך",emoji:"📥",say:"אִין",ex:"The cat is in the box."},
+ {en:"on",he:"על",emoji:"🔝",say:"אוֹן",ex:"The book is on the table."},
+ {en:"big",he:"גדול",emoji:"🐘",say:"בִּיג"},
+ {en:"small",he:"קטן",emoji:"🐭",say:"סְמוֹל"},
+ {en:"happy",he:"שמח",emoji:"😊",say:"הֶפִּי"},
+ {en:"sad",he:"עצוב",emoji:"😢",say:"סֶד"},
+ {en:"good",he:"טוב",emoji:"👌",say:"גוּד"},
+ {en:"mother",he:"אמא",emoji:"👩",say:"מַאדֶ'ר"},
+ {en:"father",he:"אבא",emoji:"👨",say:"פָאדֶ'ר"},
+ {en:"sister",he:"אחות",emoji:"👭",say:"סִיסְטֶר"},
+ {en:"brother",he:"אח",emoji:"👬",say:"בְּרָאדֶ'ר"},
+ {en:"friend",he:"חבר / חברה",emoji:"🤝",say:"פְרֶנְד"},
+ {en:"book",he:"ספר",emoji:"📖",say:"בּוּק"},
+ {en:"school",he:"בית ספר",emoji:"🏫",say:"סְקוּל"},
+ {en:"teacher",he:"מורה",emoji:"👩‍🏫",say:"טִיצ'ֶר"},
+ {en:"house",he:"בית",emoji:"🏠",say:"הַאוּס"},
+ {en:"dog",he:"כלב",emoji:"🐶",say:"דוֹג"},
+ {en:"cat",he:"חתול",emoji:"🐱",say:"קֶט"}
+];
+const colorSentence=c=>(c[5].endsWith(" are")?c[5]:c[5]+" is")+" "+c[0]+".";
+
+/* ---------- storage (safe) ---------- */
+const KEY="englishfun.v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+const state=Object.assign({stars:0,seen:[],best:{}},load());
+const $=id=>document.getElementById(id);
+function setStars(){$("starCount").textContent=state.stars}
+
+/* ---------- speech ---------- */
+let voice=null;
+// Score installed voices so the most natural female teacher voice wins on each device.
+const VOICE_TOP=["Ava","Jenny","Aria","Emma","Michelle","Samantha","Allison","Susan","Zoe","Joelle","Google US English"];
+const VOICE_MALE=/\b(Guy|Andrew|Brian|Christopher|Eric|Roger|Steffan|David|Mark|Alex|Fred|Tom|Aaron|Evan|Nathan|Ralph|Junior)\b/i;
+const VOICE_NOVELTY=/Bells|Boing|Bubbles|Cellos|Bad News|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Albert|Bahh|Hysterical|Deranged|Pipe|Ana\b/i;
+function voiceScore(v){
+  let s=0;const n=v.name;
+  if(/^en[-_]US/i.test(v.lang))s+=50;else if(/^en/i.test(v.lang))s+=10;else return -1e9;
+  if(/Natural|Neural/i.test(n))s+=200;          // Edge / Windows 11 neural voices
+  if(/Online/i.test(n))s+=40;
+  if(/Premium|Enhanced/i.test(n))s+=120;        // iOS / macOS downloaded voices
+  if(/^Google/i.test(n))s+=90;                  // Chrome cloud voice
+  const i=VOICE_TOP.findIndex(p=>n.includes(p));if(i>=0)s+=60-i*3;
+  if(VOICE_MALE.test(n))s-=150;
+  if(VOICE_NOVELTY.test(n))s-=1000;             // joke voices, and the child voice "Ana"
+  return s;
+}
+function pickVoice(){
+  if(!("speechSynthesis" in window))return;
+  const vs=speechSynthesis.getVoices();
+  if(!vs.length)return;
+  voice=vs.slice().sort((a,b)=>voiceScore(b)-voiceScore(a))[0];
+  if(voiceScore(voice)<0)voice=null;
+}
+if("speechSynthesis" in window){
+  pickVoice();
+  speechSynthesis.addEventListener?speechSynthesis.addEventListener("voiceschanged",pickVoice):(speechSynthesis.onvoiceschanged=pickVoice);
+  setTimeout(pickVoice,500);setTimeout(pickVoice,1500); // Safari never fires voiceschanged
+}else{$("noVoice").hidden=false}
+function speak(text,rate=0.85){
+  if(!("speechSynthesis" in window))return;
+  if(!voice)pickVoice();
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang="en-US";
+  // Neural voices already speak clearly, so slow them less than robotic ones.
+  const natural=voice&&/Natural|Neural|Premium|Enhanced/i.test(voice.name);
+  u.rate=Math.min(1,rate*(natural?1.05:0.95));u.pitch=1.05;
+  if(voice)u.voice=voice;
+  speechSynthesis.speak(u);
+}
+// Say a letter's name, not the article "a"
+const letterSpeech=L=>L==="A"?"ay":L==="Z"?"zee":L+".";
+
+/* ---------- tabs ---------- */
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function showTab(t){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  ["letters","days","numbers","colors","words","games"].forEach(s=>$("sec-"+s).hidden=s!==t);
+  if(t==="games")showMenu();
+}
+
+/* ---------- today ---------- */
+const now=new Date(),todayIdx=now.getDay();
+$("todayEn").textContent=DAYS[todayIdx].en;
+$("todayHe").textContent="היום "+DAYS[todayIdx].he;
+$("sayToday").onclick=()=>speak("Today is "+DAYS[todayIdx].en);
+
+/* ---------- letters ---------- */
+let cur=0;
+function highlight(word,L){
+  const i=word.toLowerCase().indexOf(L.toLowerCase());
+  if(i<0)return word;
+  return word.slice(0,i)+"<mark>"+word[i]+"</mark>"+word.slice(i+1);
+}
+function renderGrid(){
+  $("grid").innerHTML=LETTERS.map((l,i)=>`<button class="tile${state.seen.includes(l[0])?" seen":""}" data-i="${i}" aria-current="${i===cur}" aria-label="${l[0]}">${l[0]}<small>${l[0].toLowerCase()}</small></button>`).join("");
+  $("grid").querySelectorAll(".tile").forEach(t=>t.onclick=()=>{setLetter(+t.dataset.i);speak(letterSpeech(LETTERS[cur][0]))});
+  $("lProgress").textContent=`עברת על ${state.seen.length} מתוך 26 אותיות`;
+}
+function setLetter(i){
+  cur=(i+26)%26;const [L,name,word,emo,he]=LETTERS[cur];
+  $("fGlyph").innerHTML=`${L}<small>${L.toLowerCase()}</small>`;
+  $("fGlyph").classList.remove("pop");void $("fGlyph").offsetWidth;$("fGlyph").classList.add("pop");
+  $("fName").textContent=name;$("fWord").innerHTML=highlight(word,L);$("fEmoji").textContent=emo;$("fHe").textContent=he;
+  if(!state.seen.includes(L)){state.seen.push(L);save()}
+  renderGrid();
+}
+$("sayLetter").onclick=()=>speak(letterSpeech(LETTERS[cur][0]));
+$("sayWord").onclick=()=>speak(LETTERS[cur][2]);
+$("prevL").onclick=()=>{setLetter(cur-1);speak(letterSpeech(LETTERS[cur][0]))};
+$("nextL").onclick=()=>{setLetter(cur+1);speak(letterSpeech(LETTERS[cur][0]))};
+
+/* ---------- days ---------- */
+function renderDays(){
+  $("days").innerHTML=DAYS.map((d,i)=>`
+    <div class="day${i===todayIdx?" is-today":""}" style="--c:${d.c}">
+      <div class="num">${i+1}</div>
+      <div class="txt">
+        <div><span class="eng">${d.en}</span>${i===todayIdx?'<span class="badge">היום</span>':""}</div>
+        <div class="he">${d.he} · אומרים: ${d.say}</div>
+        <div class="tip">${d.tip.replace(/([A-Za-z][A-Za-z-]*)/g,"<bdi>$1</bdi>")}</div>
+      </div>
+      <button class="say" data-i="${i}" aria-label="שמעי ${d.en}">🔊</button>
+    </div>`).join("");
+  $("days").querySelectorAll(".say").forEach(b=>b.onclick=()=>speak(DAYS[+b.dataset.i].en));
+  const y=DAYS[(todayIdx+6)%7],t=DAYS[todayIdx],m=DAYS[(todayIdx+1)%7];
+  $("yt").innerHTML=[["Yesterday","אתמול",y],["Today","היום",t],["Tomorrow","מחר",m]].map(([en,he,d])=>
+    `<div><div class="lbl">${en}</div><div class="val">${d.en}</div><div class="he">${he}: ${d.he}</div></div>`).join("");
+}
+
+/* ---------- numbers ---------- */
+let curN=0;
+function setNum(i){
+  curN=(i+20)%20;const [w,say]=NUMS[curN];
+  $("nGlyph").textContent=curN+1;
+  $("nGlyph").classList.remove("pop");void $("nGlyph").offsetWidth;$("nGlyph").classList.add("pop");
+  $("nWord").textContent=w;$("nSay").textContent=say;$("nDots").textContent="⭐".repeat(curN+1);
+  $("nGrid").querySelectorAll(".tile").forEach((t,j)=>t.setAttribute("aria-current",j===curN));
+}
+$("nGrid").innerHTML=NUMS.map((n,i)=>`<button class="tile" data-i="${i}" aria-current="${i===0}" aria-label="${n[0]}">${i+1}</button>`).join("");
+$("nGrid").querySelectorAll(".tile").forEach(t=>t.onclick=()=>{setNum(+t.dataset.i);speak(NUMS[curN][0])});
+$("sayNum").onclick=()=>speak(NUMS[curN][0]);
+$("prevN").onclick=()=>{setNum(curN-1);speak(NUMS[curN][0])};
+$("nextN").onclick=()=>{setNum(curN+1);speak(NUMS[curN][0])};
+
+/* ---------- colors ---------- */
+let curC=0;
+function renderColors(){
+  $("colors").innerHTML=COLORS.map((c,i)=>`<div class="ccard">
+    <div class="sw" style="--sw:${c[3]}">${c[4]}</div>
+    <div style="min-width:0"><span class="eng">${c[0]}</span><span class="he">${c[1]} · אומרים: ${c[2]}</span></div>
+    <button class="say" data-i="${i}" aria-label="שמעי ${c[0]}">🔊</button></div>`).join("");
+  $("colors").querySelectorAll(".say").forEach(b=>b.onclick=()=>{curC=+b.dataset.i;$("cSentence").textContent=colorSentence(COLORS[curC]);speak(COLORS[curC][0])});
+}
+$("saySent").onclick=()=>speak(colorSentence(COLORS[curC]));
+
+/* ---------- words ---------- */
+const wordCard=(w,i)=>`<div class="wcard">
+    <div class="emo" aria-hidden="true">${w.emoji||"🔤"}</div>
+    <div style="min-width:0"><span class="eng">${w.en}</span><span class="he">${w.he}${w.say?` · אומרים: ${w.say}`:""}</span>${w.ex?`<button class="ex en" data-i="${i}">💬 ${w.ex}</button>`:""}</div>
+    <button class="say" data-i="${i}" aria-label="שמעי ${w.en}">🔊</button></div>`;
+function renderWords(){
+  const grp=(f)=>WORDS.map((w,i)=>f(w)?wordCard(w,i):"").join("");
+  $("words").innerHTML=`<h3 class="wgroup">⭐ מילים מהכיתה</h3>${grp(w=>w.cls)}<h3 class="wgroup">📚 עוד מילים חשובות</h3>${grp(w=>!w.cls)}`;
+  $("words").querySelectorAll(".say").forEach(b=>b.onclick=()=>speak(WORDS[+b.dataset.i].en));
+  $("words").querySelectorAll(".ex").forEach(b=>b.onclick=()=>speak(WORDS[+b.dataset.i].ex));
+}
+$("toggleHe").onclick=()=>{const h=$("words").classList.toggle("hide-he");$("toggleHe").textContent=h?"👀 הראי תרגום":"🙈 הסתירי תרגום"};
+$("sayAll").onclick=()=>speak(WORDS.filter(w=>w.cls).map(w=>w.en).join(". ")+".",0.7);
+
+/* ---------- games ---------- */
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+function pickOpts(answer,pool,n=4){return shuffle([answer,...shuffle(pool.filter(x=>x!==answer)).slice(0,n-1)])}
+const ABC=LETTERS.map(l=>l[0]);
+// Plausible misspellings for the spelling game (swap, drop, double, vowel change)
+function misspell(w){
+  const out=new Set(),V="aeiou";
+  for(let i=0;i<w.length-1;i++)if(w[i]!==w[i+1]&&w[i]!==" "&&w[i+1]!==" ")out.add(w.slice(0,i)+w[i+1]+w[i]+w.slice(i+2));
+  for(let i=1;i<w.length;i++)if(w[i]!==" ")out.add(w.slice(0,i)+w.slice(i+1));
+  for(let i=0;i<w.length;i++)if(/[a-z]/.test(w[i])&&w[i]!==w[i-1])out.add(w.slice(0,i)+w[i]+w.slice(i));
+  for(let i=0;i<w.length;i++)if(V.includes(w[i]))for(const v of V)if(v!==w[i])out.add(w.slice(0,i)+v+w.slice(i+1));
+  out.delete(w);WORDS.forEach(x=>out.delete(x.en));
+  return [...out].filter(x=>x.trim().length>1);
+}
+const pickWord=()=>{const c=WORDS.filter(w=>w.cls);return Math.random()<0.6&&c.length?c[rnd(c.length)]:WORDS[rnd(WORDS.length)]};
+const wordPrompt=w=>`${w.emoji?w.emoji+"  ":""}${w.he}`;
+
+const GAMES=[
+ {id:"hearL",tag:"אותיות",c:"var(--tomato)",t:"שמעי ובחרי אות",d:"שומעים אות. מה שמעת?",
+  q(){const a=ABC[rnd(26)];return{text:"איזו אות שמעת?",say:letterSpeech(a),opts:pickOpts(a,ABC),answer:a}}},
+ {id:"case",tag:"אותיות",c:"var(--sky)",t:"גדולה וקטנה",d:"מצאי את האות הקטנה שמתאימה לגדולה",
+  q(){const a=ABC[rnd(26)];return{text:"מה האות הקטנה של:",big:a,opts:pickOpts(a.toLowerCase(),ABC.map(x=>x.toLowerCase())),answer:a.toLowerCase(),say:letterSpeech(a)}}},
+ {id:"next",tag:"אותיות",c:"var(--berry)",t:"מה האות הבאה?",d:"השלימי את סדר ה-ABC",
+  q(){const i=rnd(24);const a=ABC[i+2];return{text:"איזו אות באה אחרי?",big:`${ABC[i]} ${ABC[i+1]} _`,opts:pickOpts(a,ABC),answer:a}}},
+ {id:"word",tag:"אותיות",c:"var(--grass)",t:"באיזו אות מתחילה?",d:"רואים תמונה ומילה. באיזו אות היא מתחילה?",
+  q(){const l=LETTERS[rnd(26)];if(l[0]==="X")return this.q();return{text:`${l[3]}  ${l[4]}`,big:l[2].replace(/^./,"_"),say:l[2],opts:pickOpts(l[0],ABC),answer:l[0]}}},
+ {id:"hearD",tag:"ימים",c:"var(--sun)",t:"שמעי ובחרי יום",d:"שומעים יום באנגלית ובוחרים אותו בעברית",
+  q(){const d=DAYS[rnd(7)];return{text:"איזה יום שמעת?",say:d.en,opts:pickOpts(d.he,DAYS.map(x=>x.he)),answer:d.he,he:true}}},
+ {id:"trD",tag:"ימים",c:"var(--tomato)",t:"תרגמי את היום",d:"רואים יום בעברית ובוחרים את המילה באנגלית",
+  q(){const d=DAYS[rnd(7)];return{text:`איך אומרים באנגלית "${d.he}"?`,opts:pickOpts(d.en,DAYS.map(x=>x.en)),answer:d.en,sayAfter:d.en}}},
+ {id:"hearN",tag:"מספרים",c:"var(--sky)",t:"שמעי ובחרי מספר",d:"שומעים מספר באנגלית. איזה מספר זה?",
+  q(){const i=rnd(20);return{text:"איזה מספר שמעת?",say:NUMS[i][0],opts:pickOpts(String(i+1),NUMS.map((_,j)=>String(j+1))),answer:String(i+1),sayAfter:NUMS[i][0]}}},
+ {id:"wordN",tag:"מספרים",c:"var(--berry)",t:"איך כותבים את המספר?",d:"רואים ספרות ובוחרים את המילה באנגלית",
+  q(){const i=rnd(20);const near=NUMS.map(n=>n[0]).filter((_,j)=>Math.abs(j-i)<=6||Math.abs(j-i)===10);return{text:"איך כותבים באנגלית:",big:String(i+1),opts:pickOpts(NUMS[i][0],near),answer:NUMS[i][0],sayAfter:NUMS[i][0]}}},
+ {id:"countN",tag:"מספרים",c:"var(--grass)",t:"ספרי!",d:"כמה יש בתמונה? בוחרים את המילה באנגלית",
+  q(){const i=rnd(12);const e=["🐟","🍎","⭐","🎈","🐞","🌸"][rnd(6)];const near=NUMS.slice(0,15).map(n=>n[0]);return{text:`<span class="en">How many?</span> כמה יש?`,bigSmall:`<span style="font-size:30px;letter-spacing:4px">${e.repeat(i+1)}</span>`,opts:pickOpts(NUMS[i][0],near),answer:NUMS[i][0],sayAfter:NUMS[i][0]}}},
+ {id:"nameC",tag:"צבעים",c:"var(--tomato)",t:"איזה צבע זה?",d:"רואים צבע ובוחרים את השם באנגלית",
+  q(){const c=COLORS[rnd(COLORS.length)];return{text:`<span class="en">What color is it?</span>`,bigSmall:`<span class="sw" style="--sw:${c[3]};width:90px;height:90px;display:inline-flex;font-size:40px">${c[4]}</span>`,opts:pickOpts(c[0],COLORS.map(x=>x[0])),answer:c[0],sayAfter:c[0]}}},
+ {id:"hearC",tag:"צבעים",c:"var(--sun)",t:"שמעי ובחרי צבע",d:"שומעים צבע באנגלית ולוחצים על העיגול הנכון",
+  q(){const c=COLORS[rnd(COLORS.length)];return{text:"איזה צבע שמעת?",say:c[0],opts:pickOpts(c[0],COLORS.map(x=>x[0])),answer:c[0],swatch:true}}},
+ {id:"afterD",tag:"ימים",c:"var(--grass)",t:"איזה יום בא אחרי?",d:"סדר הימים באנגלית",
+  q(){const i=rnd(7);const a=DAYS[(i+1)%7].en;return{text:"איזה יום בא אחרי",bigSmall:DAYS[i].en+" ?",say:DAYS[i].en,opts:pickOpts(a,DAYS.map(x=>x.en)),answer:a}}},
+];
+
+GAMES.push(
+ {id:"hearW",tag:"מילים",c:"var(--berry)",t:"שמעי ובחרי מילה",d:"שומעים מילה באנגלית ובוחרים את התרגום",
+  q(){const w=pickWord();return{text:"איזו מילה שמעת?",say:w.en,opts:pickOpts(w.he,WORDS.map(x=>x.he)),answer:w.he,he:true}}},
+ {id:"trW",tag:"מילים",c:"var(--sky)",t:"תרגמי את המילה",d:"רואים מילה בעברית ובוחרים אותה באנגלית",
+  q(){const w=pickWord();return{text:"איך אומרים באנגלית?",bigSmall:`<span style="font-family:var(--f-body)">${wordPrompt(w)}</span>`,opts:pickOpts(w.en,WORDS.map(x=>x.en)),answer:w.en,sayAfter:w.en}}},
+ {id:"spellW",tag:"מילים",c:"var(--grass)",t:"איך כותבים נכון?",d:"שומעים מילה ובוחרים את הכתיב הנכון",
+  q(){const w=pickWord();if(w.en.length<2)return this.q();return{text:`איך כותבים נכון: ${wordPrompt(w)}`,say:w.en,opts:shuffle([w.en,...shuffle(misspell(w.en)).slice(0,3)]),answer:w.en,sayAfter:w.en}}}
+);
+// newest lesson first
+const TAG_ORDER=["מילים","מספרים","צבעים","אותיות","ימים"];
+GAMES.sort((a,b)=>TAG_ORDER.indexOf(a.tag)-TAG_ORDER.indexOf(b.tag));
+
+function showMenu(){
+  $("gamePlay").hidden=true;$("gameMenu").hidden=false;
+  $("games").innerHTML=GAMES.map(g=>`<button class="gcard" data-id="${g.id}" style="--c:${g.c}">
+    <span class="tag">${g.tag}</span><span class="t">${g.t}</span><span class="d">${g.d}</span>
+    <span class="best">${state.best[g.id]!=null?`השיא שלך: ${state.best[g.id]}/10`:"עוד לא שיחקת"}</span></button>`).join("");
+  $("games").querySelectorAll(".gcard").forEach(b=>b.onclick=()=>startGame(b.dataset.id));
+}
+
+let G=null;
+function startGame(id){
+  const g=GAMES.find(x=>x.id===id);
+  G={g,n:0,score:0,res:[],qs:[]};
+  // avoid repeating the same answer twice in a row
+  let last=null;
+  for(let i=0;i<10;i++){let q,tries=0;do{q=g.q();tries++}while(q.answer===last&&tries<10);last=q.answer;G.qs.push(q)}
+  $("gameMenu").hidden=true;$("gamePlay").hidden=false;renderQ();
+}
+function renderQ(){
+  const q=G.qs[G.n];
+  const dots=Array.from({length:10},(_,i)=>`<i class="${G.res[i]===true?"ok":G.res[i]===false?"no":""}${i===G.n?" now":""}"></i>`).join("");
+  $("gamePlay").innerHTML=`<div class="quiz">
+    <div class="qhead"><span class="title">${G.g.t}</span><div class="dots">${dots}</div></div>
+    <div class="prompt">
+      <div class="q">${q.text}</div>
+      ${q.big?`<div class="bigq">${q.big}</div>`:""}
+      ${q.bigSmall?`<div class="bigq" style="font-size:40px">${q.bigSmall}</div>`:""}
+      ${q.say?`<button class="say" id="qSay">🔊 שמעי שוב</button>`:""}
+    </div>
+    <div class="opts">${q.opts.map(o=>q.swatch?`<button class="opt swatch" data-v="${o}" aria-label="${o}" style="--sw:${COLORS.find(c=>c[0]===o)[3]}"></button>`:`<button class="opt${q.he?" he":""}" data-v="${o}">${o}</button>`).join("")}</div>
+    <div class="feedback" id="fb" aria-live="polite"></div>
+    <div class="qfoot"><button class="btn ghost" id="quit">חזרה למשחקים</button><button class="btn" id="nextQ" hidden>הבא ←</button></div>
+  </div>`;
+  if(q.say){$("qSay").onclick=()=>speak(q.say);setTimeout(()=>speak(q.say),250)}
+  $("quit").onclick=showMenu;
+  $("gamePlay").querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(b));
+  $("nextQ").onclick=()=>{G.n++;G.n<10?renderQ():finish()};
+}
+const PRAISE=["Great job!","Excellent!","Well done!","Super!","Amazing!"];
+function answer(btn){
+  const q=G.qs[G.n],ok=btn.dataset.v===q.answer;
+  $("gamePlay").querySelectorAll(".opt").forEach(b=>{b.disabled=true;if(b.dataset.v===q.answer)b.classList.add("right")});
+  if(!ok)btn.classList.add("wrong");
+  G.res[G.n]=ok;
+  const fb=$("fb");
+  if(ok){G.score++;state.stars++;save();setStars();const p=PRAISE[rnd(PRAISE.length)];fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span> ★`;speak(q.sayAfter||p,0.9)}
+  else{fb.className="feedback no";fb.innerHTML=`כמעט! התשובה הנכונה: <span class="en">${q.answer}</span>`;if(!q.he)speak(q.answer.length===1?letterSpeech(q.answer.toUpperCase()):q.answer)}
+  $("nextQ").hidden=false;$("nextQ").textContent=G.n===9?"לתוצאה ←":"הבא ←";$("nextQ").focus();
+}
+function finish(){
+  const s=G.score,id=G.g.id;
+  if(state.best[id]==null||s>state.best[id]){state.best[id]=s;save()}
+  const msg=s===10?"מושלם! כל הכבוד!":s>=7?"מעולה! עוד קצת ותגיעי ל-10":s>=4?"יפה מאוד! בואי ננסה שוב":"זה בסדר, לומדים מתרגול. ננסה שוב?";
+  const st="★".repeat(Math.round(s/2))+"☆".repeat(5-Math.round(s/2));
+  $("gamePlay").innerHTML=`<div class="quiz result">
+    <div class="st">${st}</div><div class="score en">${s}/10</div><p>${msg}</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="again">שחקי שוב</button><button class="btn ghost" id="back">כל המשחקים</button></div></div>`;
+  $("again").onclick=()=>startGame(id);$("back").onclick=showMenu;
+  speak(s>=7?"Excellent work!":"Good try!",0.9);
+}
+
+/* ---------- boot ---------- */
+setStars();renderDays();renderColors();renderWords();
+cur=0;{const [L,name,word,emo,he]=LETTERS[0];$("fWord").innerHTML=highlight(word,L)}renderGrid();
+try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games"].includes(h))showTab(h)}catch(e){}
+</script>
+
+</body>
+</html>
