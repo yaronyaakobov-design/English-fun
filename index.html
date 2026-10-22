@@ -303,7 +303,7 @@ h2{font-family:var(--f-display);font-size:24px;margin:0 0 10px;text-wrap:balance
     <div id="gamePlay" hidden></div>
   </section>
 
-  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span><span class="en" id="voiceName" style="opacity:.6"></span><span class="en" style="opacity:.6"> · v7</span></footer>
+  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span><span class="en" id="voiceName" style="opacity:.6"></span><span class="en" style="opacity:.6"> · v8</span></footer>
 </div>
 
 <script>
@@ -451,8 +451,9 @@ function speak(text,rate=0.85){
   speechSynthesis.speak(u);
 }
 // Say a letter's name, not the article "a"
-// "ay" is read as "eye" by many voices, and a bare "A" as the article, so name it explicitly.
-const letterSpeech=L=>L==="A"?"letter A":L==="Z"?"zee":L+".";
+// Say only the letter's name: a capital letter with a period is read as the letter name,
+// while phonetic spellings like ay are read as "eye" by Apple voices. Z is the American "zee".
+const letterSpeech=L=>L==="Z"?"zee":L.toUpperCase()+".";
 
 /* ---------- tabs ---------- */
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
