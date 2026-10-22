@@ -301,7 +301,7 @@ h2{font-family:var(--f-display);font-size:24px;margin:0 0 10px;text-wrap:balance
     <div id="gamePlay" hidden></div>
   </section>
 
-  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span></footer>
+  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span><span class="en" id="voiceName" style="opacity:.6"></span></footer>
 </div>
 
 <script>
@@ -406,11 +406,17 @@ let voice=null;
 const VOICE_TOP=["Ava","Jenny","Aria","Emma","Michelle","Samantha","Allison","Susan","Zoe","Joelle","Google US English"];
 const VOICE_MALE=/\b(Guy|Andrew|Brian|Christopher|Eric|Roger|Steffan|David|Mark|Alex|Fred|Tom|Aaron|Evan|Nathan|Ralph|Junior)\b/i;
 const VOICE_NOVELTY=/Bells|Boing|Bubbles|Cellos|Bad News|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Albert|Bahh|Hysterical|Deranged|Pipe|Ana\b/i;
+// Non-American accents, by region in the name and by Apple's British/Australian/Irish/Indian voice names.
+const VOICE_NOT_US=/United Kingdom|\bUK\b|British|Australia|India|Ireland|Scotland|South Africa|New Zealand|Canada|\b(Daniel|Kate|Serena|Arthur|Martha|Stephanie|Oliver|Karen|Moira|Tessa|Rishi|Veena|Fiona|Lee|Catherine|Gordon|Sonia|Libby|Maisie|Ryan|Thomas|Natasha|William|Neerja|Prabhat)\b/i;
+const isUS=v=>/^en[-_]US/i.test(v.lang)||/United States|US English/i.test(v.name);
 function voiceScore(v){
   let s=0;const n=v.name;
-  if(/^en[-_]US/i.test(v.lang))s+=50;else if(/^en/i.test(v.lang))s+=10;else return -1e9;
+  if(!/^en/i.test(v.lang))return -1e9;
+  s+=isUS(v)?500:-400;                          // American accent only, others are a last resort
+  if(VOICE_NOT_US.test(n))s-=400;
   if(/Natural|Neural/i.test(n))s+=200;          // Edge / Windows 11 neural voices
   if(/Online/i.test(n))s+=40;
+  if(/Multilingual/i.test(n))s-=30;
   if(/Premium|Enhanced/i.test(n))s+=120;        // iOS / macOS downloaded voices
   if(/^Google/i.test(n))s+=90;                  // Chrome cloud voice
   const i=VOICE_TOP.findIndex(p=>n.includes(p));if(i>=0)s+=60-i*3;
@@ -423,7 +429,8 @@ function pickVoice(){
   const vs=speechSynthesis.getVoices();
   if(!vs.length)return;
   voice=vs.slice().sort((a,b)=>voiceScore(b)-voiceScore(a))[0];
-  if(voiceScore(voice)<0)voice=null;
+  if(voiceScore(voice)<-1e8)voice=null;
+  const el=document.getElementById("voiceName");if(el)el.textContent=voice?" · Voice: "+voice.name:"";
 }
 if("speechSynthesis" in window){
   pickVoice();
