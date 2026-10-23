@@ -59,7 +59,7 @@ function check(name, ok, detail) {
     const chosen = await page.evaluate(() => voice && voice.name);
     check(`${dev}: picks ${cfg.expect}`, chosen === cfg.expect, "got " + chosen);
     check(`${dev}: footer shows voice`, (await page.textContent("#voiceName")).includes(cfg.expect));
-    check(`${dev}: build tag v9`, (await page.textContent("footer")).includes("v9"));
+    check(`${dev}: build tag v10`, (await page.textContent("footer")).includes("v10"));
 
     // Letters: tile clicks, the "letter" button, prev/next
     for (let i = 0; i < 26; i++) {
