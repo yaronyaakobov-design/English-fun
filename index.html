@@ -236,7 +236,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 .actions .btn{flex:1 1 auto}
 
 /* Illustrated map: the SVG is the ground, levels and banners are HTML on top at the same coordinates */
-.qmap{position:relative;width:100%;max-width:100%;aspect-ratio:400/2780;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);border:3px solid var(--paper)}
+.qmap{position:relative;width:100%;max-width:100%;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);border:3px solid var(--paper)}
 .mapsvg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mnode{position:absolute;transform:translate(-50%,-27px);display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;padding:0;width:104px;z-index:2}
 .mnode .ball{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:700;font-size:24px;background:var(--c);color:#fff;border:4px solid #fff;box-shadow:0 4px 0 rgba(30,42,68,.28);position:relative}
@@ -266,6 +266,12 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 .play .dots{display:flex;gap:4px;margin-top:10px;flex-wrap:nowrap}
 .play .dots i{flex:1;width:auto;height:8px;border-radius:999px;background:var(--line)}
 .play .dots i.ok{background:var(--grass)}.play .dots i.no{background:var(--tomato)}.play .dots i.now{background:var(--sky);outline:none}
+.tbox{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--muted)}
+.tbox .timer{flex:1;margin:0}
+.hg{width:26px;height:34px;flex:none}
+.tsec{font-weight:700;font-size:17px;min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums}
+.tbox.low{color:var(--tomato)}
+.tbox.low .hg{animation:shake .5s infinite}
 .timer{height:10px;border-radius:999px;background:var(--line);margin-top:8px;overflow:hidden}
 .timer i{display:block;height:100%;width:100%;background:var(--sun);border-radius:999px;transform-origin:right;transition:background .3s}
 .timer i.low{background:var(--tomato)}
@@ -281,6 +287,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 .play .opts.n3{grid-template-columns:1fr}
 .play .opt{border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:12px 8px;font-family:var(--f-display);font-weight:600;font-size:28px;direction:ltr;min-height:64px;overflow-wrap:anywhere}
 .play .opts.n6 .opt{font-size:24px;min-height:58px}
+.play .opt.emo{font-size:40px;line-height:1.1}
 .play .opt.he{font-family:var(--f-body);direction:rtl;font-size:21px}
 .play .opt.qsw{background:var(--sw);min-height:76px}
 .play .opt.right{border-color:var(--grass);background:var(--good-bg)}
@@ -337,7 +344,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 @keyframes bob{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-62%)}}
 @keyframes fall{to{transform:translateY(110vh) rotate(300deg)}}
-@media (prefers-reduced-motion: reduce){.mnode.now .ball,.me-av{animation:none}.confetti{display:none}}
+@media (prefers-reduced-motion: reduce){.mnode.now .ball,.me-av,.tbox.low .hg{animation:none}.confetti{display:none}}
 @media (max-width:560px){
   nav.tabs{grid-template-columns:repeat(4,1fr)}
   .mnode .ball{width:48px;height:48px;font-size:21px;border-width:3px}
@@ -466,7 +473,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
   <!-- QUEST -->
   <section id="sec-quest" hidden><div id="questScreen"></div></section>
 
-  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span><span class="en" id="voiceName" style="opacity:.6"></span><span class="en" style="opacity:.6"> · v9</span></footer>
+  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v10</span></span></footer>
 </div>
 
 <script>
@@ -865,6 +872,13 @@ const SENTENCES=[
  {s:"___ is my mother.",a:"She",o:["She","He","They"],he:"היא אמא שלי.",e:"👩"},
  {s:"___ is my father.",a:"He",o:["He","She","We"],he:"הוא אבא שלי.",e:"👨"}
 ];
+/* ---------- animals and food: [english, emoji, hebrew] ---------- */
+const ANIMALS=[["cat","🐱","חתול"],["dog","🐶","כלב"],["fish","🐟","דג"],["bird","🐦","ציפור"],["horse","🐴","סוס"],["cow","🐮","פרה"],["lion","🦁","אריה"],
+ ["monkey","🐵","קוף"],["elephant","🐘","פיל"],["rabbit","🐰","ארנב"],["frog","🐸","צפרדע"],["bear","🐻","דוב"],["pig","🐷","חזיר"],["duck","🦆","ברווז"],
+ ["sheep","🐑","כבשה"],["snake","🐍","נחש"],["mouse","🐭","עכבר"],["tiger","🐯","נמר"],["chicken","🐔","תרנגולת"],["zebra","🦓","זברה"]];
+const FOOD=[["apple","🍎","תפוח"],["banana","🍌","בננה"],["bread","🍞","לחם"],["milk","🥛","חלב"],["water","💧","מים"],["egg","🥚","ביצה"],["pizza","🍕","פיצה"],
+ ["cake","🎂","עוגה"],["cheese","🧀","גבינה"],["rice","🍚","אורז"],["orange","🍊","תפוז"],["grapes","🍇","ענבים"],["carrot","🥕","גזר"],["tomato","🍅","עגבנייה"],
+ ["ice cream","🍦","גלידה"],["juice","🧃","מיץ"],["cookie","🍪","עוגייה"],["sandwich","🥪","כריך"],["soup","🍲","מרק"],["corn","🌽","תירס"]];
 const SENT_EXTRA=["the","and","no","yes","what","go","it"];
 const fullSentence=x=>x.s.replace("___",x.a);
 
@@ -876,7 +890,7 @@ function pickOpts(answer,pool,n){return shuffle([answer,...shuffle(uniq(pool).fi
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ABC=LETTERS.map(l=>l[0]),abc=ABC.map(x=>x.toLowerCase());
 const NUMW=NUMS.map(n=>n[0]);
-const KNOWN=new Set([...WORDS.map(w=>w.en),...NUMW,...COLORS.map(c=>c[0]),...DAYS.map(d=>d.en)].map(x=>x.toLowerCase()));
+const KNOWN=new Set([...WORDS.map(w=>w.en),...NUMW,...COLORS.map(c=>c[0]),...DAYS.map(d=>d.en),...ANIMALS.map(a=>a[0]),...FOOD.map(f=>f[0])].map(x=>x.toLowerCase()));
 // Plausible misspellings: swap, drop, double, vowel change. Never a real word from the app.
 function misspell(w){
   const out=new Set(),V="aeiou";
@@ -891,6 +905,18 @@ const spellOpts=(w,n)=>shuffle([w,...shuffle(misspell(w)).slice(0,n-1)]);
 const pickWord=()=>{const c=WORDS.filter(w=>w.cls);return Math.random()<0.5?c[rnd(c.length)]:WORDS[rnd(WORDS.length)]};
 const BUILD_WORDS=[...WORDS.filter(w=>/^[a-z]{3,6}$/.test(w.en)).map(w=>({en:w.en,he:w.he,emoji:w.emoji})),
   ...LETTERS.filter(l=>/^[A-Za-z]{3,6}$/.test(l[2])).map(l=>({en:l[2].toLowerCase(),he:l[4],emoji:l[3]}))];
+const pick=a=>a[rnd(a.length)];
+// The same five question types for any picture vocabulary
+function vocabGens(list){
+  const en=list.map(x=>x[0]),pics=list.map(x=>x[1]),words=list.filter(x=>/^[a-z]{3,7}$/.test(x[0]));
+  return{
+    name:k=>{const x=pick(list);return{text:"What is it? מה זה?",pic:x[1],opts:pickOpts(x[0],en,k),answer:x[0],sayAfter:x[0]}},
+    hear:k=>{const x=pick(list);return{text:"מה שמעתם? בחרו תמונה",say:x[0],opts:pickOpts(x[1],pics,k),answer:x[1],emo:true,sayAfter:x[0]}},
+    tr:k=>{const x=pick(list);return{text:`איך אומרים באנגלית "${x[2]}"?`,opts:pickOpts(x[0],en,k),answer:x[0],sayAfter:x[0]}},
+    spell:k=>{const x=pick(words);return{text:"איך כותבים נכון?",pic:x[1],hint:x[2],say:x[0],opts:spellOpts(x[0],k),answer:x[0],sayAfter:x[0]}},
+    build:()=>{const x=pick(words);return{text:"סדרו את האותיות:",pic:x[1],hint:x[2],build:shuffle(x[0].split("")),answer:x[0],sayAfter:x[0]}}
+  };
+}
 const swatchOf=name=>COLORS.find(c=>c[0]===name)[3];
 
 /* ---------- question generators: k = number of options ---------- */
@@ -921,7 +947,9 @@ const GEN={
  wBuildHear(){const w=BUILD_WORDS[rnd(BUILD_WORDS.length)];const extra=shuffle("aeioustrnm".split("").filter(c=>!w.en.includes(c))).slice(0,2);return{text:"מה שמעתם? בנו את המילה:",say:w.en,build:shuffle([...w.en.split(""),...extra]),answer:w.en,sayAfter:w.en}},
  sFill(k){const x=SENTENCES[rnd(SENTENCES.length)];const pool=uniq([...x.o,...shuffle(SENT_EXTRA)]).filter(o=>o.toLowerCase()!==x.a.toLowerCase());return{text:"השלימו את המשפט:",pic:x.e,sent:x.s,hint:x.he,opts:shuffle([x.a,...pool.slice(0,Math.max(2,k-1))]),answer:x.a,sayAfter:fullSentence(x)}}
 };
-const ALL_CHOICE=["lHear","lStart","nHear20","nWord20","nSpell","cHear","cSent","cSpell","dTr","dAfter","dSpell","wTr","wHear","wSpell","sFill"];
+const AN=vocabGens(ANIMALS),FD=vocabGens(FOOD);
+Object.assign(GEN,{aName:AN.name,aHear:AN.hear,aTr:AN.tr,aSpell:AN.spell,aBuild:AN.build,fName:FD.name,fHear:FD.hear,fTr:FD.tr,fSpell:FD.spell,fBuild:FD.build});
+const ALL_CHOICE=["aHear","aTr","aSpell","fHear","fTr","fSpell","lHear","lStart","nHear20","nWord20","nSpell","cHear","cSent","cSpell","dTr","dAfter","dSpell","wTr","wHear","wSpell","sFill"];
 
 /* ---------- worlds and levels ---------- */
 const WORLDS=[
@@ -929,37 +957,25 @@ const WORLDS=[
  {name:"הר המספרים",e:"🔢",c:"var(--sky)"},
  {name:"יער הצבעים",e:"🎨",c:"var(--grass)"},
  {name:"עיר הימים",e:"📅",c:"var(--sun)"},
- {name:"ממלכת המילים",e:"📚",c:"var(--berry)"},
- {name:"טירת האלופים",e:"🏰",c:"var(--tomato)"}
+ {name:"חוות החיות",e:"🐮",c:"var(--berry)"},
+ {name:"שוק האוכל",e:"🍎",c:"var(--tomato)"},
+ {name:"ממלכת המילים",e:"📚",c:"var(--sky)"},
+ {name:"טירת האלופים",e:"🏰",c:"var(--berry)"}
 ];
-// w: world (1-6), g: generators, k: options per question, time: seconds per question (0 = no timer), n: questions
-const LEVELS=[
- {w:1,t:"גדולה וקטנה",g:["lCase"],k:3},
- {w:1,t:"אוזן קשבת",g:["lHear"],k:3},
- {w:1,t:"באיזו אות מתחילה?",g:["lStart"],k:4},
- {w:1,t:"סדר ה-ABC",g:["lNext","lHear","lCase"],k:4,time:20},
- {w:2,t:"סופרים עד 10",g:["nHear10"],k:3},
- {w:2,t:"כותבים מספרים",g:["nWord10","nCount"],k:4},
- {w:2,t:"עד 20!",g:["nHear20","nWord20"],k:4,time:20},
- {w:2,t:"אלופי המספרים",g:["nSpell","nHear20","nCount"],k:4,time:15},
- {w:3,t:"איזה צבע?",g:["cName"],k:3},
- {w:3,t:"שומעים צבעים",g:["cHear"],k:4},
- {w:3,t:"משפטי צבע",g:["cSent"],k:4,time:20},
- {w:3,t:"קשת בענן",g:["cSpell","cHear","cSent"],k:4,time:15},
- {w:4,t:"ימי השבוע",g:["dHear"],k:3},
- {w:4,t:"מתרגמים ימים",g:["dTr"],k:4},
- {w:4,t:"מה בא אחרי?",g:["dAfter","dHear"],k:4,time:20},
- {w:4,t:"שבוע שלם",g:["dSpell","dTr","dAfter"],k:4,time:15},
- {w:5,t:"מילים ראשונות",g:["wTr"],k:3},
- {w:5,t:"אוזן למילים",g:["wHear"],k:4},
- {w:5,t:"כתיב נכון",g:["wSpell"],k:4,time:20},
- {w:5,t:"בונים מילים",g:["wBuild"],k:0},
- {w:6,t:"משלימים משפט",g:["sFill"],k:3},
- {w:6,t:"שומעים ובונים",g:["wBuildHear","sFill","wSpell"],k:4,time:25},
- {w:6,t:"מבחן האלופים",g:ALL_CHOICE,k:6,time:12},
- {w:6,t:"הבוס הגדול",g:[...ALL_CHOICE,"wBuildHear"],k:6,time:10,n:10,boss:true}
+// [world, title, generators, options per question (0 = build the word), boss]
+const LV=[
+ [1,"גדולה וקטנה",["lCase"],3],[1,"אוזן קשבת",["lHear"],3],[1,"באיזו אות מתחילה?",["lStart"],4],[1,"סדר ה-ABC",["lNext"],4],[1,"אלופי האותיות",["lHear","lStart","lNext","lCase"],4],
+ [2,"סופרים עד 10",["nHear10"],3],[2,"כותבים מספרים",["nWord10"],4],[2,"ספרו!",["nCount"],4],[2,"עד 20!",["nHear20","nWord20"],4],[2,"אלופי המספרים",["nSpell","nHear20","nCount"],4],
+ [3,"איזה צבע?",["cName"],3],[3,"שומעים צבעים",["cHear"],4],[3,"משפטי צבע",["cSent"],4],[3,"כתיב צבעים",["cSpell"],4],[3,"קשת בענן",["cSpell","cHear","cSent","cName"],4],
+ [4,"ימי השבוע",["dHear"],3],[4,"מתרגמים ימים",["dTr"],4],[4,"מה בא אחרי?",["dAfter"],4],[4,"כתיב ימים",["dSpell"],4],[4,"שבוע שלם",["dSpell","dTr","dAfter","dHear"],4],
+ [5,"מי זה?",["aName"],3],[5,"שומעים חיות",["aHear"],4],[5,"מתרגמים חיות",["aTr"],4],[5,"כתיב חיות",["aSpell"],4],[5,"בונים חיות",["aBuild","aHear","aSpell"],4],
+ [6,"מה אוכלים?",["fName"],3],[6,"שומעים אוכל",["fHear"],4],[6,"מתרגמים אוכל",["fTr"],4],[6,"כתיב אוכל",["fSpell"],4],[6,"בונים ארוחה",["fBuild","fHear","fSpell"],4],
+ [7,"מילים ראשונות",["wTr"],3],[7,"אוזן למילים",["wHear"],4],[7,"כתיב נכון",["wSpell"],4],[7,"בונים מילים",["wBuild"],0],[7,"מלך המילים",["wBuild","wSpell","wHear","wTr"],4],
+ [8,"משלימים משפט",["sFill"],3],[8,"שומעים ובונים",["wBuildHear","sFill"],4],[8,"ערבוב גדול",ALL_CHOICE,4],[8,"מבחן האלופים",ALL_CHOICE,6],[8,"הבוס הגדול",[...ALL_CHOICE,"wBuildHear"],6,true]
 ];
-const HEARTS=3,QN=8;
+// Every question has an hourglass: 30 seconds on level 1, shrinking evenly to 9 seconds on the boss
+const LEVELS=LV.map(([w,t,g,k,boss],i)=>Object.assign({w,t,g,k,time:Math.round(30-21*i/(LV.length-1))},boss?{n:10,boss:true}:{}));
+const PER_WORLD=5,HEARTS=3,QN=6;
 const qCount=L=>L.n||QN;
 // Building a word takes longer than tapping an answer
 const qTime=(L,q)=>L.time?(q.build?L.time+12:L.time):0;
@@ -984,7 +1000,7 @@ function scoreAnswer(w,timeFrac,streak){
 }
 // Finishing a level: 10 × world for every heart left. Stars = hearts left.
 const finishBonus=(w,hearts)=>hearts>0?hearts*10*w:0;
-const RANKS=[[0,"🐣","מתחיל","מתחילה"],[4,"🧭","חוקר","חוקרת"],[8,"🦸","גיבור","גיבורה"],[12,"🥇","אלוף","אלופה"],[16,"🎓","מאסטר","מאסטרית"],[20,"🧙","קוסם אנגלית","קוסמת אנגלית"],[24,"👑","אגדה","אגדה"]];
+const RANKS=[[0,"🐣","מתחיל","מתחילה"],[5,"🧭","חוקר","חוקרת"],[10,"🦸","גיבור","גיבורה"],[15,"🥇","אלוף","אלופה"],[20,"🚀","כוכב","כוכבת"],[25,"🎓","מאסטר","מאסטרית"],[30,"🧙","קוסם אנגלית","קוסמת אנגלית"],[40,"👑","אגדה","אגדה"]];
 function rankOf(passed,g){let r=RANKS[0];for(const x of RANKS)if(passed>=x[0])r=x;return r[1]+" "+(g==="m"?r[2]:r[3])}
 
 /* ---------- access code (paywall hook) ---------- */
@@ -1002,7 +1018,9 @@ function validCode(c){const m=String(c).trim().toUpperCase().replace(/\s+/g,"").
 const KEY="englishquest.v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-const S=Object.assign({profiles:[],cur:null,friends:[],license:null},load());
+const S=Object.assign({profiles:[],cur:null,friends:[],license:null,mute:false},load());
+// v2 has 40 levels instead of 24: keep the players, restart their progress
+if(S.ver!==2){S.profiles.forEach(p=>p.best={});S.friends=[];S.ver=2;save()}
 const me=()=>S.profiles.find(p=>p.id===S.cur)||null;
 const tx=(f,m)=>me()&&me().g==="m"?m:f;
 function passedCount(p){let n=0;while(n<LEVELS.length&&p.best[n]&&p.best[n].stars>0)n++;return n}
@@ -1021,7 +1039,7 @@ function record(p,li,pts,stars){
 const b64e=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0)));
 function encodeShare(p){
-  const j=JSON.stringify([1,p.name,p.av,p.g,passedCount(p),totalPts(p),totalStars(p),Math.floor(Date.now()/1000)]);
+  const j=JSON.stringify([2,p.name,p.av,p.g,passedCount(p),totalPts(p),totalStars(p),Math.floor(Date.now()/1000)]);
   return "EQ:"+b64e(j)+"."+h32(j+SALT).toString(36).slice(-4);
 }
 function parseShare(text){
@@ -1029,7 +1047,7 @@ function parseShare(text){
   if(!m)return null;
   try{
     const j=b64d(m[1]);if(h32(j+SALT).toString(36).slice(-4)!==m[2])return null;
-    const a=JSON.parse(j);if(a[0]!==1)return null;
+    const a=JSON.parse(j);if(a[0]!==2)return null;
     const [,name,av,g,passed,pts,stars,ts]=a;
     if(typeof name!=="string"||!name.trim()||passed<0||passed>LEVELS.length||pts<0||stars<0||stars>LEVELS.length*3)return null;
     return {name:name.slice(0,14),av,g,passed,pts,stars,ts};
@@ -1065,22 +1083,22 @@ function showProfiles(){
   const list=S.profiles.map(p=>`<button class="pcard" data-id="${p.id}"><span class="av">${p.av}</span><b>${esc(p.name)}</b><small>שלב ${Math.min(passedCount(p)+1,LEVELS.length)} · ${totalPts(p)} 💎</small></button>`).join("");
   screen.innerHTML=`
     ${S.profiles.length?`<h2>מי משחק עכשיו?</h2><div class="profiles">${list}</div>`:`<div class="card" style="margin-bottom:16px"><h2>ברוכים הבאים ל-<span class="en">English Quest</span>!</h2><p class="muted" style="margin:0">24 שלבים ב-6 עולמות. כל שלב קשה קצת יותר מהקודם. צוברים נקודות וכוכבים ומתחרים בחברים.</p></div>`}
-    ${S.profiles.length<6?`<form class="card form" id="newP">
+    ${S.profiles.length<6?`<form class="card form" id="qx-newP">
       <h2 style="margin:0">${S.profiles.length?"שחקן חדש":"יוצרים שחקן"}</h2>
-      <label for="pName">שם</label><input type="text" id="pName" maxlength="14" autocomplete="off" placeholder="למשל: נועה">
+      <label for="pName">שם</label><input type="text" id="qx-pName" maxlength="14" autocomplete="off" placeholder="למשל: נועה">
       <div class="seg" role="group" aria-label="פנייה"><button type="button" data-g="f" aria-pressed="true">בת</button><button type="button" data-g="m" aria-pressed="false">בן</button></div>
       <label>דמות</label><div class="avs">${AVATARS.map((a,i)=>`<button type="button" data-a="${a}" aria-pressed="${i===0}">${a}</button>`).join("")}</div>
-      <div class="msg no" id="pMsg"></div>
+      <div class="msg no" id="qx-pMsg"></div>
       <button class="btn big" type="submit">יוצאים לדרך ▶</button></form>`:""}`;
   screen.querySelectorAll(".pcard").forEach(b=>b.onclick=()=>{S.cur=b.dataset.id;save();go(showMap)});
-  const f=$("newP");if(!f)return;
+  const f=$("qx-newP");if(!f)return;
   let g="f",av=AVATARS[0];
   f.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{g=b.dataset.g;f.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   f.querySelectorAll(".avs button").forEach(b=>b.onclick=()=>{av=b.dataset.a;f.querySelectorAll(".avs button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   f.onsubmit=e=>{
-    e.preventDefault();const name=$("pName").value.trim();
-    if(!name){$("pMsg").textContent="כתבו שם כדי להתחיל";return}
-    if(S.profiles.some(p=>p.name===name)){$("pMsg").textContent="השם הזה כבר קיים במכשיר";return}
+    e.preventDefault();const name=$("qx-pName").value.trim();
+    if(!name){$("qx-pMsg").textContent="כתבו שם כדי להתחיל";return}
+    if(S.profiles.some(p=>p.name===name)){$("qx-pMsg").textContent="השם הזה כבר קיים במכשיר";return}
     const p={id:"p"+Date.now().toString(36)+rnd(1e4),name,g,av,best:{}};
     S.profiles.push(p);S.cur=p.id;save();speak("Hello "+name+"! Let's play!");go(showMap);
   };
@@ -1089,16 +1107,18 @@ function showProfiles(){
 /* ---------- illustrated map ---------- */
 // The map is one tall SVG drawn bottom-up: level 1 at the bottom, the castle at the top.
 // Level buttons are HTML laid over it at the same coordinates, so they stay tappable and accessible.
-const MW=400,ZH=430,MH=ZH*6+200;
+const MW=400,ZH=560,NZ=8,MH=ZH*NZ+200;
 const zoneTop=wi=>MH-40-(wi+1)*ZH;
-const nodeXY=li=>{const wi=Math.floor(li/4),j=li%4;return[Math.round(200+118*Math.sin(li*1.2+0.4)),zoneTop(wi)+ZH-60-j*92]};
+const nodeXY=li=>{const wi=Math.floor(li/PER_WORLD),j=li%PER_WORLD;return[Math.round(200+118*Math.sin(li*1.2+0.4)),zoneTop(wi)+ZH-100-j*88]};
 const ZONES=[
- {bg:["#8FD3F0","#5DB6E3"],decor:[["🌴",52,250,34],["⛵",345,120,30],["🐠",350,330,24],["🐚",40,385,22],["🦀",330,400,22],["🌊",60,90,26]]},
- {bg:["#CFE6B4","#A9D08E"],decor:[["🌲",40,300,30],["🐐",350,360,26],["🌲",360,190,28],["🦅",60,80,24],["🪨",340,60,22]]},
- {bg:["#9ED98A","#6FBF63"],decor:[["🌳",38,330,34],["🍄",355,380,24],["🦋",340,160,24],["🌳",360,260,32],["🌻",50,90,30],["🐿️",40,200,24]]},
- {bg:["#F1E3C3","#E3CF9F"],decor:[["🏫",48,320,32],["🚌",345,390,28],["🏠",355,230,30],["🌭",40,170,22],["🚲",345,80,24]]},
- {bg:["#E2D3F7","#C9B2EE"],decor:[["📚",45,340,30],["🦄",350,300,32],["🌸",40,190,24],["✏️",355,150,24],["🎒",50,70,26]]},
- {bg:["#FFF1C9","#FFDB8A"],decor:[["☁️",55,330,38],["✨",350,360,24],["☁️",345,170,34],["👑",45,170,26],["🐉",350,70,30]]}
+ {art:"island",bg:["#8FD3F0","#5DB6E3"],decor:[["🌴",52,250,34],["⛵",345,120,30],["🐠",350,330,24],["🐚",40,385,22],["🦀",330,400,22],["🌊",60,90,26]]},
+ {art:"mountains",bg:["#CFE6B4","#A9D08E"],decor:[["🌲",40,300,30],["🐐",350,360,26],["🌲",360,190,28],["🦅",60,80,24],["🪨",340,60,22]]},
+ {art:"forest",bg:["#9ED98A","#6FBF63"],decor:[["🌳",38,330,34],["🍄",355,380,24],["🦋",340,160,24],["🌳",360,260,32],["🌻",50,90,30],["🐿️",40,200,24]]},
+ {art:"town",bg:["#F1E3C3","#E3CF9F"],decor:[["🏫",48,320,32],["🚌",345,390,28],["🏠",355,230,30],["🌭",40,170,22],["🚲",345,80,24]]},
+ {art:"farm",bg:["#D8EFA8","#B5DB79"],decor:[["🌾",45,360,28],["🚜",345,420,30],["🌻",355,250,26],["🐓",45,200,26],["🌾",350,120,26]]},
+ {art:"market",bg:["#FFE0C2","#FFC99A"],decor:[["🧺",48,380,30],["🍉",350,420,28],["🥖",40,230,26],["🍓",355,270,24],["🧁",350,120,26]]},
+ {art:"hills",bg:["#E2D3F7","#C9B2EE"],decor:[["📚",45,340,30],["🦄",350,300,32],["🌸",40,190,24],["✏️",355,150,24],["🎒",50,70,26]]},
+ {art:"castle",bg:["#FFF1C9","#FFDB8A"],decor:[["☁️",55,330,38],["✨",350,360,24],["☁️",345,170,34],["👑",45,170,26],["🐉",350,70,30]]}
 ];
 function mapPathD(pts){
   // Catmull-Rom through the points, as cubic Béziers
@@ -1110,71 +1130,83 @@ function mapPathD(pts){
   return d;
 }
 function zoneArt(wi){
-  const y=zoneTop(wi),Z=ZONES[wi],g=`zg${wi}`;
-  let s=`<defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${Z.bg[1]}"/><stop offset="1" stop-color="${Z.bg[0]}"/></linearGradient></defs>`;
-  s+=wi===5?`<rect x="0" y="0" width="${MW}" height="${y+ZH+2}" fill="url(#${g})"/>`:`<rect x="0" y="${y-2}" width="${MW}" height="${ZH+4}" fill="url(#${g})"/>`;
-  if(wi===0){ // island in the sea, with surf
+  const y=zoneTop(wi),Z=ZONES[wi],A=Z.art,g=`zg${wi}`;
+  let s=`<defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${Z.bg[1]}"/><stop offset="1" stop-color="${Z.bg[0]}"/></linearGradient><clipPath id="zc${wi}"><rect x="0" y="${A==="castle"?0:y}" width="${MW}" height="${A==="castle"?y+ZH:ZH}"/></clipPath></defs><g clip-path="url(#zc${wi})">`;
+  s+=A==="castle"?`<rect x="0" y="0" width="${MW}" height="${y+ZH+2}" fill="url(#${g})"/>`:`<rect x="0" y="${y-2}" width="${MW}" height="${ZH+4}" fill="url(#${g})"/>`;
+  if(A==="island"){ // island in the sea, with surf
     s+=`<ellipse cx="200" cy="${y+235}" rx="185" ry="175" fill="#F5E2A8"/><ellipse cx="200" cy="${y+235}" rx="160" ry="152" fill="#B9DD83"/>`;
     for(let k=0;k<5;k++)s+=`<path d="M${20+k*80},${y+28+(k%2)*20} q10,-8 20,0 t20,0" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>`;
   }
-  if(wi===1){ // snowy mountains behind the meadow
+  if(A==="mountains"){ // snowy mountains behind the meadow
     [[70,150,95],[200,110,120],[330,150,95]].forEach(([cx,h,w])=>{
       s+=`<polygon points="${cx-w},${y+h+130} ${cx},${y+h-50} ${cx+w},${y+h+130}" fill="#8FA5A0"/><polygon points="${cx-26},${y+h-12} ${cx},${y+h-50} ${cx+26},${y+h-12} ${cx+10},${y+h-20} ${cx-8},${y+h-8}" fill="#fff"/>`;
     });
     s+=`<ellipse cx="200" cy="${y+ZH}" rx="260" ry="160" fill="#A9D08E"/>`;
   }
-  if(wi===2){ // rainbow over the forest
+  if(A==="forest"){ // rainbow over the forest
     ["#E53935","#FB8C00","#FDD835","#43A047","#1E88E5","#8E24AA"].forEach((c,k)=>s+=`<path d="M${60+k*9},${y+190} A${140-k*9},${120-k*9} 0 0 1 ${340-k*9},${y+190}" stroke="${c}" stroke-width="9" fill="none" opacity=".55"/>`);
   }
-  if(wi===3){ // little houses along the streets
+  if(A==="town"){ // little houses along the streets
     [[30,"#F28B6B"],[95,"#7FB2E5"],[300,"#F6C453"],[355,"#9C8BD9"]].forEach(([x,c],k)=>{
       const h=60+(k%2)*22,by=y+70;
       s+=`<rect x="${x-24}" y="${by+90-h}" width="48" height="${h}" rx="4" fill="${c}"/><rect x="${x-14}" y="${by+100-h}" width="10" height="10" fill="#fff" opacity=".8"/><rect x="${x+4}" y="${by+100-h}" width="10" height="10" fill="#fff" opacity=".8"/>`;
     });
     s+=`<rect x="0" y="${y+165}" width="${MW}" height="14" fill="#CDB98C" opacity=".6"/>`;
   }
-  if(wi===4){ // rolling lavender hills
+  if(A==="hills"){ // rolling lavender hills
     s+=`<ellipse cx="80" cy="${y+ZH}" rx="190" ry="120" fill="#B89BE6" opacity=".6"/><ellipse cx="330" cy="${y+ZH-20}" rx="170" ry="110" fill="#B89BE6" opacity=".5"/>`;
   }
-  if(wi===5){ // the champions' castle at the very top
+  if(A==="castle"){ // the champions' castle at the very top
     s+=`<g transform="translate(200 ${y-50})"><rect x="-60" y="-10" width="120" height="70" fill="#C9A7E8"/><rect x="-80" y="-40" width="32" height="100" fill="#B48FE0"/><rect x="48" y="-40" width="32" height="100" fill="#B48FE0"/>
       <polygon points="-84,-40 -64,-78 -44,-40" fill="#F2603F"/><polygon points="44,-40 64,-78 84,-40" fill="#F2603F"/><rect x="-14" y="22" width="28" height="38" rx="14" fill="#6E4AA8"/>
       <rect x="-60" y="-24" width="14" height="14" fill="#C9A7E8"/><rect x="-30" y="-24" width="14" height="14" fill="#C9A7E8"/><rect x="0" y="-24" width="14" height="14" fill="#C9A7E8"/><rect x="30" y="-24" width="14" height="14" fill="#C9A7E8"/>
       <line x1="64" y1="-78" x2="64" y2="-100" stroke="#6E4AA8" stroke-width="3"/><polygon points="64,-100 84,-93 64,-86" fill="#FFC23D"/></g>`;
   }
+  if(A==="farm"){ // red barn and a fence
+    s+=`<g transform="translate(330 ${y+300})"><polygon points="-40,0 0,-34 40,0" fill="#B83B2E"/><rect x="-36" y="0" width="72" height="56" fill="#D9473A"/><rect x="-12" y="22" width="24" height="34" fill="#fff"/><path d="M-12 22l24 34M12 22l-24 34" stroke="#D9473A" stroke-width="3"/></g>`;
+    for(let k=0;k<7;k++)s+=`<rect x="${12+k*16}" y="${y+150}" width="5" height="34" fill="#C89B6D"/>`;
+    s+=`<rect x="10" y="${y+158}" width="110" height="5" fill="#C89B6D"/><rect x="10" y="${y+172}" width="110" height="5" fill="#C89B6D"/>`;
+  }
+  if(A==="market"){ // market stalls with striped awnings
+    [[60,"#F2603F"],[340,"#3B86D9"]].forEach(([x,c])=>{
+      for(let k=0;k<5;k++)s+=`<rect x="${x-40+k*16}" y="${y+60}" width="16" height="22" fill="${k%2?"#fff":c}"/>`;
+      s+=`<rect x="${x-36}" y="${y+82}" width="72" height="40" fill="#E9C48F"/><rect x="${x-40}" y="${y+82}" width="80" height="8" fill="#C89B6D"/>`;
+    });
+  }
   Z.decor.forEach(([e,x,yy,sz])=>s+=`<text x="${x}" y="${y+yy}" font-size="${sz}" text-anchor="middle" dominant-baseline="central">${e}</text>`);
+  s+=`</g>`;
   // wavy edge into the next zone
-  if(wi<5)s+=`<path d="M0,${y+8} Q50,${y-14} 100,${y+4} T200,${y+2} T300,${y+6} T400,${y} V${y+14} H0Z" fill="${Z.bg[1]}"/>`;
+  if(wi<NZ-1)s+=`<path d="M0,${y+8} Q50,${y-14} 100,${y+4} T200,${y+2} T300,${y+6} T400,${y} V${y+14} H0Z" fill="${Z.bg[1]}"/>`;
   return s;
 }
 function mapHTML(p){
   const passed=passedCount(p),cur=Math.min(passed,LEVELS.length-1);
-  const pts=[[200,MH-8],...LEVELS.map((_,i)=>nodeXY(i)),[200,zoneTop(5)+12]];
+  const pts=[[200,MH-8],...LEVELS.map((_,i)=>nodeXY(i)),[200,zoneTop(NZ-1)+12]];
   const d=mapPathD(pts);
   // How far along the road the player is: the path segment up to the current node
   const doneD=mapPathD(pts.slice(0,cur+2));
   let svg=`<svg class="mapsvg" viewBox="0 0 ${MW} ${MH}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">`;
-  for(let wi=0;wi<6;wi++)svg+=zoneArt(wi);
+  for(let wi=0;wi<NZ;wi++)svg+=zoneArt(wi);
   svg+=`<path d="${d}" stroke="#7A5A3A" stroke-opacity=".35" stroke-width="30" fill="none" stroke-linecap="round"/>
     <path d="${d}" stroke="#F6E7C1" stroke-width="22" fill="none" stroke-linecap="round"/>
     <path d="${d}" stroke="#D9C08A" stroke-width="3" stroke-dasharray="2 12" fill="none" stroke-linecap="round"/>
     <path d="${doneD}" stroke="#FFC23D" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="1 14"/>`;
   // fog over worlds that are still closed
-  for(let wi=0;wi<6;wi++)if(!unlocked(p,wi*4))svg+=`<rect x="0" y="${wi===5?0:zoneTop(wi)}" width="${MW}" height="${wi===5?zoneTop(5)+ZH:ZH}" fill="#fff" opacity=".38"/>`;
+  for(let wi=0;wi<NZ;wi++)if(!unlocked(p,wi*PER_WORLD))svg+=`<rect x="0" y="${wi===NZ-1?0:zoneTop(wi)}" width="${MW}" height="${wi===NZ-1?zoneTop(wi)+ZH:ZH}" fill="#fff" opacity=".38"/>`;
   svg+=`</svg>`;
   const pct=(x,y)=>`left:${(x/MW*100).toFixed(2)}%;top:${(y/MH*100).toFixed(3)}%`;
   const banners=WORLDS.map((W,wi)=>{
-    const st=[0,1,2,3].reduce((a,j)=>a+(p.best[wi*4+j]?p.best[wi*4+j].stars:0),0),open=unlocked(p,wi*4);
-    return `<div class="wban${open?"":" closed"}" style="${pct(200,zoneTop(wi)+(wi===5?-30:12))}">${open?W.e:"🔒"} <b>${W.name}</b> <span>★${st}/12</span></div>`;
+    const ids=[...Array(PER_WORLD).keys()].map(j=>wi*PER_WORLD+j),st=ids.reduce((a,i)=>a+(p.best[i]?p.best[i].stars:0),0),open=unlocked(p,ids[0]);
+    return `<div class="wban${open?"":" closed"}" style="${pct(200,zoneTop(wi)+(wi===NZ-1?-30:12))}">${open?W.e:"🔒"} <b>${W.name}</b> <span>★${st}/${PER_WORLD*3}</span></div>`;
   }).join("");
   const nodes=LEVELS.map((L,i)=>{
     const [x,y]=nodeXY(i),op=unlocked(p,i),pw=paywalled(i),b=p.best[i];
     return `<button class="mnode${op&&!pw?"":" lock"}${i===cur&&op&&!pw?" now":""}${b?" done":""}${L.boss?" boss":""}" style="${pct(x,y)};--c:${WORLDS[L.w-1].c}" data-li="${i}" aria-label="שלב ${i+1}: ${L.t}${b?`, ${b.stars} כוכבים`:""}">
-      <span class="ball">${pw?"🔑":op?(L.boss?"👑":i+1):"🔒"}${L.time&&op&&!pw?`<i class="tm">⏱</i>`:""}</span>
+      <span class="ball">${pw?"🔑":op?(L.boss?"👑":i+1):"🔒"}</span>
       <span class="nst">${b?starStr(b.stars):""}</span><span class="nt">${L.t}</span></button>`;
   }).join("");
   const [ax,ay]=nodeXY(cur);
-  return `<div class="qmap" id="qmap">${svg}${banners}${nodes}<div class="me-av" style="${pct(ax,ay-58)}" aria-hidden="true">${p.av}</div></div>`;
+  return `<div class="qmap" id="qx-qmap" style="aspect-ratio:${MW}/${MH}">${svg}${banners}${nodes}<div class="me-av" style="${pct(ax,ay-58)}" aria-hidden="true">${p.av}</div></div>`;
 }
 
 function starStr(n,max=3){return "★".repeat(n)+(n<max?`<span class="off">${"★".repeat(max-n)}</span>`:"")}
@@ -1192,16 +1224,16 @@ function showMap(scroll=true){
       </div>
     </div>
     <div class="actions">
-      <button class="btn big warm" id="cont">▶ ${passed>=LEVELS.length?"עברת הכול! שחקו שוב":"לשלב "+(passed+1)}</button>
-      <button class="btn alt" id="toBoard">🏆 טבלת אלופים</button>
-      <button class="btn ghost" id="toProfiles">👥 החלפת שחקן</button>
+      <button class="btn big warm" id="qx-cont">▶ ${passed>=LEVELS.length?"עברת הכול! שחקו שוב":"לשלב "+(passed+1)}</button>
+      <button class="btn alt" id="qx-toBoard">🏆 טבלת אלופים</button>
+      <button class="btn ghost" id="qx-toProfiles">👥 החלפת שחקן</button>
     </div>
     ${PAYWALL&&!S.license?`<p class="muted" style="margin-top:-8px">שלבים 1–${FREE_LEVELS} פתוחים בחינם. 🔑 = נפתח עם קוד גישה.</p>`:""}
     ${mapHTML(p)}`;
   screen.querySelectorAll(".mnode").forEach(b=>b.onclick=()=>tryLevel(+b.dataset.li));
-  $("cont").onclick=()=>tryLevel(nextLi);
-  $("toBoard").onclick=()=>go(showBoard);
-  $("toProfiles").onclick=()=>go(showProfiles);
+  $("qx-cont").onclick=()=>tryLevel(nextLi);
+  $("qx-toBoard").onclick=()=>go(showBoard);
+  $("qx-toProfiles").onclick=()=>go(showProfiles);
   // Bring the player's spot on the map into view
   if(scroll)requestAnimationFrame(()=>{const n=screen.querySelector(".mnode.now");if(n&&n.offsetParent)n.scrollIntoView({block:"center"})});
 }
@@ -1210,6 +1242,24 @@ function tryLevel(li){
   if(paywalled(li))return showPaywall(li);
   if(!unlocked(p,li)){speak("Locked!");const n=screen.querySelector(`.mnode[data-li="${li}"] .ball`);if(n){n.style.animation="shake .35s";setTimeout(()=>n.style.animation="",400)}return}
   go(startLevel,li);
+}
+
+/* ---------- sound effects ---------- */
+// Short tones from Web Audio; created on the first tap so iPhone allows it
+let AC=null;
+function sfx(kind){
+  if(S.mute)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==="suspended")AC.resume();
+    const notes={ok:[[660,0],[990,.09]],no:[[220,0],[180,.12]],win:[[523,0],[659,.12],[784,.24],[1047,.36]],lose:[[392,0],[330,.15],[262,.3]]}[kind];
+    notes.forEach(([f,t])=>{
+      const o=AC.createOscillator(),g=AC.createGain(),t0=AC.currentTime+t;
+      o.type=kind==="no"?"square":"triangle";o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(kind==="no"?.06:.14,t0+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+.18);
+      o.connect(g).connect(AC.destination);o.start(t0);o.stop(t0+.2);
+    });
+  }catch(e){}
 }
 
 /* ---------- playing a level ---------- */
@@ -1223,48 +1273,59 @@ function heartsStr(){return "❤️".repeat(R.hearts)+"🤍".repeat(HEARTS-R.hea
 function renderQ(){
   const q=R.qs[R.n],L=R.L,W=WORLDS[L.w-1],qn=qCount(L);
   const dots=Array.from({length:qn},(_,i)=>`<i class="${R.res[i]===true?"ok":R.res[i]===false?"no":i===R.n?"now":""}"></i>`).join("");
-  const opts=q.build?`<div class="slots" id="slots">${q.answer.split("").map((_,i)=>`<button data-s="${i}" aria-label="מקום ${i+1}"></button>`).join("")}</div>
-      <div class="tiles" id="tiles">${q.build.map((c,i)=>`<button data-t="${i}">${c}</button>`).join("")}</div>`
-    :`<div class="opts n${q.opts.length}">${q.opts.map((o,i)=>q.sw?`<button class="opt qsw" data-i="${i}" aria-label="${o}" style="--sw:${swatchOf(o)}"></button>`:`<button class="opt${q.he?" he":""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
+  const opts=q.build?`<div class="slots" id="qx-slots">${q.answer.split("").map((_,i)=>`<button data-s="${i}" aria-label="מקום ${i+1}"></button>`).join("")}</div>
+      <div class="tiles" id="qx-tiles">${q.build.map((c,i)=>`<button data-t="${i}">${c}</button>`).join("")}</div>`
+    :`<div class="opts n${q.opts.length}">${q.opts.map((o,i)=>q.sw?`<button class="opt qsw" data-i="${i}" aria-label="${o}" style="--sw:${swatchOf(o)}"></button>`:`<button class="opt${q.he?" he":""}${q.emo?" emo":""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
   screen.innerHTML=`<div class="play">
-    <div class="phead"><button class="x" id="quit" aria-label="חזרה למפה">✕</button>
+    <div class="phead"><button class="x" id="qx-quit" aria-label="חזרה למפה">✕</button><button class="x" id="qx-mute" aria-label="צלילים">${S.mute?"🔇":"🔈"}</button>
       <span class="lt">${W.e} שלב ${R.li+1} · ${L.t}</span>
-      <span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="pts">${R.pts}</span></div>
+      <span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="qx-pts">${R.pts}</span></div>
     <div class="dots">${dots}</div>
-    ${qTime(L,q)?`<div class="timer"><i id="tbar"></i></div>`:""}
+    ${qTime(L,q)?`<div class="tbox"><svg class="hg" viewBox="0 0 30 40" aria-hidden="true"><path d="M4 2h22M4 38h22M6 3c0 9 8 12 8 17s-8 8-8 17M24 3c0 9-8 12-8 17s8 8 8 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon id="qx-hgTop" fill="#F2B640"/><polygon id="qx-hgBot" fill="#F2B640"/><line id="qx-hgFlow" x1="15" y1="20" x2="15" y2="35" stroke="#F2B640" stroke-width="1.5"/></svg><div class="timer"><i id="qx-tbar"></i></div><span class="tsec en" id="qx-tsec"></span></div>`:""}
     <div class="prompt">
       <div class="qq">${q.text}</div>
       ${q.pic?`<div class="pic">${q.pic}</div>`:""}
       ${q.hint?`<div class="qhint">${esc(q.hint)}</div>`:""}
       ${q.big?`<div class="bigq">${esc(q.big)}</div>`:""}
       ${q.sent?`<div class="sent">${esc(q.sent).replace("___","<u>&nbsp;</u>")}</div>`:""}
-      ${q.say?`<button class="say" id="qSay">🔊 שוב</button>`:""}
+      ${q.say?`<button class="say" id="qx-qSay">🔊 שוב</button>`:""}
     </div>
     ${opts}
-    <div class="feedback" id="fb" aria-live="polite">${R.streak>=3?`🔥 רצף של ${R.streak}!`:""}</div>
-    <div class="foot"><button class="btn" id="nextQ" hidden>הבא ←</button></div>
+    <div class="feedback" id="qx-fb" aria-live="polite">${R.streak>=3?`🔥 רצף של ${R.streak}!`:""}</div>
+    <div class="foot"><button class="btn" id="qx-nextQ" hidden>הבא ←</button></div>
   </div>`;
   R.locked=false;
-  $("quit").onclick=()=>go(showMap);
-  if(q.say){$("qSay").onclick=()=>speak(q.say);setTimeout(()=>{if(R&&R.qs[R.n]===q)speak(q.say)},250)}
+  $("qx-quit").onclick=()=>go(showMap);
+  $("qx-mute").onclick=()=>{S.mute=!S.mute;save();$("qx-mute").textContent=S.mute?"🔇":"🔈"};
+  if(q.say){$("qx-qSay").onclick=()=>speak(q.say);setTimeout(()=>{if(R&&R.qs[R.n]===q)speak(q.say)},250)}
   if(q.build)wireBuild(q);
   else screen.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(q.opts[+b.dataset.i],b));
-  $("nextQ").onclick=next;
+  $("qx-nextQ").onclick=next;
   const T=qTime(L,q);
   if(T){
     // Listening questions get a short grace period while the word is spoken
-    const t0=Date.now()+(q.say?1200:0),bar=$("tbar");
+    const t0=Date.now()+(q.say?1200:0),bar=$("qx-tbar");
     R.deadline=t0+T*1000;R.T=T;
     timerId=setInterval(()=>{
       const left=Math.max(0,R.deadline-Date.now()),frac=Math.min(1,left/(T*1000));
       bar.style.transform=`scaleX(${frac})`;bar.classList.toggle("low",frac<.3);
+      drawHourglass(frac);$("qx-tsec").textContent=Math.ceil(left/1000);
       if(left<=0){stopTimer();answer(null,null,true)}
     },100);
   }
 }
+// Sand drains from the top bulb into the bottom one as the time runs out
+function drawHourglass(frac){
+  const top=$("qx-hgTop");if(!top)return;
+  const ys=4+(1-frac)*15,hw=9*(19-ys)/15,yb=36-(1-frac)*15,hb=9*(yb-21)/15;
+  top.setAttribute("points",`${15-hw},${ys} ${15+hw},${ys} 15,19`);
+  $("qx-hgBot").setAttribute("points",`6,36 24,36 ${15+hb},${yb} ${15-hb},${yb}`);
+  $("qx-hgFlow").style.opacity=frac>0&&frac<1?1:0;
+  top.closest(".tbox").classList.toggle("low",frac<.3);
+}
 function wireBuild(q){
   const picked=[];
-  const slots=[...$("slots").children],tiles=[...$("tiles").children];
+  const slots=[...$("qx-slots").children],tiles=[...$("qx-tiles").children];
   const paint=()=>slots.forEach((s,i)=>{s.textContent=picked[i]!=null?q.build[picked[i]]:"";s.classList.toggle("full",picked[i]!=null)});
   tiles.forEach(t=>t.onclick=()=>{
     if(R.locked||picked.length>=slots.length)return;
@@ -1283,23 +1344,26 @@ function answer(val,btn,timeout){
   if(qTime(L,q)){frac=Math.max(0,(R.deadline-Date.now())/(R.T*1000));stopTimer()}
   screen.querySelectorAll(".opt").forEach((b,i)=>{b.disabled=true;if(q.opts[i]===q.answer)b.classList.add("right")});
   if(btn&&!ok)btn.classList.add("wrong");
-  if(q.build){$("slots").classList.add(ok?"right":"wrong");screen.querySelectorAll(".tiles button").forEach(t=>t.disabled=true)}
+  if(q.build){$("qx-slots").classList.add(ok?"right":"wrong");screen.querySelectorAll(".tiles button").forEach(t=>t.disabled=true)}
   R.res[R.n]=ok;
-  const fb=$("fb");
+  const fb=$("qx-fb");
   if(ok){
     R.streak++;R.best=Math.max(R.best,R.streak);
-    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;$("pts").textContent=R.pts;
+    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;$("qx-pts").textContent=R.pts;
     const p=PRAISE[rnd(PRAISE.length)];
     fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span> +${gain}${R.streak>=3?` 🔥${R.streak}`:""}`;
-    speak(q.sayAfter||p,0.9);
-    setTimeout(()=>{if(R&&R.qs[R.n]===q)next()},q.sayAfter&&q.sayAfter.length>12?1900:1200);
+    sfx("ok");speak(q.sayAfter||p,0.9);
+    setTimeout(()=>{if(R&&R.qs[R.n]===q)next()},q.sayAfter&&q.sayAfter.length>12?1700:1100);
   }else{
     R.streak=0;R.hearts--;
     screen.querySelector(".hearts").textContent=heartsStr();
     fb.className="feedback no";
     fb.innerHTML=`${timeout?"נגמר הזמן! ":"כמעט! "}התשובה: <span class="${q.he?"":"en"}">${esc(q.answer)}</span>`;
+    sfx("no");
     if(!q.he)speak(q.sayAfter||(q.answer.length===1?letterSpeech(q.answer.toUpperCase()):q.answer));
-    const nb=$("nextQ");nb.hidden=false;nb.textContent=R.hearts<=0?"לתוצאה ←":"הבא ←";nb.focus();
+    // Keep the game moving: show the right answer, then go on by itself (the button skips the wait)
+    const nb=$("qx-nextQ");nb.hidden=false;nb.textContent=R.hearts<=0?"לתוצאה ←":"הבא ←";
+    setTimeout(()=>{if(R&&R.qs[R.n]===q)next()},2300);
   }
 }
 function next(){
@@ -1330,13 +1394,14 @@ function finish(){
       ${won?`<tr><td>בונוס לבבות</td><td class="en">+${bonus}</td></tr>`:""}</table>
     ${news?`<div class="news">${news}</div>`:""}
     <div class="row">
-      ${nextOk?`<button class="btn big warm" id="nextL">לשלב ${li+2} ▶</button>`:""}
-      <button class="btn${won?" ghost":" big warm"}" id="again">${tx("שחקי שוב","שחק שוב")}</button>
-      <button class="btn ghost" id="toMap">למפה</button>
+      ${nextOk?`<button class="btn big warm" id="qx-nextL">לשלב ${li+2} ▶</button>`:""}
+      <button class="btn${won?" ghost":" big warm"}" id="qx-again">${tx("שחקי שוב","שחק שוב")}</button>
+      <button class="btn ghost" id="qx-toMap">למפה</button>
     </div></div>`;
-  if(nextOk)$("nextL").onclick=()=>tryLevel(li+1);
-  $("again").onclick=()=>go(startLevel,li);
-  $("toMap").onclick=()=>go(showMap);
+  if(nextOk)$("qx-nextL").onclick=()=>tryLevel(li+1);
+  $("qx-again").onclick=()=>go(startLevel,li);
+  $("qx-toMap").onclick=()=>go(showMap);
+  sfx(won?"win":"lose");
   speak(won?(stars===3?"Perfect! Three stars!":"Level complete!"):"Good try! Let's try again.",0.9);
   if(won&&stars===3)confetti();
   R=null;
@@ -1364,25 +1429,25 @@ function showBoard(){
     ${p?`<div class="card form" style="margin-bottom:14px">
       <h3>📤 שולחים את ההישג לחברים</h3>
       <p class="muted" style="margin:0">החברים מדביקים את ההודעה אצלם, ואתם מופיעים בטבלה שלהם.</p>
-      <div class="codebox" id="myCode">${esc(txt)}</div>
-      <div class="row"><button class="btn" id="copy">העתקה</button>
-        <a class="btn alt" style="text-decoration:none" id="wa" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">שליחה בוואטסאפ</a></div>
-      <div class="msg ok" id="copyMsg"></div></div>`:""}
-    <form class="card form" id="addF">
+      <div class="codebox" id="qx-myCode">${esc(txt)}</div>
+      <div class="row"><button class="btn" id="qx-copy">העתקה</button>
+        <a class="btn alt" style="text-decoration:none" id="qx-wa" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">שליחה בוואטסאפ</a></div>
+      <div class="msg ok" id="qx-copyMsg"></div></div>`:""}
+    <form class="card form" id="qx-addF">
       <h3>➕ מוסיפים חבר/ה לטבלה</h3>
       <label for="fCode">מדביקים כאן את ההודעה שקיבלתם</label>
-      <textarea id="fCode" placeholder="🏆 ... הקוד שלי לטבלת האלופים: EQ:..."></textarea>
-      <div class="msg" id="fMsg"></div>
+      <textarea id="qx-fCode" placeholder="🏆 ... הקוד שלי לטבלת האלופים: EQ:..."></textarea>
+      <div class="msg" id="qx-fMsg"></div>
       <button class="btn" type="submit">הוספה לטבלה</button></form>
-    <div class="row" style="margin-top:16px"><button class="btn ghost" id="toMap">→ חזרה למפה</button></div>`;
+    <div class="row" style="margin-top:16px"><button class="btn ghost" id="qx-toMap">→ חזרה למפה</button></div>`;
   screen.querySelectorAll(".del").forEach(b=>b.onclick=()=>{S.friends.splice(+b.dataset.f,1);save();showBoard()});
-  $("toMap").onclick=()=>go(p?showMap:showProfiles);
-  if(p)$("copy").onclick=()=>{
-    const ok=()=>$("copyMsg").textContent="הועתק! אפשר להדביק בוואטסאפ.";
+  $("qx-toMap").onclick=()=>go(p?showMap:showProfiles);
+  if(p)$("qx-copy").onclick=()=>{
+    const ok=()=>$("qx-copyMsg").textContent="הועתק! אפשר להדביק בוואטסאפ.";
     try{navigator.clipboard.writeText(txt).then(ok,()=>selectCode())}catch(e){selectCode()}
   };
-  $("addF").onsubmit=e=>{
-    e.preventDefault();const f=parseShare($("fCode").value),m=$("fMsg");
+  $("qx-addF").onsubmit=e=>{
+    e.preventDefault();const f=parseShare($("qx-fCode").value),m=$("qx-fMsg");
     if(!f){m.className="msg no";m.textContent="לא מצאתי קוד תקין. צריך להדביק את כל ההודעה, כולל EQ:...";return}
     const r=addFriend(f);
     if(r==="self"){m.className="msg no";m.textContent="זה שחקן שכבר נמצא במכשיר הזה.";return}
@@ -1390,27 +1455,27 @@ function showBoard(){
     if(r==="ok")setTimeout(showBoard,900);
   };
 }
-function selectCode(){const r=document.createRange();r.selectNodeContents($("myCode"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="סמנו והעתיקו את הטקסט."}
+function selectCode(){const r=document.createRange();r.selectNodeContents($("qx-myCode"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("qx-copyMsg").textContent="סמנו והעתיקו את הטקסט."}
 
 /* ---------- paywall sheet ---------- */
-function closeSheet(){const s=$("sheet");if(s)s.remove()}
+function closeSheet(){const s=$("qx-sheet");if(s)s.remove()}
 function showPaywall(li){
   closeSheet();
-  const d=document.createElement("div");d.className="sheet";d.id="sheet";
-  d.innerHTML=`<form class="card" id="payF" role="dialog" aria-label="פתיחת המסע המלא">
+  const d=document.createElement("div");d.className="sheet";d.id="qx-sheet";
+  d.innerHTML=`<form class="card" id="qx-payF" role="dialog" aria-label="פתיחת המסע המלא">
     <h2 style="margin:0">🔑 פותחים את המסע המלא</h2>
     <p style="margin:0">שלבים 1–${FREE_LEVELS} חינם. כדי להמשיך לשלב ${li+1} ולכל ${LEVELS.length} השלבים צריך קוד גישה.</p>
     <ul><li>4 עולמות נוספים: צבעים, ימים, מילים ומשפטים</li><li>מבחן האלופים והבוס הגדול</li><li>כל הילדים במכשיר, תשלום חד-פעמי</li></ul>
-    <label for="acc">קוד גישה</label><input type="text" id="acc" class="en" placeholder="EQ-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
-    <div class="msg" id="accMsg"></div>
-    <div class="row"><button class="btn" type="submit">פתיחה</button><button class="btn ghost" type="button" id="accX">אחר כך</button></div></form>`;
+    <label for="acc">קוד גישה</label><input type="text" id="qx-acc" class="en" placeholder="EQ-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
+    <div class="msg" id="qx-accMsg"></div>
+    <div class="row"><button class="btn" type="submit">פתיחה</button><button class="btn ghost" type="button" id="qx-accX">אחר כך</button></div></form>`;
   document.body.appendChild(d);
   d.onclick=e=>{if(e.target===d)closeSheet()};
-  $("accX").onclick=closeSheet;
-  $("payF").onsubmit=e=>{
-    e.preventDefault();const c=$("acc").value;
-    if(!validCode(c)){$("accMsg").className="msg no";$("accMsg").textContent="הקוד לא תקין. בדקו שהוקלד בדיוק כמו שקיבלתם.";return}
-    S.license=c.trim().toUpperCase();save();$("accMsg").className="msg ok";$("accMsg").textContent="המסע המלא נפתח! 🎉";
+  $("qx-accX").onclick=closeSheet;
+  $("qx-payF").onsubmit=e=>{
+    e.preventDefault();const c=$("qx-acc").value;
+    if(!validCode(c)){$("qx-accMsg").className="msg no";$("qx-accMsg").textContent="הקוד לא תקין. בדקו שהוקלד בדיוק כמו שקיבלתם.";return}
+    S.license=c.trim().toUpperCase();save();$("qx-accMsg").className="msg ok";$("qx-accMsg").textContent="המסע המלא נפתח! 🎉";
     setTimeout(()=>{closeSheet();showMap()},900);
   };
 }

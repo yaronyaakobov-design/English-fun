@@ -33,9 +33,9 @@ async function newPage(browser) {
 const noOverflow = page => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 async function createPlayer(page, name, boy) {
-  await page.fill("#pName", name);
+  await page.fill("#qx-pName", name);
   if (boy) await page.click('.seg button[data-g="m"]');
-  await page.click("#newP button[type=submit]");
+  await page.click("#qx-newP button[type=submit]");
 }
 
 // Answer the current question right or wrong through the UI, then move on without waiting for the auto-advance.
@@ -47,7 +47,7 @@ async function answerQ(page, right) {
     for (const ch of letters) {
       const i = q.build.findIndex((c, j) => c === ch && !used.has(j));
       used.add(i);
-      await page.click(`#tiles button[data-t="${i}"]`);
+      await page.click(`#qx-tiles button[data-t="${i}"]`);
     }
   } else {
     const i = right ? q.opts.indexOf(q.answer) : q.opts.findIndex(o => o !== q.answer);
@@ -69,7 +69,7 @@ const advance = page => page.evaluate(() => EQ.next());
       EQ.LEVELS.forEach((L, li) => {
         for (let rep = 0; rep < 40; rep++) {
           const qs = EQ.makeQuestions(li);
-          out.push(["count", li, qs.length === (L.n || 8)]);
+          out.push(["count", li, qs.length === (L.n || 6)]);
           qs.forEach(q => {
             out.push(["text", li, typeof q.text === "string" && q.text.length > 0 && !/undefined|NaN/.test(JSON.stringify(q))]);
             if (q.build) {
@@ -95,9 +95,9 @@ const advance = page => page.evaluate(() => EQ.next());
     pass += Object.keys(agg).length;
 
     const levels = await page.evaluate(() => EQ.LEVELS.map(L => ({ w: L.w, k: L.k, time: L.time || 0 })));
-    check("24 levels in 6 worlds", levels.length === 24 && new Set(levels.map(l => l.w)).size === 6);
+    check("40 levels in 8 worlds of 5", levels.length === 40 && new Set(levels.map(l => l.w)).size === 8 && [1,2,3,4,5,6,7,8].every(w => levels.filter(l => l.w === w).length === 5));
     check("worlds never get easier", levels.every((l, i) => i === 0 || l.w >= levels[i - 1].w));
-    check("last level of each world is timed", [3, 7, 11, 15, 18, 21, 22, 23].every(i => levels[i].time > 0));
+    check("every level has an hourglass, shrinking from 30s to 9s", levels.every((l, i) => l.time > 0 && (i === 0 || l.time <= levels[i - 1].time)) && levels[0].time === 30 && levels[39].time === 9);
     const timed = levels.filter(l => l.time);
     check("final levels have the shortest timer", timed.slice(-2).every(l => l.time <= Math.min(...timed.slice(0, -2).map(x => x.time))));
 
@@ -146,10 +146,10 @@ const advance = page => page.evaluate(() => EQ.next());
   /* ---------- full playthrough on a phone screen ---------- */
   {
     const page = await newPage(browser);
-    check("first screen: create player form", await page.isVisible("#newP"));
+    check("first screen: create player form", await page.isVisible("#qx-newP"));
     check("no overflow: profiles", await noOverflow(page));
-    await page.click("#newP button[type=submit]");
-    check("empty name refused", (await page.textContent("#pMsg")).length > 0);
+    await page.click("#qx-newP button[type=submit]");
+    check("empty name refused", (await page.textContent("#qx-pMsg")).length > 0);
     await createPlayer(page, "נועה");
     check("map shown after creating player", await page.isVisible(".hero"));
     check("hero shows level 1", (await page.textContent(".hero .stat b")).startsWith("1"));
@@ -157,7 +157,7 @@ const advance = page => page.evaluate(() => EQ.next());
     check("no overflow: map", await noOverflow(page));
     const mapCheck = async label => {
       const m = await page.evaluate(() => {
-        const box = document.querySelector("#qmap").getBoundingClientRect();
+        const box = document.querySelector("#qx-qmap").getBoundingClientRect();
         const balls = [...document.querySelectorAll(".mnode .ball")].map(b => b.getBoundingClientRect());
         const bans = [...document.querySelectorAll(".wban")].map(b => b.getBoundingClientRect());
         const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
@@ -167,7 +167,7 @@ const advance = page => page.evaluate(() => EQ.next());
         bans.forEach(b => { if (!inside(b)) outside++; });
         return { n: balls.length, overlaps, outside, banHits, avatar: !!document.querySelector(".me-av"), now: document.querySelectorAll(".mnode.now").length };
       });
-      check(`map ${label}: 24 level buttons`, m.n === 24, m.n);
+      check(`map ${label}: 40 level buttons`, m.n === 40, m.n);
       check(`map ${label}: level circles never overlap`, m.overlaps === 0, m.overlaps);
       check(`map ${label}: world banners never cover a level`, m.banHits === 0, m.banHits);
       check(`map ${label}: everything inside the map`, m.outside === 0, m.outside);
@@ -176,40 +176,55 @@ const advance = page => page.evaluate(() => EQ.next());
     await mapCheck("phone");
     check("footer credit", (await page.textContent("footer")).includes("Made with ❤ by Yaron Y"));
 
-    // Level 1: all right -> 3 stars, 140 points (8x10 + 6 streak bonuses of 5 + 3 hearts x 10)
-    await page.click("#cont");
+    // Level 1: all right -> 3 stars. Points depend on speed now, so check the range: 6x10 + 4 streaks x5 + 30 hearts = 110, plus up to 6x5 speed
+    await page.click("#qx-cont");
     check("no overflow: level", await noOverflow(page));
     await page.evaluate(() => window.__said.splice(0));
-    for (let n = 0; n < 8; n++) { await answerQ(page, true); if (n < 7) await advance(page); }
+    for (let n = 0; n < 6; n++) { await answerQ(page, true); if (n < 5) await advance(page); }
     const said = await page.evaluate(() => window.__said.map(u => u.lang));
     check("speech is en-US", said.length > 0 && said.every(l => l === "en-US"));
     await advance(page);
     check("level 1 result: 3 stars", (await page.$$(".bigst .off")).length === 0 && (await page.textContent(".qres h2")).includes("מושלם"));
-    check("level 1 result: +140", (await page.textContent(".gain")).trim() === "+140", await page.textContent(".gain"));
+    const gain1 = +(await page.textContent(".gain")).trim().slice(1);
+    check("level 1 result: 110-140 points", gain1 >= 110 && gain1 <= 140, gain1);
     check("level 1 result: level 2 unlocked", (await page.textContent(".news")).includes("שלב 2"));
     check("no overflow: result", await noOverflow(page));
     const st = await page.evaluate(() => EQ.S.profiles[0].best[0]);
-    check("saved best for level 1", st.pts === 140 && st.stars === 3, JSON.stringify(st));
+    check("saved best for level 1", st.pts === gain1 && st.stars === 3, JSON.stringify(st));
+    const dupIds = () => page.evaluate(() => { const c = {}; document.querySelectorAll("[id]").forEach(e => c[e.id] = (c[e.id] || 0) + 1); return Object.keys(c).filter(k => c[k] > 1); });
+    check("no duplicate ids on the result screen", (await dupIds()).length === 0, (await dupIds()).join(","));
+    // The "next level" button on the result screen starts level 2
+    await page.click("#qx-nextL");
+    check("next-level button starts level 2", (await page.evaluate(() => EQ.R && EQ.R.li)) === 1);
+    check("hourglass shown", await page.isVisible(".hg"));
+    check("no duplicate ids while playing", (await dupIds()).length === 0, (await dupIds()).join(","));
+    await page.waitForTimeout(400);
+    check("hourglass counts seconds", /^\d+$/.test((await page.textContent("#qx-tsec")).trim()));
+    // A wrong answer moves on by itself
+    const n0 = await page.evaluate(() => EQ.R.n);
+    await answerQ(page, false);
+    await page.waitForTimeout(2600);
+    check("wrong answer auto-advances", (await page.evaluate(() => EQ.R && EQ.R.n)) === n0 + 1);
+    await page.evaluate(() => EQ.go(EQ.startLevel, 0));
 
     // Replay level 1 and lose: 3 wrong answers end the level, best score is kept
-    await page.click("#again");
     for (let n = 0; n < 3; n++) { await answerQ(page, false); await advance(page); }
     check("3 mistakes end the level", (await page.textContent(".qres h2")).includes("נגמרו הלבבות"));
-    check("losing keeps the best score", (await page.evaluate(() => EQ.S.profiles[0].best[0].pts)) === 140);
-    await page.click("#toMap");
+    check("losing keeps the best score", (await page.evaluate(() => EQ.S.profiles[0].best[0].pts)) === gain1);
+    await page.click("#qx-toMap");
 
     // Locked level does nothing
     await page.click('.mnode[data-li="5"]');
     check("locked level stays on map", await page.isVisible(".hero"));
 
     // Play every level to the end with one mistake each (2 stars), forcing one timeout on timed levels
-    for (let li = 1; li < 24; li++) {
+    for (let li = 1; li < 40; li++) {
       await page.evaluate(i => { EQ.go(EQ.startLevel, i); }, li);
       const L = await page.evaluate(i => EQ.LEVELS[i], li);
-      const qn = L.n || 8;
+      const qn = L.n || 6;
       for (let n = 0; n < qn; n++) {
         if (n === 2 && L.time) {
-          check(`level ${li + 1}: timer bar shown`, await page.isVisible("#tbar"));
+          check(`level ${li + 1}: timer bar shown`, await page.isVisible("#qx-tbar"));
           await page.evaluate(() => { EQ.R.deadline = Date.now() - 1; });
           await page.waitForTimeout(250);
           check(`level ${li + 1}: timeout costs a heart`, (await page.evaluate(() => EQ.R.hearts)) === 2);
@@ -224,11 +239,11 @@ const advance = page => page.evaluate(() => EQ.next());
       await advance(page);
       const h = await page.textContent(".qres h2");
       check(`level ${li + 1}: passed with 2 stars`, h.includes("עברת") && (await page.$$(".bigst .off")).length === 1, h);
-      if (li === 23) check("no overflow: final result", await noOverflow(page));
+      if (li === 39) check("no overflow: final result", await noOverflow(page));
     }
     const prog = await page.evaluate(() => { const p = EQ.S.profiles[0]; return { passed: EQ.passedCount(p), pts: EQ.totalPts(p) }; });
-    check("all 24 levels passed", prog.passed === 24, prog.passed);
-    check("points grow with worlds", prog.pts > 140 * 24, prog.pts);
+    check("all 40 levels passed", prog.passed === 40, prog.passed);
+    check("points grow with worlds", prog.pts > 100 * 40, prog.pts);
     await page.evaluate(() => EQ.go(EQ.showMap));
     check("map rank is legend", (await page.textContent(".rank")).includes("אגדה"));
     for (const w of [320, 430, 820]) { await page.setViewportSize({ width: w, height: 800 }); await page.waitForTimeout(100); await mapCheck(w + "px"); check(`no overflow: map at ${w}px`, await noOverflow(page)); }
@@ -236,20 +251,20 @@ const advance = page => page.evaluate(() => EQ.next());
     check("no JS errors (playthrough)", page.errors.length === 0, page.errors.join("; "));
 
     // Leaderboard + sharing to a second device
-    await page.click("#toBoard");
+    await page.click("#qx-toBoard");
     check("no overflow: leaderboard", await noOverflow(page));
-    const msg = await page.textContent("#myCode");
+    const msg = await page.textContent("#qx-myCode");
     check("share message has name and code", msg.includes("נועה") && /EQ:[A-Za-z0-9_-]+\.[a-z0-9]+/.test(msg));
-    check("whatsapp link carries the code", (await page.getAttribute("#wa", "href")).includes(encodeURIComponent("EQ:")));
+    check("whatsapp link carries the code", (await page.getAttribute("#qx-wa", "href")).includes(encodeURIComponent("EQ:")));
 
     const p2 = await newPage(browser);
     await createPlayer(p2, "דני", true);
-    await p2.click("#toBoard");
-    await p2.fill("#fCode", "garbage");
-    await p2.click("#addF button[type=submit]");
-    check("bad friend code shows an error", (await p2.textContent("#fMsg")).includes("לא מצאתי"));
-    await p2.fill("#fCode", msg);
-    await p2.click("#addF button[type=submit]");
+    await p2.click("#qx-toBoard");
+    await p2.fill("#qx-fCode", "garbage");
+    await p2.click("#qx-addF button[type=submit]");
+    check("bad friend code shows an error", (await p2.textContent("#qx-fMsg")).includes("לא מצאתי"));
+    await p2.fill("#qx-fCode", msg);
+    await p2.click("#qx-addF button[type=submit]");
     await p2.waitForTimeout(1000);
     const rows = await p2.$$eval(".brow .nm b", els => els.map(e => e.textContent));
     check("friend added and ranked first", rows[0] === "נועה" && rows[1] === "דני", rows.join(","));
@@ -261,16 +276,16 @@ const advance = page => page.evaluate(() => EQ.next());
     await p2.evaluate(() => { EQ.setPaywall(true); const p = EQ.S.profiles[0]; for (let i = 0; i < 8; i++) p.best[i] = { pts: 100, stars: 3 }; EQ.go(EQ.showMap); });
     check("paywalled levels show a key", (await p2.$$('.mnode.lock .ball')).length > 0 && (await p2.textContent('.mnode[data-li="8"] .ball')).includes("🔑"));
     await p2.click('.mnode[data-li="8"]');
-    check("paywall sheet opens", await p2.isVisible("#sheet"));
+    check("paywall sheet opens", await p2.isVisible("#qx-sheet"));
     check("no overflow: paywall", await noOverflow(p2));
-    await p2.fill("#acc", "EQ-AAAA-AAAA");
-    await p2.click("#payF button[type=submit]");
-    check("wrong access code refused", (await p2.textContent("#accMsg")).includes("לא תקין"));
+    await p2.fill("#qx-acc", "EQ-AAAA-AAAA");
+    await p2.click("#qx-payF button[type=submit]");
+    check("wrong access code refused", (await p2.textContent("#qx-accMsg")).includes("לא תקין"));
     const code = await p2.evaluate(() => EQ.makeCode("T3ST"));
-    await p2.fill("#acc", code.toLowerCase());
-    await p2.click("#payF button[type=submit]");
+    await p2.fill("#qx-acc", code.toLowerCase());
+    await p2.click("#qx-payF button[type=submit]");
     await p2.waitForTimeout(1100);
-    check("valid access code unlocks", !(await p2.isVisible("#sheet")) && !(await p2.textContent('.mnode[data-li="8"] .ball')).includes("🔑"));
+    check("valid access code unlocks", !(await p2.isVisible("#qx-sheet")) && !(await p2.textContent('.mnode[data-li="8"] .ball')).includes("🔑"));
     await p2.reload();
     check("license survives reload", await p2.evaluate(() => !!EQ.S.license));
     check("no JS errors (second device)", p2.errors.length === 0, p2.errors.join("; "));
