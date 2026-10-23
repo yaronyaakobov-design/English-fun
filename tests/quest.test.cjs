@@ -36,6 +36,8 @@ async function createPlayer(page, name, boy) {
   await page.fill("#qx-pName", name);
   if (boy) await page.click('.seg button[data-g="m"]');
   await page.click("#qx-newP button[type=submit]");
+  // New players are offered the opening challenge; these tests start from the beginning
+  await page.click("#qx-placeNo");
 }
 
 // Answer the current question right or wrong through the UI, then move on without waiting for the auto-advance.
@@ -56,6 +58,8 @@ async function answerQ(page, right) {
   return q;
 }
 const advance = page => page.evaluate(() => EQ.next());
+// Visible buttons in the game smaller than the 44px Apple recommends for small fingers
+const smallTargets = page => page.evaluate(() => [...document.querySelectorAll("#sec-quest button, #sec-quest a.btn")].filter(b => b.offsetParent && !b.disabled).map(b => [b, b.getBoundingClientRect()]).filter(([, r]) => r.width < 44 || r.height < 44).map(([b, r]) => (b.id || b.className || b.textContent.trim().slice(0, 12)) + " " + Math.round(r.width) + "x" + Math.round(r.height)));
 
 (async () => {
   const browser = await chromium.launch();
@@ -122,7 +126,7 @@ const advance = page => page.evaluate(() => EQ.next());
     check("access code: tampered rejected", !c[6] && !c[8] && !c[9]);
 
     const sh = await page.evaluate(() => {
-      const p = { name: "נועה", av: "🦊", g: "f", best: { 0: { pts: 140, stars: 3 }, 1: { pts: 120, stars: 2 }, 3: { pts: 90, stars: 1 } } };
+      const p = { name: "נועה", av: "🦊", g: "f", best: { "abc-case": { pts: 140, stars: 3 }, "abc-hear": { pts: 120, stars: 2 }, "abc-next": { pts: 90, stars: 1 } } };
       const code = EQ.encodeShare(p), msg = "🏆 blah blah הקוד: " + code + " עוד טקסט";
       const back = EQ.parseShare(msg);
       const [b64, chk] = code.slice(3).split(".");
@@ -131,14 +135,14 @@ const advance = page => page.evaluate(() => EQ.next());
       return { code, back, tampered: EQ.parseShare("EQ:" + b64.slice(0, -2) + "AA." + chk), forged: EQ.parseShare(forgedCode), junk: EQ.parseShare("hello") };
     });
     check("share: round trip keeps Hebrew name", sh.back && sh.back.name === "נועה" && sh.back.av === "🦊");
-    check("share: passed = consecutive levels only", sh.back && sh.back.passed === 2, JSON.stringify(sh.back));
+    check("share: passed = levels done", sh.back && sh.back.passed === 3, JSON.stringify(sh.back));
     check("share: points and stars summed", sh.back && sh.back.pts === 350 && sh.back.stars === 6);
     check("share: tampered code rejected", sh.tampered === null && sh.forged === null && sh.junk === null);
 
     const order = await page.evaluate(() => EQ.sortBoard([
       { name: "A", passed: 3, pts: 900, stars: 9 }, { name: "B", passed: 5, pts: 100, stars: 5 },
       { name: "C", passed: 5, pts: 300, stars: 5 }, { name: "D", passed: 5, pts: 300, stars: 9 }]).map(r => r.name).join(""));
-    check("leaderboard: level first, then points, then stars", order === "DCBA", order);
+    check("leaderboard: points first, then stars, then level", order === "ADCB", order);
     check("no JS errors (logic)", page.errors.length === 0, page.errors.join("; "));
     await page.context().close();
   }
@@ -189,7 +193,11 @@ const advance = page => page.evaluate(() => EQ.next());
     check("level 1 result: 110-140 points", gain1 >= 110 && gain1 <= 140, gain1);
     check("level 1 result: level 2 unlocked", (await page.textContent(".news")).includes("שלב 2"));
     check("no overflow: result", await noOverflow(page));
-    const st = await page.evaluate(() => EQ.S.profiles[0].best[0]);
+    const shareHref = await page.getAttribute("#qx-share", "href");
+    check("result screen: send-to-friends button with link", shareHref && decodeURIComponent(shareHref).includes("English-fun/#eq=EQ:"), shareHref);
+    check("result screen: confetti on a win", (await page.$$(".confetti")).length > 0);
+    check("touch targets >= 44px: result", (await smallTargets(page)).length === 0, (await smallTargets(page)).join(","));
+    const st = await page.evaluate(() => EQ.S.profiles[0].best["abc-case"]);
     check("saved best for level 1", st.pts === gain1 && st.stars === 3, JSON.stringify(st));
     const dupIds = () => page.evaluate(() => { const c = {}; document.querySelectorAll("[id]").forEach(e => c[e.id] = (c[e.id] || 0) + 1); return Object.keys(c).filter(k => c[k] > 1); });
     check("no duplicate ids on the result screen", (await dupIds()).length === 0, (await dupIds()).join(","));
@@ -197,6 +205,7 @@ const advance = page => page.evaluate(() => EQ.next());
     await page.click("#qx-nextL");
     check("next-level button starts level 2", (await page.evaluate(() => EQ.R && EQ.R.li)) === 1);
     check("hourglass shown", await page.isVisible(".hg"));
+    check("touch targets >= 44px: question", (await smallTargets(page)).length === 0, (await smallTargets(page)).join(","));
     check("no duplicate ids while playing", (await dupIds()).length === 0, (await dupIds()).join(","));
     await page.waitForTimeout(400);
     check("hourglass counts seconds", /^\d+$/.test((await page.textContent("#qx-tsec")).trim()));
@@ -210,7 +219,7 @@ const advance = page => page.evaluate(() => EQ.next());
     // Replay level 1 and lose: 3 wrong answers end the level, best score is kept
     for (let n = 0; n < 3; n++) { await answerQ(page, false); await advance(page); }
     check("3 mistakes end the level", (await page.textContent(".qres h2")).includes("נגמרו הלבבות"));
-    check("losing keeps the best score", (await page.evaluate(() => EQ.S.profiles[0].best[0].pts)) === gain1);
+    check("losing keeps the best score", (await page.evaluate(() => EQ.S.profiles[0].best["abc-case"].pts)) === gain1);
     await page.click("#qx-toMap");
 
     // Locked level does nothing
@@ -246,6 +255,8 @@ const advance = page => page.evaluate(() => EQ.next());
     check("points grow with worlds", prog.pts > 100 * 40, prog.pts);
     await page.evaluate(() => EQ.go(EQ.showMap));
     check("map rank is legend", (await page.textContent(".rank")).includes("אגדה"));
+    check("days-in-a-row shown after playing", (await page.textContent(".hero .streak")).includes("1 יום"));
+    check("touch targets >= 44px: map", (await smallTargets(page)).length === 0, (await smallTargets(page)).join(","));
     for (const w of [320, 430, 820]) { await page.setViewportSize({ width: w, height: 800 }); await page.waitForTimeout(100); await mapCheck(w + "px"); check(`no overflow: map at ${w}px`, await noOverflow(page)); }
     await page.setViewportSize({ width: 375, height: 740 });
     check("no JS errors (playthrough)", page.errors.length === 0, page.errors.join("; "));
@@ -256,6 +267,8 @@ const advance = page => page.evaluate(() => EQ.next());
     const msg = await page.textContent("#qx-myCode");
     check("share message has name and code", msg.includes("נועה") && /EQ:[A-Za-z0-9_-]+\.[a-z0-9]+/.test(msg));
     check("whatsapp link carries the code", (await page.getAttribute("#qx-wa", "href")).includes(encodeURIComponent("EQ:")));
+    check("share message has a one-tap link", msg.includes("https://yaronyaakobov-design.github.io/English-fun/#eq=EQ:"));
+    check("touch targets >= 44px: leaderboard", (await smallTargets(page)).length === 0, (await smallTargets(page)).join(","));
 
     const p2 = await newPage(browser);
     await createPlayer(p2, "דני", true);
@@ -269,11 +282,14 @@ const advance = page => page.evaluate(() => EQ.next());
     const rows = await p2.$$eval(".brow .nm b", els => els.map(e => e.textContent));
     check("friend added and ranked first", rows[0] === "נועה" && rows[1] === "דני", rows.join(","));
     check("boy profile uses masculine text", (await p2.evaluate(() => EQ.tx("נסי", "נסה"))) === "נסה");
+    await p2.click("#qx-toMap");
+    check("map shows place on the leaderboard", (await p2.textContent("#qx-toBoard")).includes("מקום 2 מ-2"));
+    await p2.click("#qx-toBoard");
     await p2.click(".del");
     check("friend can be removed", (await p2.$$(".brow")).length === 1);
 
     // Paywall preview: level 9 needs a code
-    await p2.evaluate(() => { EQ.setPaywall(true); const p = EQ.S.profiles[0]; for (let i = 0; i < 8; i++) p.best[i] = { pts: 100, stars: 3 }; EQ.go(EQ.showMap); });
+    await p2.evaluate(() => { EQ.setPaywall(true); const p = EQ.S.profiles[0]; for (let i = 0; i < 8; i++) p.best[EQ.LEVELS[i].id] = { pts: 100, stars: 3 }; EQ.go(EQ.showMap); });
     check("paywalled levels show a key", (await p2.$$('.mnode.lock .ball')).length > 0 && (await p2.textContent('.mnode[data-li="8"] .ball')).includes("🔑"));
     await p2.click('.mnode[data-li="8"]');
     check("paywall sheet opens", await p2.isVisible("#qx-sheet"));
@@ -290,10 +306,210 @@ const advance = page => page.evaluate(() => EQ.next());
     check("license survives reload", await p2.evaluate(() => !!EQ.S.license));
     check("no JS errors (second device)", p2.errors.length === 0, p2.errors.join("; "));
     await p2.context().close();
+
+    // A friend's link opens the game and adds them to the leaderboard in one tap
+    for (const [label, withPlayer] of [["new device", false], ["device with a player", true]]) {
+      const ctx = await browser.newContext({ viewport: { width: 375, height: 740 }, isMobile: true, hasTouch: true });
+      const p3 = await ctx.newPage(); p3.errors = []; p3.on("pageerror", e => p3.errors.push(e.message));
+      await p3.addInitScript(stub);
+      await p3.goto(URL);
+      if (withPlayer) { await p3.click("#tab-quest"); await createPlayer(p3, "רוני", true); await p3.click("#tab-letters"); }
+      const link = msg.match(/https:\S+/)[0];
+      await p3.goto(URL + link.slice(link.indexOf("#")));
+      await p3.waitForTimeout(300);
+      check(`link (${label}): quest tab opens on the leaderboard`, await p3.isVisible("#sec-quest") && await p3.isVisible(".board"));
+      check(`link (${label}): friend added`, (await p3.$$eval(".brow .nm b", els => els.map(e => e.textContent))).includes("נועה"));
+      check(`link (${label}): confirmation shown`, (await p3.textContent("#qx-linkMsg")).includes("נועה"));
+      check(`link (${label}): address cleaned`, !(await p3.evaluate(() => location.hash)));
+      await p3.reload(); await p3.click("#tab-quest");
+      check(`link (${label}): friend kept after reload`, (await p3.evaluate(() => EQ.S.friends.map(f => f.name))).includes("נועה"));
+      check(`no JS errors (link, ${label})`, p3.errors.length === 0, p3.errors.join("; "));
+      await ctx.close();
+    }
+    {
+      const ctx = await browser.newContext({ viewport: { width: 375, height: 740 } });
+      const p4 = await ctx.newPage(); p4.errors = []; p4.on("pageerror", e => p4.errors.push(e.message));
+      await p4.addInitScript(stub);
+      await p4.goto(URL + "#eq=EQ:broken.zz");
+      await p4.waitForTimeout(300);
+      check("broken link: friendly error, nothing added", (await p4.textContent("#qx-linkMsg")).includes("לא תקין") && (await p4.evaluate(() => EQ.S.friends.length)) === 0);
+      check("no JS errors (broken link)", p4.errors.length === 0, p4.errors.join("; "));
+      await ctx.close();
+    }
     await page.context().close();
+  }
+
+  // ---------- Opening challenge: finds the child's level by itself ----------
+  async function placement(knows) {
+    const ctx = await browser.newContext({ viewport: { width: 375, height: 740 }, isMobile: true, hasTouch: true });
+    const pg = await ctx.newPage(); pg.errors = []; pg.on("pageerror", e => pg.errors.push(e.message));
+    await pg.addInitScript(stub);
+    await pg.goto(URL); await pg.click("#tab-quest");
+    await pg.fill("#qx-pName", "בודק");
+    await pg.click("#qx-newP button[type=submit]");
+    const offered = await pg.isVisible("#qx-placeGo");
+    await pg.click("#qx-placeGo");
+    const worlds = [];
+    while (await pg.evaluate(() => !!(EQ.R && EQ.R.place))) {
+      const w = await pg.evaluate(() => EQ.R.L.w);
+      worlds.push(w);
+      if (worlds.length === 1) check("challenge: no hourglass, no hearts", !(await pg.isVisible(".hg")) && !(await pg.isVisible(".hearts")));
+      await answerQ(pg, knows(w, worlds));
+      await advance(pg);
+    }
+    const r = await pg.evaluate(() => { const p = EQ.S.profiles[0]; return { placed: p.placed, first: EQ.firstOpen(p), pts: EQ.totalPts(p), stars: EQ.totalStars(p), passed: EQ.passedCount(p) }; });
+    const text = await pg.textContent(".qres");
+    return { pg, offered, worlds, r, text };
+  }
+  {
+    const { pg, offered, worlds, r, text } = await placement(() => true);
+    check("challenge offered to a new player", offered);
+    check("challenge: knows everything -> harder questions each time, 8 questions", worlds.join() === "2,2,5,5,7,7,8,8", worlds.join());
+    check("challenge: knows everything -> starts in the last world", r.placed.w === 8 && r.first === 35 && text.includes("טירת האלופים"), JSON.stringify(r));
+    check("challenge: skipped levels give no points or stars", r.pts === 0 && r.stars === 0 && r.passed === 35, JSON.stringify(r));
+    await pg.click("#qx-placeOk");
+    check("challenge: map opens on level 36", (await pg.textContent(".hero .stat b")).trim().startsWith("36"));
+    check("challenge: skipped levels show 1 star and stay open", (await pg.$$eval('.mnode[data-li="3"] .nst span.off', e => e.length)) === 1 && !(await pg.$eval('.mnode[data-li="3"]', e => e.classList.contains("lock"))));
+    check("challenge: not offered again", !(await pg.isVisible("#qx-placeGo")));
+    // Playing a skipped level for real replaces the free star with what was earned
+    await pg.evaluate(() => EQ.go(EQ.startLevel, 0));
+    for (let n = 0; n < 6; n++) { await answerQ(pg, true); await advance(pg); }
+    const after = await pg.evaluate(() => { const p = EQ.S.profiles[0]; return { b: p.best["abc-case"], stars: EQ.totalStars(p) }; });
+    check("challenge: replaying a skipped level earns real stars and points", after.b.stars === 3 && after.b.pts > 0 && !after.b.skip && after.stars === 3, JSON.stringify(after));
+    check("no JS errors (challenge, strong)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    const { pg, worlds, r, text } = await placement(() => false);
+    check("challenge: knows nothing -> easier questions, stops after 4", worlds.join() === "2,2,1,1", worlds.join());
+    check("challenge: knows nothing -> starts at the beginning", r.placed.w === 1 && r.first === 0 && r.passed === 0 && text.includes("מההתחלה"), JSON.stringify(r));
+    check("no JS errors (challenge, beginner)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    const { pg, worlds, r } = await placement(w => w <= 4);
+    check("challenge: knows worlds 1-4 -> starts in world 5", r.placed.w === 5 && r.first === 20, JSON.stringify(r) + " " + worlds.join());
+    check("challenge: never more than 10 questions", worlds.length <= 10, worlds.length);
+    await pg.context().close();
+  }
+  {
+    // One slip in a world gets a third, deciding question
+    const { pg, worlds } = await placement((w, ws) => !(w === 2 && ws.length === 1));
+    check("challenge: a tie gets a third question", worlds.slice(0, 4).join() === "2,2,2,5", worlds.join());
+    await pg.context().close();
+  }
+  {
+    // Existing players get the offer on the map once, and can say no
+    const pg = await withSave({ ver: 3, cur: "f6", friends: [], profiles: [{ id: "f6", name: "עדי", av: "🐝", g: "f", best: { "abc-case": { pts: 100, stars: 3 } } }] });
+    check("existing player: challenge offered on the map", await pg.isVisible(".placecard"));
+    await pg.click("#qx-placeNo");
+    await pg.reload(); await pg.click("#tab-quest");
+    check("existing player: 'no thanks' is remembered", !(await pg.isVisible(".placecard")));
+    // Help mode: a child who keeps missing gets fewer choices and more time, same scoring
+    const h = await pg.evaluate(() => {
+      const p = EQ.S.profiles[0], li = 2;
+      const normal = EQ.needsHelp(p, li);
+      EQ.go(EQ.startLevel, li); const nOpts = EQ.R.qs[0].opts.length, nTime = EQ.R.L.time;
+      p.fails = { "abc-start": 2 };
+      const help = EQ.needsHelp(p, li);
+      EQ.go(EQ.startLevel, li);
+      const hOpts = EQ.R.qs[0].opts.length, badge = !!document.querySelector(".phead .help"), deadline = EQ.R.deadline - Date.now();
+      p.fails = {}; p.recent = [false, false, false, false, true, false, false, true, false, false];
+      const help2 = EQ.needsHelp(p, li);
+      p.recent = [];
+      return { normal, nOpts, help, hOpts, badge, help2, secs: Math.round(deadline / 1000), nTime };
+    });
+    check("help mode: off for a child doing fine", !h.normal && h.nOpts === 4);
+    check("help mode: after losing a level twice, 3 choices instead of 4", h.help && h.hOpts === 3 && h.badge, JSON.stringify(h));
+    check("help mode: 50% more time", h.secs >= Math.round(h.nTime * 1.5) - 1, JSON.stringify(h));
+    check("help mode: also when most recent answers were wrong", h.help2);
+    check("no JS errors (offer + help)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    // Leaderboard order: points, then stars, then levels
+    const pg = await withSave({ ver: 3, friends: [], profiles: [] });
+    const order = await pg.evaluate(() => EQ.sortBoard([
+      { name: "far", passed: 30, pts: 500, stars: 30 }, { name: "busy", passed: 8, pts: 900, stars: 20 },
+      { name: "tieA", passed: 5, pts: 400, stars: 9 }, { name: "tieB", passed: 9, pts: 400, stars: 12 }]).map(r => r.name));
+    check("leaderboard: ranked by points, then stars", order.join() === "busy,far,tieB,tieA", order.join());
+    await pg.context().close();
+  }
+
+  // ---------- Upgrades keep saved progress ----------
+  // Load a save written by an earlier version and check nothing is lost.
+  async function withSave(save) {
+    const ctx = await browser.newContext({ viewport: { width: 375, height: 740 }, isMobile: true, hasTouch: true });
+    const pg = await ctx.newPage(); pg.errors = []; pg.on("pageerror", e => pg.errors.push(e.message));
+    await pg.addInitScript(stub);
+    await pg.goto(URL);
+    await pg.evaluate(s => { localStorage.clear(); localStorage.setItem("englishquest.v1", s); }, typeof save === "string" ? save : JSON.stringify(save));
+    await pg.reload();
+    await pg.click("#tab-quest");
+    return pg;
+  }
+  const friend = { name: "תמר", av: "🐼", g: "f", passed: 7, pts: 900, stars: 18, ts: 1761200000 };
+  {
+    // v10 save (ver 2): 40 levels, progress keyed by position. Player passed levels 1-12.
+    const best = {}; for (let i = 0; i < 12; i++) best[i] = { pts: 100 + i, stars: 1 + (i % 3) };
+    const v2 = { ver: 2, cur: "a1", mute: true, license: null, friends: [friend], profiles: [{ id: "a1", name: "מיה", av: "🦄", g: "f", best }, { id: "b2", name: "יואב", av: "🐯", g: "m", best: { 0: { pts: 120, stars: 3 } } }] };
+    const pg = await withSave(v2);
+    const r = await pg.evaluate(() => { const p = EQ.S.profiles[0]; return { ver: EQ.S.ver, passed: EQ.passedCount(p), pts: EQ.totalPts(p), first: EQ.firstOpen(p), keys: Object.keys(p.best), mute: EQ.S.mute, friends: EQ.S.friends.length, other: EQ.passedCount(EQ.S.profiles[1]), backup: JSON.parse(localStorage.getItem(EQ.BACKUP_KEY) || "null"), saved: JSON.parse(localStorage.getItem("englishquest.v1")) }; });
+    const expPts = Object.values(best).reduce((a, b) => a + b.pts, 0);
+    check("upgrade from v10: save version raised to 3", r.ver === 3 && r.saved.ver === 3, r.ver);
+    check("upgrade from v10: all 12 levels kept", r.passed === 12, r.passed);
+    check("upgrade from v10: points kept", r.pts === expPts, r.pts + " vs " + expPts);
+    check("upgrade from v10: progress keyed by level id", r.keys.includes("abc-case") && r.keys.includes("col-hear") && !r.keys.includes("0"), r.keys.join(","));
+    check("upgrade from v10: player stands on level 13", r.first === 12 && (await pg.textContent(".hero .stat b")).trim().startsWith("13"));
+    check("upgrade from v10: second player, friends, settings kept", r.other === 1 && r.friends === 1 && r.mute === true);
+    check("upgrade from v10: backup of the old save kept", r.backup && r.backup.ver === 2 && r.backup.profiles[0].best["11"].pts === 111);
+    await pg.reload(); await pg.click("#tab-quest");
+    check("upgrade from v10: second load changes nothing", (await pg.evaluate(() => EQ.passedCount(EQ.S.profiles[0]))) === 12);
+    check("no JS errors (upgrade from v10)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    // v9 save (no version): 24 levels in the old order
+    const v1 = { cur: "c3", friends: [], profiles: [{ id: "c3", name: "אורי", av: "🐸", g: "m", best: { 0: { pts: 90, stars: 3 }, 1: { pts: 80, stars: 2 }, 2: { pts: 70, stars: 1 }, 3: { pts: 60, stars: 3 }, 4: { pts: 50, stars: 1 } } }] };
+    const pg = await withSave(v1);
+    const r = await pg.evaluate(() => { const p = EQ.S.profiles[0]; return { keys: Object.keys(p.best).sort(), pts: EQ.totalPts(p), first: EQ.firstOpen(p), lockedDone: EQ.LEVELS.filter((L, i) => p.best[L.id] && !EQ.unlocked(p, i)).length }; });
+    check("upgrade from v9: levels mapped to the right ids", r.keys.join() === "abc-case,abc-hear,abc-mix,abc-start,num-hear10", r.keys.join());
+    check("upgrade from v9: points kept", r.pts === 350, r.pts);
+    check("upgrade from v9: new level 4 is next, nothing passed is locked", r.first === 3 && r.lockedDone === 0, JSON.stringify(r));
+    check("no JS errors (upgrade from v9)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    // A future version adds a level in the middle and keeps a level id this build does not know
+    const v3 = { ver: 3, cur: "d4", friends: [], profiles: [{ id: "d4", name: "שירה", av: "🐨", g: "f", best: { "abc-case": { pts: 100, stars: 3 }, "abc-hear": { pts: 100, stars: 3 }, "future-level": { pts: 77, stars: 2 }, "abc-mix": { pts: 100, stars: 3 } } }] };
+    const pg = await withSave(v3);
+    const r = await pg.evaluate(() => { const p = EQ.S.profiles[0]; return { pts: EQ.totalPts(p), kept: !!p.best["future-level"], start: EQ.unlocked(p, 2), next: EQ.unlocked(p, 3), mix: EQ.unlocked(p, 4), after: EQ.unlocked(p, 5), backup: localStorage.getItem(EQ.BACKUP_KEY) }; });
+    check("unknown level ids are kept, not dropped", r.kept && r.pts === 377, JSON.stringify(r));
+    check("a gap in the middle never locks levels already reached", r.start && r.next && r.mix && r.after, JSON.stringify(r));
+    check("current saves are not re-converted", r.backup === null);
+    await pg.context().close();
+  }
+  {
+    const pg = await withSave("{not json");
+    check("broken save: game still opens", await pg.isVisible("#qx-newP"));
+    check("no JS errors (broken save)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    // Days in a row
+    const pg = await withSave({ ver: 3, cur: "e5", friends: [], profiles: [{ id: "e5", name: "גל", av: "🐙", g: "m", best: {} }] });
+    const r = await pg.evaluate(() => {
+      const p = EQ.S.profiles[0], d = new Date(); d.setDate(d.getDate() - 1);
+      const y = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      p.days = { last: y, n: 4 }; const before = EQ.streakDays(p); EQ.playedToday(p); const after = EQ.streakDays(p); EQ.playedToday(p);
+      const same = EQ.streakDays(p); p.days = { last: "2020-01-01", n: 9 }; const gone = EQ.streakDays(p); EQ.playedToday(p);
+      return [before, after, same, gone, EQ.streakDays(p)];
+    });
+    check("days in a row: continue, same day, reset after a gap", r.join() === "4,5,5,0,1", r.join());
+    await pg.context().close();
   }
 
   await browser.close();
   console.log(`${pass} passed, ${fail} failed`);
   if (fail) { console.log(failures.slice(0, 40).join("\n")); process.exit(1); }
-})().catch(e => { console.error(e); process.exit(1); });
+})().catch(e => { console.error(e); console.log(pass + " passed so far; failures:\n" + failures.join("\n")); process.exit(1); });

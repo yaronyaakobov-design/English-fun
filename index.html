@@ -259,7 +259,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 /* Play */
 .play{background:var(--paper);border-radius:22px;padding:14px 16px 16px;box-shadow:var(--shadow)}
 .phead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.phead .x{border:2px solid var(--line);background:var(--bg);border-radius:999px;width:38px;height:38px;font-size:16px}
+.phead .x{border:2px solid var(--line);background:var(--bg);border-radius:999px;width:44px;height:44px;font-size:17px;flex:none}
 .phead .lt{flex:1;min-width:0;font-weight:600;font-size:15px}
 .hearts{font-size:20px;letter-spacing:2px;white-space:nowrap}
 .pts{font-family:var(--f-display);font-weight:700;color:var(--berry);font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -328,7 +328,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 .brow .lv{text-align:center;font-family:var(--f-display);line-height:1.1}
 .brow .lv b{display:block;font-size:22px;color:var(--tomato)}
 .brow .lv small{font-size:12px;color:var(--muted)}
-.brow .del{border:none;background:none;color:var(--muted);font-size:16px;padding:4px}
+.brow .del{border:none;background:none;color:var(--muted);font-size:16px;min-width:44px;min-height:44px}
 .codebox{font-size:14px;direction:rtl;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);border-radius:12px;padding:10px;user-select:all}
 .msg{font-weight:600;min-height:1.5em}
 .msg:empty{display:none}
@@ -360,6 +360,15 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
   .slots button{width:40px;height:50px;font-size:24px}
   .tiles button{width:44px;height:50px;font-size:24px}
 }
+#sec-quest .play .say{min-height:44px}
+.qres .share{display:block;text-decoration:none;text-align:center;margin-top:12px}
+.hero .streak{color:var(--tomato);font-weight:700;font-size:15px}
+.lnote{background:var(--good-bg);border-radius:14px;padding:8px 14px;margin-bottom:10px}
+.lnote.no{background:var(--bad-bg)}
+.phead .help{font-size:13px;background:var(--good-bg);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.placecard{margin-bottom:14px}.placecard .row{margin-top:10px}
+.placeoffer .row{margin-top:6px}
+.brow .lv b{font-size:20px}
 </style>
 
 </head>
@@ -473,7 +482,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
   <!-- QUEST -->
   <section id="sec-quest" hidden><div id="questScreen"></div></section>
 
-  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v10</span></span></footer>
+  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v11</span></span></footer>
 </div>
 
 <script>
@@ -962,29 +971,32 @@ const WORLDS=[
  {name:"ממלכת המילים",e:"📚",c:"var(--sky)"},
  {name:"טירת האלופים",e:"🏰",c:"var(--berry)"}
 ];
-// [world, title, generators, options per question (0 = build the word), boss]
+// [id, world, title, generators, options per question (0 = build the word), boss]
+// Saved progress is keyed by the id. Never change or reuse an id: new levels get new ids,
+// and they can go anywhere in the list without touching anyone's progress.
 const LV=[
- [1,"גדולה וקטנה",["lCase"],3],[1,"אוזן קשבת",["lHear"],3],[1,"באיזו אות מתחילה?",["lStart"],4],[1,"סדר ה-ABC",["lNext"],4],[1,"אלופי האותיות",["lHear","lStart","lNext","lCase"],4],
- [2,"סופרים עד 10",["nHear10"],3],[2,"כותבים מספרים",["nWord10"],4],[2,"ספרו!",["nCount"],4],[2,"עד 20!",["nHear20","nWord20"],4],[2,"אלופי המספרים",["nSpell","nHear20","nCount"],4],
- [3,"איזה צבע?",["cName"],3],[3,"שומעים צבעים",["cHear"],4],[3,"משפטי צבע",["cSent"],4],[3,"כתיב צבעים",["cSpell"],4],[3,"קשת בענן",["cSpell","cHear","cSent","cName"],4],
- [4,"ימי השבוע",["dHear"],3],[4,"מתרגמים ימים",["dTr"],4],[4,"מה בא אחרי?",["dAfter"],4],[4,"כתיב ימים",["dSpell"],4],[4,"שבוע שלם",["dSpell","dTr","dAfter","dHear"],4],
- [5,"מי זה?",["aName"],3],[5,"שומעים חיות",["aHear"],4],[5,"מתרגמים חיות",["aTr"],4],[5,"כתיב חיות",["aSpell"],4],[5,"בונים חיות",["aBuild","aHear","aSpell"],4],
- [6,"מה אוכלים?",["fName"],3],[6,"שומעים אוכל",["fHear"],4],[6,"מתרגמים אוכל",["fTr"],4],[6,"כתיב אוכל",["fSpell"],4],[6,"בונים ארוחה",["fBuild","fHear","fSpell"],4],
- [7,"מילים ראשונות",["wTr"],3],[7,"אוזן למילים",["wHear"],4],[7,"כתיב נכון",["wSpell"],4],[7,"בונים מילים",["wBuild"],0],[7,"מלך המילים",["wBuild","wSpell","wHear","wTr"],4],
- [8,"משלימים משפט",["sFill"],3],[8,"שומעים ובונים",["wBuildHear","sFill"],4],[8,"ערבוב גדול",ALL_CHOICE,4],[8,"מבחן האלופים",ALL_CHOICE,6],[8,"הבוס הגדול",[...ALL_CHOICE,"wBuildHear"],6,true]
+ ["abc-case",1,"גדולה וקטנה",["lCase"],3],["abc-hear",1,"אוזן קשבת",["lHear"],3],["abc-start",1,"באיזו אות מתחילה?",["lStart"],4],["abc-next",1,"סדר ה-ABC",["lNext"],4],["abc-mix",1,"אלופי האותיות",["lHear","lStart","lNext","lCase"],4],
+ ["num-hear10",2,"סופרים עד 10",["nHear10"],3],["num-word10",2,"כותבים מספרים",["nWord10"],4],["num-count",2,"ספרו!",["nCount"],4],["num-20",2,"עד 20!",["nHear20","nWord20"],4],["num-mix",2,"אלופי המספרים",["nSpell","nHear20","nCount"],4],
+ ["col-name",3,"איזה צבע?",["cName"],3],["col-hear",3,"שומעים צבעים",["cHear"],4],["col-sent",3,"משפטי צבע",["cSent"],4],["col-spell",3,"כתיב צבעים",["cSpell"],4],["col-mix",3,"קשת בענן",["cSpell","cHear","cSent","cName"],4],
+ ["day-hear",4,"ימי השבוע",["dHear"],3],["day-tr",4,"מתרגמים ימים",["dTr"],4],["day-after",4,"מה בא אחרי?",["dAfter"],4],["day-spell",4,"כתיב ימים",["dSpell"],4],["day-mix",4,"שבוע שלם",["dSpell","dTr","dAfter","dHear"],4],
+ ["ani-name",5,"מי זה?",["aName"],3],["ani-hear",5,"שומעים חיות",["aHear"],4],["ani-tr",5,"מתרגמים חיות",["aTr"],4],["ani-spell",5,"כתיב חיות",["aSpell"],4],["ani-mix",5,"בונים חיות",["aBuild","aHear","aSpell"],4],
+ ["food-name",6,"מה אוכלים?",["fName"],3],["food-hear",6,"שומעים אוכל",["fHear"],4],["food-tr",6,"מתרגמים אוכל",["fTr"],4],["food-spell",6,"כתיב אוכל",["fSpell"],4],["food-mix",6,"בונים ארוחה",["fBuild","fHear","fSpell"],4],
+ ["word-tr",7,"מילים ראשונות",["wTr"],3],["word-hear",7,"אוזן למילים",["wHear"],4],["word-spell",7,"כתיב נכון",["wSpell"],4],["word-build",7,"בונים מילים",["wBuild"],0],["word-mix",7,"מלך המילים",["wBuild","wSpell","wHear","wTr"],4],
+ ["sent-fill",8,"משלימים משפט",["sFill"],3],["sent-build",8,"שומעים ובונים",["wBuildHear","sFill"],4],["champ-mix",8,"ערבוב גדול",ALL_CHOICE,4],["champ-test",8,"מבחן האלופים",ALL_CHOICE,6],["boss",8,"הבוס הגדול",[...ALL_CHOICE,"wBuildHear"],6,true]
 ];
 // Every question has an hourglass: 30 seconds on level 1, shrinking evenly to 9 seconds on the boss
-const LEVELS=LV.map(([w,t,g,k,boss],i)=>Object.assign({w,t,g,k,time:Math.round(30-21*i/(LV.length-1))},boss?{n:10,boss:true}:{}));
+const LEVELS=LV.map(([id,w,t,g,k,boss],i)=>Object.assign({id,w,t,g,k,time:Math.round(30-21*i/(LV.length-1))},boss?{n:10,boss:true}:{}));
 const PER_WORLD=5,HEARTS=3,QN=6;
 const qCount=L=>L.n||QN;
 // Building a word takes longer than tapping an answer
-const qTime=(L,q)=>L.time?(q.build?L.time+12:L.time):0;
+// Help mode gives half as much time again
+const qTime=(L,q)=>L.time?Math.round((q.build?L.time+12:L.time)*(R&&R.easy?1.5:1)):0;
 
-function makeQuestions(li){
-  const L=LEVELS[li],qs=[];let last=null;
+function makeQuestions(li,easy){
+  const L=LEVELS[li],qs=[],k=easy&&L.k>3?L.k-1:L.k;let last=null;
   for(let i=0;i<qCount(L);i++){
     let q,tries=0;
-    do{q=GEN[L.g[(i+rnd(L.g.length))%L.g.length]](L.k);tries++}while(q.answer===last&&tries<12);
+    do{q=GEN[L.g[(i+rnd(L.g.length))%L.g.length]](k);tries++}while(q.answer===last&&tries<12);
     last=q.answer;qs.push(q);
   }
   return qs;
@@ -1018,22 +1030,56 @@ function validCode(c){const m=String(c).trim().toUpperCase().replace(/\s+/g,"").
 const KEY="englishquest.v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-const S=Object.assign({profiles:[],cur:null,friends:[],license:null,mute:false},load());
-// v2 has 40 levels instead of 24: keep the players, restart their progress
-if(S.ver!==2){S.profiles.forEach(p=>p.best={});S.friends=[];S.ver=2;save()}
+// Save format version. Older saves kept progress by level position; they are converted once,
+// after a copy of the old save is kept under BACKUP_KEY.
+const VER=3,BACKUP_KEY="englishquest.backup";
+const V1_IDS="abc-case abc-hear abc-start abc-mix num-hear10 num-word10 num-20 num-mix col-name col-hear col-sent col-mix day-hear day-tr day-after day-mix word-tr word-hear word-spell word-build sent-fill sent-build champ-test boss".split(" ");
+const V2_IDS="abc-case abc-hear abc-start abc-next abc-mix num-hear10 num-word10 num-count num-20 num-mix col-name col-hear col-sent col-spell col-mix day-hear day-tr day-after day-spell day-mix ani-name ani-hear ani-tr ani-spell ani-mix food-name food-hear food-tr food-spell food-mix word-tr word-hear word-spell word-build word-mix sent-fill sent-build champ-mix champ-test boss".split(" ");
+function migrate(d){
+  if(!d||typeof d!=="object")return {};
+  if(d.ver>=VER)return d;
+  if(d.profiles&&d.profiles.length)try{localStorage.setItem(BACKUP_KEY,JSON.stringify(d))}catch(e){}
+  const byPos=d.ver===2?V2_IDS:V1_IDS;
+  (d.profiles||[]).forEach(p=>{
+    const nb={};
+    Object.entries(p.best||{}).forEach(([key,v])=>{const id=/^\d+$/.test(key)?byPos[+key]:key;if(id&&v)nb[id]=v});
+    p.best=nb;
+  });
+  d.ver=VER;
+  return d;
+}
+const S=Object.assign({profiles:[],cur:null,friends:[],license:null,mute:false},migrate(load()));
+S.ver=Math.max(S.ver||0,VER);save();
 const me=()=>S.profiles.find(p=>p.id===S.cur)||null;
 const tx=(f,m)=>me()&&me().g==="m"?m:f;
-function passedCount(p){let n=0;while(n<LEVELS.length&&p.best[n]&&p.best[n].stars>0)n++;return n}
+const bestOf=(p,i)=>p.best[LEVELS[i].id];
+const done=(p,i)=>{const b=bestOf(p,i);return !!(b&&b.stars>0)};
+function passedCount(p){return LEVELS.filter((_,i)=>done(p,i)).length}
+// The first level not passed yet: where the player stands on the map
+function firstOpen(p){let i=0;while(i<LEVELS.length&&done(p,i))i++;return i}
 const totalPts=p=>Object.values(p.best).reduce((a,b)=>a+b.pts,0);
-const totalStars=p=>Object.values(p.best).reduce((a,b)=>a+b.stars,0);
-const unlocked=(p,i)=>i===0||!!(p.best[i-1]&&p.best[i-1].stars>0);
+// Levels skipped by the opening challenge show 1 star on the map but count for nothing
+const totalStars=p=>Object.values(p.best).reduce((a,b)=>a+(b.skip?0:b.stars),0);
+// A level added later in the middle never locks levels the player already reached
+const unlocked=(p,i)=>i===0||done(p,i-1)||LEVELS.slice(i).some((_,k)=>done(p,i+k));
 const paywalled=i=>PAYWALL&&i>=FREE_LEVELS&&!S.license;
 function record(p,li,pts,stars){
   // Keep the best of each: replaying can raise a level's points and stars, never lower them
-  const b=p.best[li]||{pts:0,stars:0};
-  p.best[li]={pts:Math.max(pts,b.pts),stars:Math.max(stars,b.stars)};
+  const id=LEVELS[li].id,b=p.best[id]||{pts:0,stars:0};
+  p.best[id]={pts:Math.max(pts,b.pts),stars:Math.max(stars,b.skip?0:b.stars)};
   save();
 }
+
+/* ---------- days in a row ---------- */
+const dayKey=(d=new Date())=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayKey(d)};
+function playedToday(p){
+  const t=dayKey(),s=p.days||{};
+  if(s.last===t)return;
+  p.days={last:t,n:s.last===yesterday()?(s.n||0)+1:1};save();
+}
+// Days in a row so far; 0 once a day was skipped
+const streakDays=p=>p.days&&(p.days.last===dayKey()||p.days.last===yesterday())?p.days.n:0;
 
 /* ---------- share code for friends ---------- */
 const b64e=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
@@ -1053,9 +1099,22 @@ function parseShare(text){
     return {name:name.slice(0,14),av,g,passed,pts,stars,ts};
   }catch(e){return null}
 }
+// Opening this link adds the player to the friend's leaderboard in one tap
+const SHARE_URL="https://yaronyaakobov-design.github.io/English-fun/#eq=";
 function shareText(p){
   const n=passedCount(p);
-  return `🏆 ${p.name} ${p.g==="m"?"עבר":"עברה"} ${n} שלבים ב-English Quest וצבר${p.g==="m"?"":"ה"} ${totalPts(p)} נקודות! מי ${p.g==="m"?"מנצח":"מנצחת"}?\nהקוד שלי לטבלת האלופים: ${encodeShare(p)}`;
+  return `🏆 ${p.name} ${p.g==="m"?"עבר":"עברה"} ${n} שלבים ב-English Fun וצבר${p.g==="m"?"":"ה"} ${totalPts(p)} נקודות! מי ${p.g==="m"?"מנצח":"מנצחת"}?\nלחצו כדי להוסיף אותי לטבלת האלופים שלכם:\n${SHARE_URL}${encodeShare(p)}`;
+}
+const waLink=p=>"https://wa.me/?text="+encodeURIComponent(shareText(p));
+// Where the player stands among everyone on this device's leaderboard
+function standing(p){const rows=boardRows();return {place:rows.findIndex(r=>r.id===p.id)+1,of:rows.length}}
+// A friend's link was opened: add them and show the leaderboard
+function fromLink(code){
+  const f=parseShare(code);
+  let note;
+  if(!f)note=["no","הקישור לא תקין או חסר. אפשר להדביק את ההודעה למטה."];
+  else{const r=addFriend(f);note=r==="self"?["no","זה שחקן שכבר נמצא במכשיר הזה."]:r==="old"?["ok","יש כבר תוצאה חדשה יותר של "+f.name+"."]:["ok",`${f.name} ${f.g==="m"?"נוסף":"נוספה"} לטבלת האלופים! 🎉`]}
+  go(showBoard,note);
 }
 function addFriend(f){
   if(S.profiles.some(p=>p.name===f.name&&p.av===f.av))return "self";
@@ -1063,8 +1122,8 @@ function addFriend(f){
   if(i>=0){if(f.ts<S.friends[i].ts)return "old";S.friends[i]=f}else S.friends.push(f);
   save();return "ok";
 }
-// Rank by levels passed, then points, then stars
-function sortBoard(rows){return rows.slice().sort((a,b)=>b.passed-a.passed||b.pts-a.pts||b.stars-a.stars||a.name.localeCompare(b.name))}
+// Rank by points, then stars, then levels: a younger child who plays a lot can lead
+function sortBoard(rows){return rows.slice().sort((a,b)=>b.pts-a.pts||b.stars-a.stars||b.passed-a.passed||a.name.localeCompare(b.name))}
 function boardRows(){
   return sortBoard([...S.profiles.map(p=>({name:p.name,av:p.av,g:p.g,passed:passedCount(p),pts:totalPts(p),stars:totalStars(p),local:true,id:p.id})),
     ...S.friends.map((f,i)=>({...f,friend:i}))]);
@@ -1082,7 +1141,7 @@ function showProfiles(){
   updateChip();
   const list=S.profiles.map(p=>`<button class="pcard" data-id="${p.id}"><span class="av">${p.av}</span><b>${esc(p.name)}</b><small>שלב ${Math.min(passedCount(p)+1,LEVELS.length)} · ${totalPts(p)} 💎</small></button>`).join("");
   screen.innerHTML=`
-    ${S.profiles.length?`<h2>מי משחק עכשיו?</h2><div class="profiles">${list}</div>`:`<div class="card" style="margin-bottom:16px"><h2>ברוכים הבאים ל-<span class="en">English Quest</span>!</h2><p class="muted" style="margin:0">24 שלבים ב-6 עולמות. כל שלב קשה קצת יותר מהקודם. צוברים נקודות וכוכבים ומתחרים בחברים.</p></div>`}
+    ${S.profiles.length?`<h2>מי משחק עכשיו?</h2><div class="profiles">${list}</div>`:`<div class="card" style="margin-bottom:16px"><h2>ברוכים הבאים ל-<span class="en">English Quest</span>!</h2><p class="muted" style="margin:0">${LEVELS.length} שלבים ב-${WORLDS.length} עולמות. כל שלב קשה קצת יותר מהקודם. צוברים נקודות וכוכבים ומתחרים בחברים.</p></div>`}
     ${S.profiles.length<6?`<form class="card form" id="qx-newP">
       <h2 style="margin:0">${S.profiles.length?"שחקן חדש":"יוצרים שחקן"}</h2>
       <label for="pName">שם</label><input type="text" id="qx-pName" maxlength="14" autocomplete="off" placeholder="למשל: נועה">
@@ -1100,7 +1159,7 @@ function showProfiles(){
     if(!name){$("qx-pMsg").textContent="כתבו שם כדי להתחיל";return}
     if(S.profiles.some(p=>p.name===name)){$("qx-pMsg").textContent="השם הזה כבר קיים במכשיר";return}
     const p={id:"p"+Date.now().toString(36)+rnd(1e4),name,g,av,best:{}};
-    S.profiles.push(p);S.cur=p.id;save();speak("Hello "+name+"! Let's play!");go(showMap);
+    S.profiles.push(p);S.cur=p.id;save();speak("Hello "+name+"! Let's play!");go(showPlaceOffer);
   };
 }
 
@@ -1180,7 +1239,7 @@ function zoneArt(wi){
   return s;
 }
 function mapHTML(p){
-  const passed=passedCount(p),cur=Math.min(passed,LEVELS.length-1);
+  const cur=Math.min(firstOpen(p),LEVELS.length-1);
   const pts=[[200,MH-8],...LEVELS.map((_,i)=>nodeXY(i)),[200,zoneTop(NZ-1)+12]];
   const d=mapPathD(pts);
   // How far along the road the player is: the path segment up to the current node
@@ -1196,11 +1255,11 @@ function mapHTML(p){
   svg+=`</svg>`;
   const pct=(x,y)=>`left:${(x/MW*100).toFixed(2)}%;top:${(y/MH*100).toFixed(3)}%`;
   const banners=WORLDS.map((W,wi)=>{
-    const ids=[...Array(PER_WORLD).keys()].map(j=>wi*PER_WORLD+j),st=ids.reduce((a,i)=>a+(p.best[i]?p.best[i].stars:0),0),open=unlocked(p,ids[0]);
+    const ids=[...Array(PER_WORLD).keys()].map(j=>wi*PER_WORLD+j),st=ids.reduce((a,i)=>a+(bestOf(p,i)?bestOf(p,i).stars:0),0),open=unlocked(p,ids[0]);
     return `<div class="wban${open?"":" closed"}" style="${pct(200,zoneTop(wi)+(wi===NZ-1?-30:12))}">${open?W.e:"🔒"} <b>${W.name}</b> <span>★${st}/${PER_WORLD*3}</span></div>`;
   }).join("");
   const nodes=LEVELS.map((L,i)=>{
-    const [x,y]=nodeXY(i),op=unlocked(p,i),pw=paywalled(i),b=p.best[i];
+    const [x,y]=nodeXY(i),op=unlocked(p,i),pw=paywalled(i),b=bestOf(p,i);
     return `<button class="mnode${op&&!pw?"":" lock"}${i===cur&&op&&!pw?" now":""}${b?" done":""}${L.boss?" boss":""}" style="${pct(x,y)};--c:${WORLDS[L.w-1].c}" data-li="${i}" aria-label="שלב ${i+1}: ${L.t}${b?`, ${b.stars} כוכבים`:""}">
       <span class="ball">${pw?"🔑":op?(L.boss?"👑":i+1):"🔒"}</span>
       <span class="nst">${b?starStr(b.stars):""}</span><span class="nt">${L.t}</span></button>`;
@@ -1212,28 +1271,31 @@ function mapHTML(p){
 function starStr(n,max=3){return "★".repeat(n)+(n<max?`<span class="off">${"★".repeat(max-n)}</span>`:"")}
 function showMap(scroll=true){
   const p=me();if(!p)return go(showProfiles);
-  const passed=passedCount(p),nextLi=Math.min(passed,LEVELS.length-1);
+  const passed=passedCount(p),fo=firstOpen(p),nextLi=Math.min(fo,LEVELS.length-1),days=streakDays(p),st=standing(p);
   screen.innerHTML=`
     <div class="card hero">
       <span class="av">${p.av}</span>
-      <div style="min-width:0"><div class="hname">${esc(p.name)}</div><div class="rank">${rankOf(passed,p.g)}</div></div>
+      <div style="min-width:0"><div class="hname">${esc(p.name)}</div><div class="rank">${rankOf(passed,p.g)}</div>${days?`<div class="streak">🔥 ${days} ${days===1?"יום":"ימים"} ברצף</div>`:""}</div>
       <div class="stats">
-        <div class="stat"><b class="en">${Math.min(passed+1,LEVELS.length)}<small style="font-size:14px;color:var(--muted)">/${LEVELS.length}</small></b><span>שלב</span></div>
+        <div class="stat"><b class="en">${Math.min(fo+1,LEVELS.length)}<small style="font-size:14px;color:var(--muted)">/${LEVELS.length}</small></b><span>שלב</span></div>
         <div class="stat"><b class="en">${totalPts(p).toLocaleString("en-US")}</b><span>💎 נקודות</span></div>
         <div class="stat"><b class="en">${totalStars(p)}</b><span>★ כוכבים</span></div>
       </div>
     </div>
     <div class="actions">
-      <button class="btn big warm" id="qx-cont">▶ ${passed>=LEVELS.length?"עברת הכול! שחקו שוב":"לשלב "+(passed+1)}</button>
-      <button class="btn alt" id="qx-toBoard">🏆 טבלת אלופים</button>
+      <button class="btn big warm" id="qx-cont">▶ ${passed>=LEVELS.length?tx("עברת הכול! שחקי שוב","עברת הכול! שחק שוב"):"לשלב "+(fo+1)}</button>
+      <button class="btn alt" id="qx-toBoard">🏆 טבלת אלופים${st.of>1?` · מקום ${st.place} מ-${st.of}`:""}</button>
       <button class="btn ghost" id="qx-toProfiles">👥 החלפת שחקן</button>
     </div>
     ${PAYWALL&&!S.license?`<p class="muted" style="margin-top:-8px">שלבים 1–${FREE_LEVELS} פתוחים בחינם. 🔑 = נפתח עם קוד גישה.</p>`:""}
+    ${!p.placed&&fo<PER_WORLD?`<div class="card placecard"><b>🧭 ${tx("כבר יודעת","כבר יודע")} אנגלית?</b> אתגר פתיחה קצר ימצא את העולם שמתאים לך.
+      <div class="row"><button class="btn" id="qx-placeGo">לאתגר</button><button class="btn ghost" id="qx-placeNo">לא תודה</button></div></div>`:""}
     ${mapHTML(p)}`;
   screen.querySelectorAll(".mnode").forEach(b=>b.onclick=()=>tryLevel(+b.dataset.li));
   $("qx-cont").onclick=()=>tryLevel(nextLi);
   $("qx-toBoard").onclick=()=>go(showBoard);
   $("qx-toProfiles").onclick=()=>go(showProfiles);
+  if($("qx-placeGo")){$("qx-placeGo").onclick=()=>go(startPlacement);$("qx-placeNo").onclick=()=>{p.placed={w:1,declined:true};save();showMap(false)}}
   // Bring the player's spot on the map into view
   if(scroll)requestAnimationFrame(()=>{const n=screen.querySelector(".mnode.now");if(n&&n.offsetParent)n.scrollIntoView({block:"center"})});
 }
@@ -1265,8 +1327,14 @@ function sfx(kind){
 /* ---------- playing a level ---------- */
 let R=null;
 const PRAISE=["Great job!","Excellent!","Well done!","Super!","Amazing!","Awesome!"];
+// Help mode: this level was lost twice in a row, or fewer than half of the last 12 answers were right
+function needsHelp(p,li){
+  const r=p.recent||[];
+  return ((p.fails||{})[LEVELS[li].id]||0)>=2||(r.length>=8&&r.filter(x=>x).length/r.length<.5);
+}
 function startLevel(li){
-  R={li,L:LEVELS[li],qs:makeQuestions(li),n:0,hearts:HEARTS,pts:0,streak:0,best:0,res:[],locked:false};
+  const easy=needsHelp(me(),li);
+  R={li,easy,L:LEVELS[li],qs:makeQuestions(li,easy),n:0,hearts:HEARTS,pts:0,streak:0,best:0,res:[],locked:false};
   renderQ();
 }
 function heartsStr(){return "❤️".repeat(R.hearts)+"🤍".repeat(HEARTS-R.hearts)}
@@ -1278,8 +1346,8 @@ function renderQ(){
     :`<div class="opts n${q.opts.length}">${q.opts.map((o,i)=>q.sw?`<button class="opt qsw" data-i="${i}" aria-label="${o}" style="--sw:${swatchOf(o)}"></button>`:`<button class="opt${q.he?" he":""}${q.emo?" emo":""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
   screen.innerHTML=`<div class="play">
     <div class="phead"><button class="x" id="qx-quit" aria-label="חזרה למפה">✕</button><button class="x" id="qx-mute" aria-label="צלילים">${S.mute?"🔇":"🔈"}</button>
-      <span class="lt">${W.e} שלב ${R.li+1} · ${L.t}</span>
-      <span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="qx-pts">${R.pts}</span></div>
+      <span class="lt">${R.place?"🧭 אתגר פתיחה":`${W.e} שלב ${R.li+1} · ${L.t}`}${R.easy?' <span class="help">🤝 עזרה</span>':""}</span>
+      ${R.place?"":`<span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="qx-pts">${R.pts}</span>`}</div>
     <div class="dots">${dots}</div>
     ${qTime(L,q)?`<div class="tbox"><svg class="hg" viewBox="0 0 30 40" aria-hidden="true"><path d="M4 2h22M4 38h22M6 3c0 9 8 12 8 17s-8 8-8 17M24 3c0 9-8 12-8 17s8 8 8 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon id="qx-hgTop" fill="#F2B640"/><polygon id="qx-hgBot" fill="#F2B640"/><line id="qx-hgFlow" x1="15" y1="20" x2="15" y2="35" stroke="#F2B640" stroke-width="1.5"/></svg><div class="timer"><i id="qx-tbar"></i></div><span class="tsec en" id="qx-tsec"></span></div>`:""}
     <div class="prompt">
@@ -1346,17 +1414,18 @@ function answer(val,btn,timeout){
   if(btn&&!ok)btn.classList.add("wrong");
   if(q.build){$("qx-slots").classList.add(ok?"right":"wrong");screen.querySelectorAll(".tiles button").forEach(t=>t.disabled=true)}
   R.res[R.n]=ok;
+  if(!R.place){const p=me();p.recent=[...(p.recent||[]),ok].slice(-12)}
   const fb=$("qx-fb");
   if(ok){
     R.streak++;R.best=Math.max(R.best,R.streak);
-    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;$("qx-pts").textContent=R.pts;
+    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;if(!R.place)$("qx-pts").textContent=R.pts;
     const p=PRAISE[rnd(PRAISE.length)];
-    fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span> +${gain}${R.streak>=3?` 🔥${R.streak}`:""}`;
+    fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span>${R.place?"":` +${gain}${R.streak>=3?` 🔥${R.streak}`:""}`}`;
     sfx("ok");speak(q.sayAfter||p,0.9);
     setTimeout(()=>{if(R&&R.qs[R.n]===q)next()},q.sayAfter&&q.sayAfter.length>12?1700:1100);
   }else{
     R.streak=0;R.hearts--;
-    screen.querySelector(".hearts").textContent=heartsStr();
+    if(!R.place)screen.querySelector(".hearts").textContent=heartsStr();
     fb.className="feedback no";
     fb.innerHTML=`${timeout?"נגמר הזמן! ":"כמעט! "}התשובה: <span class="${q.he?"":"en"}">${esc(q.answer)}</span>`;
     sfx("no");
@@ -1368,22 +1437,27 @@ function answer(val,btn,timeout){
 }
 function next(){
   if(!R)return;
+  if(R.place)return placeNext();
   if(R.hearts<=0||R.n>=qCount(R.L)-1)return finish();
   R.n++;renderQ();
 }
 function finish(){
   stopTimer();
+  if(R.place)return placeFinish();
   const p=me(),li=R.li,L=R.L,won=R.hearts>0;
   const bonus=finishBonus(L.w,R.hearts),total=won?R.pts+bonus:0,stars=won?R.hearts:0;
-  const before=passedCount(p),prev=p.best[li];
+  const before=passedCount(p),prev=bestOf(p,li),openBefore=firstOpen(p);
   if(won)record(p,li,total,stars);
-  const after=passedCount(p),isBest=won&&(!prev||total>prev.pts);
+  p.fails=p.fails||{};p.fails[L.id]=won?0:(p.fails[L.id]||0)+1;
+  playedToday(p);save();
+  const after=passedCount(p),nf=firstOpen(p),isBest=won&&(!prev||total>prev.pts);
   const right=R.res.filter(x=>x).length;
   updateChip();
   let news="";
-  if(won&&after>before&&after<LEVELS.length)news=`🔓 נפתח שלב ${after+1}: ${LEVELS[after].t}`;
-  if(won&&after>before&&LEVELS[after]&&LEVELS[after].w!==L.w)news=`🗺️ עולם חדש נפתח: ${WORLDS[LEVELS[after].w-1].name}!`;
-  if(won&&after===LEVELS.length&&before<LEVELS.length)news="👑 סיימת את כל המסע! את/ה אגדה!";
+  const newWorld=won&&nf>openBefore&&nf<LEVELS.length&&LEVELS[nf].w!==L.w;
+  if(won&&nf>openBefore&&nf<LEVELS.length)news=`🔓 נפתח שלב ${nf+1}: ${LEVELS[nf].t}`;
+  if(newWorld)news=`🗺️ עולם חדש נפתח: ${WORLDS[LEVELS[nf].w-1].name}!`;
+  if(won&&after===LEVELS.length&&before<LEVELS.length)news=tx("👑 סיימת את כל המסע! את אגדה!","👑 סיימת את כל המסע! אתה אגדה!");
   const nextOk=won&&li+1<LEVELS.length;
   screen.innerHTML=`<div class="play qres">
     <h2>${won?(stars===3?"מושלם!":"עברת את השלב!"):"נגמרו הלבבות"}</h2>
@@ -1397,45 +1471,103 @@ function finish(){
       ${nextOk?`<button class="btn big warm" id="qx-nextL">לשלב ${li+2} ▶</button>`:""}
       <button class="btn${won?" ghost":" big warm"}" id="qx-again">${tx("שחקי שוב","שחק שוב")}</button>
       <button class="btn ghost" id="qx-toMap">למפה</button>
-    </div></div>`;
+    </div>
+    ${won?`<a class="btn alt share" id="qx-share" href="${waLink(p)}" target="_blank" rel="noopener">📤 ${tx("שלחי","שלח")} לחברים ותראו מי מוביל</a>`:""}
+    </div>`;
   if(nextOk)$("qx-nextL").onclick=()=>tryLevel(li+1);
   $("qx-again").onclick=()=>go(startLevel,li);
   $("qx-toMap").onclick=()=>go(showMap);
   sfx(won?"win":"lose");
   speak(won?(stars===3?"Perfect! Three stars!":"Level complete!"):"Good try! Let's try again.",0.9);
-  if(won&&stars===3)confetti();
+  if(won)confetti(stars===3||newWorld?28:12);
   R=null;
 }
-function confetti(){
+function confetti(n=22){
   const c=document.createElement("div");c.className="confetti";
-  c.innerHTML=Array.from({length:22},()=>`<i style="left:${rnd(96)}%;animation-delay:${rnd(600)}ms">${["⭐","🎉","💎","✨"][rnd(4)]}</i>`).join("");
+  c.innerHTML=Array.from({length:n},()=>`<i style="left:${rnd(96)}%;animation-delay:${rnd(600)}ms">${["⭐","🎉","💎","✨"][rnd(4)]}</i>`).join("");
   document.body.appendChild(c);setTimeout(()=>c.remove(),2600);
 }
 
+/* ---------- opening challenge (placement) ---------- */
+// Finds the right starting world: a binary search over the worlds. Each world is probed with
+// 2 questions from its mixed level (a third breaks a tie). Pass = the child knows that world, so the
+// next probe is harder; fail = easier. Stops when the level is clear, after at most 10 questions.
+const PLACE_MAX=10;
+function placeProbe(w){return GEN[pick(LEVELS[w===WORLDS.length?37:(w-1)*PER_WORLD+4].g)](4)}
+function startPlacement(){
+  // lo = highest world known, hi = lowest world not known yet
+  R={place:{lo:0,hi:WORLDS.length+1,w:2,right:0,wrong:0},li:-1,L:{w:2,t:"אתגר פתיחה",n:PLACE_MAX,g:[],k:4},n:0,hearts:99,pts:0,streak:0,best:0,res:[],locked:false};
+  R.qs=[placeProbe(2)];
+  renderQ();
+}
+function placeNext(){
+  const P=R.place;
+  if(R.res[R.n])P.right++;else P.wrong++;
+  if(P.right>=2||P.wrong>=2){
+    if(P.right>=2)P.lo=P.w;else P.hi=P.w;
+    if(P.hi-P.lo<=1)return placeFinish();
+    P.w=Math.floor((P.lo+P.hi)/2);P.right=P.wrong=0;
+  }
+  if(R.qs.length>=PLACE_MAX)return placeFinish();
+  R.L.w=P.w;R.qs.push(placeProbe(P.w));R.n++;renderQ();
+}
+// Start in the first world not known; levels of known worlds count as passed with 1 star
+function placeResult(p,lo){
+  const start=Math.min(lo+1,WORLDS.length);
+  LEVELS.forEach((L,i)=>{if(L.w<start&&!done(p,i))p.best[L.id]={pts:0,stars:1,skip:true}});
+  p.placed={w:start,at:dayKey()};save();
+  return start;
+}
+function placeFinish(){
+  stopTimer();
+  const p=me(),start=placeResult(p,R.place.lo),W=WORLDS[start-1];
+  screen.innerHTML=`<div class="play qres">
+    <h2>🧭 ${tx("מצאנו את העולם שלך!","מצאנו את העולם שלך!")}</h2>
+    <div class="bigst">${W.e}</div>
+    <p style="margin:0">${start===1?tx("מתחילות מההתחלה, באי האותיות. בהצלחה!","מתחילים מההתחלה, באי האותיות. בהצלחה!"):`מתחילים ב<b>${W.name}</b>, שלב ${(start-1)*PER_WORLD+1}.`}</p>
+    ${start>1?`<p class="muted" style="margin:0">השלבים הקודמים פתוחים עם כוכב אחד. אפשר לחזור אליהם ולאסוף עוד כוכבים ונקודות.</p>`:""}
+    <div class="row"><button class="btn big warm" id="qx-placeOk">יוצאים לדרך ▶</button></div></div>`;
+  $("qx-placeOk").onclick=()=>go(showMap);
+  sfx("win");confetti(start>1?28:12);
+  speak(start>1?"Great job! You know a lot of English!":"Great! Let's start the adventure!",0.9);
+  R=null;
+}
+function showPlaceOffer(){
+  const p=me();
+  screen.innerHTML=`<div class="card form placeoffer">
+    <h2 style="margin:0">🧭 אתגר פתיחה</h2>
+    <p style="margin:0">${tx("כבר יודעת קצת אנגלית?","כבר יודע קצת אנגלית?")} כמה שאלות קצרות, בלי לחץ ובלי שעון. השאלות נעשות קלות או קשות יותר לפי התשובות, ובסוף נדע מאיזה עולם להתחיל.</p>
+    <div class="row"><button class="btn big warm" id="qx-placeGo">בואו נתחיל ▶</button>
+      <button class="btn ghost" id="qx-placeNo">מתחילים מההתחלה</button></div></div>`;
+  $("qx-placeGo").onclick=()=>go(startPlacement);
+  $("qx-placeNo").onclick=()=>{p.placed={w:1,declined:true};save();go(showMap)};
+}
+
 /* ---------- leaderboard ---------- */
-function showBoard(){
+function showBoard(note){
   const p=me();updateChip();
   const rows=boardRows();
   const medal=i=>["🥇","🥈","🥉"][i]||i+1;
   const txt=p?shareText(p):"";
   screen.innerHTML=`
     <h2>🏆 טבלת אלופים</h2>
-    <p class="muted" style="margin-top:-6px">מדרגים לפי השלב הכי גבוה, ואחר כך לפי נקודות.</p>
+    ${note?`<div class="msg ${note[0]} lnote" id="qx-linkMsg">${esc(note[1])}</div>`:""}
+    <p class="muted" style="margin-top:-6px">מדרגים לפי נקודות, ואחר כך לפי כוכבים. כל שלב ששיחקתם שוב ושיפרתם מוסיף.</p>
     <div class="board">${rows.map((r,i)=>`<div class="brow${p&&r.id===p.id?" me":""}">
       <span class="pl">${medal(i)}</span><span class="av">${r.av}</span>
-      <span class="nm"><b>${esc(r.name)}</b><small>${r.local?"במכשיר הזה":"חבר/ה"} · ${r.pts.toLocaleString("en-US")} 💎 · ★${r.stars}</small></span>
-      <span class="lv"><b>${Math.min(r.passed+1,LEVELS.length)}</b><small>שלב</small></span>
-      ${r.friend!=null?`<button class="del" data-f="${r.friend}" aria-label="הסרה">✕</button>`:"<span></span>"}</div>`).join("")}</div>
+      <span class="nm"><b>${esc(r.name)}</b><small>${r.local?"במכשיר הזה":"חבר/ה"} · שלב ${Math.min(r.passed+1,LEVELS.length)} · ★${r.stars}</small></span>
+      <span class="lv"><b class="en">${r.pts.toLocaleString("en-US")}</b><small>💎 נקודות</small></span>
+      ${r.friend!=null?`<button class="del" data-f="${r.friend}" aria-label="הסרת ${esc(r.name)}">✕</button>`:"<span></span>"}</div>`).join("")}</div>
     ${p?`<div class="card form" style="margin-bottom:14px">
       <h3>📤 שולחים את ההישג לחברים</h3>
-      <p class="muted" style="margin:0">החברים מדביקים את ההודעה אצלם, ואתם מופיעים בטבלה שלהם.</p>
+      <p class="muted" style="margin:0">החברים לוחצים על הקישור בהודעה, ואתם מופיעים בטבלה שלהם. כדי לראות אותם אצלכם, הם שולחים לכם הודעה בחזרה.</p>
       <div class="codebox" id="qx-myCode">${esc(txt)}</div>
       <div class="row"><button class="btn" id="qx-copy">העתקה</button>
-        <a class="btn alt" style="text-decoration:none" id="qx-wa" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">שליחה בוואטסאפ</a></div>
+        <a class="btn alt" style="text-decoration:none" id="qx-wa" href="${waLink(p)}" target="_blank" rel="noopener">שליחה בוואטסאפ</a></div>
       <div class="msg ok" id="qx-copyMsg"></div></div>`:""}
     <form class="card form" id="qx-addF">
       <h3>➕ מוסיפים חבר/ה לטבלה</h3>
-      <label for="fCode">מדביקים כאן את ההודעה שקיבלתם</label>
+      <label for="qx-fCode">קיבלתם הודעה ולחיצה על הקישור לא עבדה? מדביקים אותה כאן</label>
       <textarea id="qx-fCode" placeholder="🏆 ... הקוד שלי לטבלת האלופים: EQ:..."></textarea>
       <div class="msg" id="qx-fMsg"></div>
       <button class="btn" type="submit">הוספה לטבלה</button></form>
@@ -1466,7 +1598,7 @@ function showPaywall(li){
     <h2 style="margin:0">🔑 פותחים את המסע המלא</h2>
     <p style="margin:0">שלבים 1–${FREE_LEVELS} חינם. כדי להמשיך לשלב ${li+1} ולכל ${LEVELS.length} השלבים צריך קוד גישה.</p>
     <ul><li>4 עולמות נוספים: צבעים, ימים, מילים ומשפטים</li><li>מבחן האלופים והבוס הגדול</li><li>כל הילדים במכשיר, תשלום חד-פעמי</li></ul>
-    <label for="acc">קוד גישה</label><input type="text" id="qx-acc" class="en" placeholder="EQ-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
+    <label for="qx-acc">קוד גישה</label><input type="text" id="qx-acc" class="en" placeholder="EQ-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
     <div class="msg" id="qx-accMsg"></div>
     <div class="row"><button class="btn" type="submit">פתיחה</button><button class="btn ghost" type="button" id="qx-accX">אחר כך</button></div></form>`;
   document.body.appendChild(d);
@@ -1483,10 +1615,13 @@ function showPaywall(li){
 /* ---------- boot ---------- */
 // Called by the tab bar each time the quest tab opens
 function open(){go(me()?showMap:showProfiles)}
-window.EQ={open,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
+window.addEventListener("hashchange",()=>{try{const h=location.hash;if(h.startsWith("#eq=")){showTab("quest");fromLink(decodeURIComponent(h.slice(4)));history.replaceState(null,"",location.pathname+location.search)}}catch(e){}});
+window.EQ={open,fromLink,startPlacement,placeResult,needsHelp,totalStars,firstOpen,migrate,VER,BACKUP_KEY,streakDays,playedToday,standing,shareText,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
   go,startLevel,next,finish,showMap,showBoard,showProfiles,showPaywall,tx,nodeXY,get R(){return R},setPaywall:v=>{PAYWALL=v}};
 })();
-try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h)}catch(e){}
+try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h);
+  // A leaderboard link from a friend: #eq=<share code>
+  else if(h.startsWith("eq=")){showTab("quest");EQ.fromLink(decodeURIComponent(h.slice(3)));history.replaceState(null,"",location.pathname+location.search)}}catch(e){}
 </script>
 
 </body>
