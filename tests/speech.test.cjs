@@ -12,12 +12,12 @@ const letterSaid = L => (L === "Z" ? "zee" : L + ".");
 
 // Voice lists as each browser reports them (US and non-US mixed in, as on real devices).
 const DEVICES = {
-  "iPhone Safari": { voices: [["Daniel", "en-GB"], ["Karen", "en-AU"], ["Moira", "en-IE"], ["Samantha", "en-US"], ["Fred", "en-US"], ["Albert", "en-US"], ["Carmit", "he-IL"]], expect: "Samantha" },
-  "iPhone Safari + Ava Premium": { voices: [["Daniel", "en-GB"], ["Martha (Premium)", "en-GB"], ["Samantha", "en-US"], ["Ava (Premium)", "en-US"]], expect: "Ava (Premium)" },
-  "Chrome desktop": { voices: [["Google UK English Female", "en-GB"], ["Google UK English Male", "en-GB"], ["Google US English", "en-US"], ["Microsoft David - English (United States)", "en-US"], ["Microsoft Zira - English (United States)", "en-US"]], expect: "Google US English" },
-  "Edge desktop": { voices: [["Microsoft Sonia Online (Natural) - English (United Kingdom)", "en-GB"], ["Microsoft Libby Online (Natural) - English (United Kingdom)", "en-GB"], ["Microsoft Ana Online (Natural) - English (United States)", "en-US"], ["Microsoft Andrew Online (Natural) - English (United States)", "en-US"], ["Microsoft Ava Online (Natural) - English (United States)", "en-US"], ["Microsoft Jenny Online (Natural) - English (United States)", "en-US"]], expect: "Microsoft Ava Online (Natural) - English (United States)" },
-  "Android Chrome": { voices: [["English United Kingdom", "en_GB"], ["English India", "en_IN"], ["English United States", "en_US"]], expect: "English United States" },
-  "Voices load late (iOS)": { voices: [["Daniel", "en-GB"], ["Samantha", "en-US"]], expect: "Samantha", late: true },
+  "iPhone Safari": { voices: [["Daniel", "en-GB"], ["Karen", "en-AU"], ["Moira", "en-IE"], ["Samantha", "en-US"], ["Fred", "en-US"], ["Albert", "en-US"], ["Carmit", "he-IL"]], expect: "Samantha", man: "Fred" },
+  "iPhone Safari + Ava Premium": { voices: [["Daniel", "en-GB"], ["Martha (Premium)", "en-GB"], ["Samantha", "en-US"], ["Ava (Premium)", "en-US"]], expect: "Ava (Premium)", man: "Ava (Premium)", deep: true },
+  "Chrome desktop": { voices: [["Google UK English Female", "en-GB"], ["Google UK English Male", "en-GB"], ["Google US English", "en-US"], ["Microsoft David - English (United States)", "en-US"], ["Microsoft Zira - English (United States)", "en-US"]], expect: "Google US English", man: "Microsoft David - English (United States)" },
+  "Edge desktop": { voices: [["Microsoft Sonia Online (Natural) - English (United Kingdom)", "en-GB"], ["Microsoft Libby Online (Natural) - English (United Kingdom)", "en-GB"], ["Microsoft Ana Online (Natural) - English (United States)", "en-US"], ["Microsoft Andrew Online (Natural) - English (United States)", "en-US"], ["Microsoft Ava Online (Natural) - English (United States)", "en-US"], ["Microsoft Jenny Online (Natural) - English (United States)", "en-US"]], expect: "Microsoft Ava Online (Natural) - English (United States)", man: "Microsoft Andrew Online (Natural) - English (United States)" },
+  "Android Chrome": { voices: [["English United Kingdom", "en_GB"], ["English India", "en_IN"], ["English United States", "en_US"]], expect: "English United States", man: "English United States", deep: true },
+  "Voices load late (iOS)": { voices: [["Daniel", "en-GB"], ["Samantha", "en-US"]], expect: "Samantha", late: true, man: "Samantha", deep: true },
 };
 
 function stub(voices, late) {
@@ -59,7 +59,27 @@ function check(name, ok, detail) {
     const chosen = await page.evaluate(() => voice && voice.name);
     check(`${dev}: picks ${cfg.expect}`, chosen === cfg.expect, "got " + chosen);
     check(`${dev}: footer shows voice`, (await page.textContent("#voiceName")).includes(cfg.expect));
-    check(`${dev}: build tag v12`, (await page.textContent("footer")).includes("v12"));
+    check(`${dev}: build tag v13`, (await page.textContent("footer")).includes("v13"));
+
+    // Narrator picker: woman / man / robot / squirrel, remembered after reload
+    await said();
+    await page.click("#voiceBtn");
+    check(`${dev}: voice picker opens`, await page.isVisible("#voiceSheet"));
+    await page.click('#voiceSheet [data-v="man"]');
+    const vm = await last();
+    check(`${dev}: man -> ${cfg.man}${cfg.deep ? " (deeper)" : ""}`, vm && vm.voice === cfg.man && vm.lang === "en-US" && (cfg.deep ? vm.pitch < 0.8 : vm.pitch === 1), JSON.stringify(vm));
+    await page.click('#voiceSheet [data-v="robot"]');
+    const vr = await last();
+    check(`${dev}: robot = teacher voice, low pitch`, vr && vr.voice === cfg.expect && vr.pitch < 0.5 && vr.lang === "en-US", JSON.stringify(vr));
+    await page.click('#voiceSheet [data-v="squirrel"]');
+    const vs = await last();
+    check(`${dev}: squirrel = teacher voice, high pitch`, vs && vs.voice === cfg.expect && vs.pitch > 1.5, JSON.stringify(vs));
+    await page.click('#voiceSheet [data-v="man"]'); await said();
+    await page.click("#voiceDone");
+    check(`${dev}: picker closes`, !(await page.isVisible("#voiceSheet")));
+    await page.reload(); await page.waitForTimeout(cfg.late ? 600 : 100);
+    check(`${dev}: choice remembered after reload`, (await page.evaluate(() => voice && voice.name)) === cfg.man && (await page.textContent("#voiceEmo")).includes("👨"));
+    await page.evaluate(() => setVoiceStyle("woman")); await said();
 
     // Letters: tile clicks, the "letter" button, prev/next
     for (let i = 0; i < 26; i++) {

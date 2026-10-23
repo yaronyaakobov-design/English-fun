@@ -56,6 +56,12 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .brand span{color:var(--muted);font-size:15px}
 .stars{display:flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--sun);border-radius:999px;padding:4px 14px;font-family:var(--f-display);font-weight:600;font-size:18px}
 .stars b{color:var(--sun);font-size:22px;line-height:1}
+.vbtn{background:var(--paper);border:2px solid var(--line);border-radius:999px;min-width:48px;height:44px;font-size:22px;line-height:1;box-shadow:var(--shadow)}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vgrid button{border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;min-height:96px}
+.vgrid button .ve{font-size:36px;line-height:1}
+.vgrid button small{color:var(--muted);font-weight:400;font-size:13px}
+.vgrid button[aria-pressed="true"]{border-color:var(--tomato);background:var(--bad-bg)}
 
 nav.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-block:4px 18px}
 nav.tabs button{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 6px;font-size:17px;font-weight:600;box-shadow:var(--shadow)}
@@ -398,6 +404,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 <div class="wrap" dir="rtl" lang="he">
   <header class="top">
     <div class="brand"><h1 class="en">English Fun</h1><span>לומדים אנגלית בכיף</span></div>
+    <button class="vbtn" id="voiceBtn" aria-label="בחירת קול המקריא" title="קול המקריא"><span id="voiceEmo">👩‍🏫</span></button>
     <div class="stars" title="כוכבים שאספת"><b>★</b><span id="starCount">0</span></div>
   </header>
 
@@ -504,7 +511,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
   <!-- QUEST -->
   <section id="sec-quest" hidden><div id="questScreen"></div></section>
 
-  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v12</span></span></footer>
+  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v13</span></span></footer>
 </div>
 
 <script>
@@ -604,15 +611,27 @@ const $=id=>document.getElementById(id);
 function setStars(){$("starCount").textContent=state.stars}
 
 /* ---------- speech ---------- */
-let voice=null;
-// Score installed voices so the most natural female teacher voice wins on each device.
+let voice=null,voiceDeep=false;
+// Narrator styles. Woman and man use the most natural American voice of that kind on the device;
+// robot and squirrel are playful characters made from the teacher's voice with pitch and speed.
+const VOICE_STYLES={
+  woman:{e:"👩‍🏫",he:"מורה",sub:"קול אישה",pitch:1.05,rate:1},
+  man:{e:"👨‍🏫",he:"מורה",sub:"קול גבר",pitch:1,rate:1},
+  robot:{e:"🤖",he:"רובוט",sub:"קול מתכתי",pitch:.4,rate:.92},
+  squirrel:{e:"🐿️",he:"סנאי",sub:"קול מצחיק",pitch:1.8,rate:1.05}
+};
+let voiceStyle="woman";
+try{const s=localStorage.getItem("ef.voice");if(VOICE_STYLES[s])voiceStyle=s}catch(e){}
+// Score installed voices so the most natural teacher voice of the wanted kind wins on each device.
 const VOICE_TOP=["Ava","Jenny","Aria","Emma","Michelle","Samantha","Allison","Susan","Zoe","Joelle","Google US English"];
 const VOICE_MALE=/\b(Guy|Andrew|Brian|Christopher|Eric|Roger|Steffan|David|Mark|Alex|Fred|Tom|Aaron|Evan|Nathan|Ralph|Junior)\b/i;
+const VOICE_TOP_MALE=["Andrew","Guy","Brian","Christopher","Eric","Evan","Nathan","Aaron","Tom","Alex","David","Mark","Roger","Steffan","Fred"];
+const VOICE_FEMALE=/\b(Ava|Jenny|Aria|Emma|Michelle|Samantha|Allison|Susan|Zoe|Joelle|Zira|Nicky|Victoria|Kathy|Ana)\b|Female/i;
 const VOICE_NOVELTY=/Bells|Boing|Bubbles|Cellos|Bad News|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Albert|Bahh|Hysterical|Deranged|Pipe|Ana\b/i;
 // Non-American accents, by region in the name and by Apple's British/Australian/Irish/Indian voice names.
 const VOICE_NOT_US=/United Kingdom|\bUK\b|British|Australia|India|Ireland|Scotland|South Africa|New Zealand|Canada|\b(Daniel|Kate|Serena|Arthur|Martha|Stephanie|Oliver|Karen|Moira|Tessa|Rishi|Veena|Fiona|Lee|Catherine|Gordon|Sonia|Libby|Maisie|Ryan|Thomas|Natasha|William|Neerja|Prabhat)\b/i;
 const isUS=v=>/^en[-_]US/i.test(v.lang)||/United States|US English/i.test(v.name);
-function voiceScore(v){
+function voiceScore(v,male=false){
   let s=0;const n=v.name;
   if(!/^en/i.test(v.lang))return -1e9;
   s+=isUS(v)?500:-400;                          // American accent only, others are a last resort
@@ -622,8 +641,14 @@ function voiceScore(v){
   if(/Multilingual/i.test(n))s-=30;
   if(/Premium|Enhanced/i.test(n))s+=120;        // iOS / macOS downloaded voices
   if(/^Google/i.test(n))s+=90;                  // Chrome cloud voice
-  const i=VOICE_TOP.findIndex(p=>n.includes(p));if(i>=0)s+=60-i*3;
-  if(VOICE_MALE.test(n))s-=150;
+  if(male){
+    const k=VOICE_TOP_MALE.findIndex(p=>n.includes(p));if(k>=0)s+=60-k*3;
+    if(VOICE_MALE.test(n))s+=250;
+    if(VOICE_FEMALE.test(n))s-=150;
+  }else{
+    const i=VOICE_TOP.findIndex(p=>n.includes(p));if(i>=0)s+=60-i*3;
+    if(VOICE_MALE.test(n))s-=150;
+  }
   if(VOICE_NOVELTY.test(n))s-=1000;             // joke voices, and the child voice "Ana"
   return s;
 }
@@ -631,15 +656,42 @@ function pickVoice(){
   if(!("speechSynthesis" in window))return;
   const vs=speechSynthesis.getVoices();
   if(!vs.length)return;
-  voice=vs.slice().sort((a,b)=>voiceScore(b)-voiceScore(a))[0];
-  if(voiceScore(voice)<-1e8)voice=null;
-  const el=document.getElementById("voiceName");if(el)el.textContent=voice?" · Voice: "+voice.name:"";
+  const male=voiceStyle==="man";
+  voice=vs.slice().sort((a,b)=>voiceScore(b,male)-voiceScore(a,male))[0];
+  if(voiceScore(voice,male)<-1e8)voice=null;
+  // No man's voice on this device: the teacher's voice, deeper
+  voiceDeep=male&&!!voice&&!VOICE_MALE.test(voice.name);
+  const st=VOICE_STYLES[voiceStyle];
+  const el=document.getElementById("voiceName");if(el)el.textContent=voice?" · Voice: "+voice.name+(voiceStyle==="woman"?"":" ("+voiceStyle+")"):"";
+  const em=document.getElementById("voiceEmo");if(em)em.textContent=st.e;
 }
 if("speechSynthesis" in window){
   pickVoice();
   speechSynthesis.addEventListener?speechSynthesis.addEventListener("voiceschanged",pickVoice):(speechSynthesis.onvoiceschanged=pickVoice);
   setTimeout(pickVoice,500);setTimeout(pickVoice,1500); // Safari never fires voiceschanged
 }else{$("noVoice").hidden=false}
+function setVoiceStyle(s){
+  if(!VOICE_STYLES[s])return;
+  voiceStyle=s;try{localStorage.setItem("ef.voice",s)}catch(e){}
+  pickVoice();
+}
+// The narrator picker: a sheet with the four voices; tapping one plays a sample
+function showVoicePicker(){
+  const old=document.getElementById("voiceSheet");if(old)old.remove();
+  const d=document.createElement("div");d.className="sheet";d.id="voiceSheet";
+  const draw=()=>{d.innerHTML=`<div class="card" role="dialog" aria-label="בחירת קול המקריא">
+    <h2 style="margin:0">🗣️ מי מקריא?</h2>
+    <div class="vgrid">${Object.entries(VOICE_STYLES).map(([k,s])=>`<button data-v="${k}" aria-pressed="${k===voiceStyle}"><span class="ve">${s.e}</span>${s.he}<small>${s.sub}</small></button>`).join("")}</div>
+    <p class="muted" style="margin:0;font-size:14px">${voice?`<span class="en">${voice.name}</span>${voiceDeep?" · אין במכשיר קול גבר, אז הקול מועמק":""}`:"אין קול במכשיר הזה"}</p>
+    <button class="btn" id="voiceDone">סגירה</button></div>`;
+    d.querySelectorAll(".vgrid button").forEach(b=>b.onclick=()=>{setVoiceStyle(b.dataset.v);draw();speak(VOICE_SAMPLE[b.dataset.v])});
+    d.querySelector("#voiceDone").onclick=()=>d.remove();
+  };
+  d.onclick=e=>{if(e.target===d)d.remove()};
+  draw();document.body.appendChild(d);
+}
+const VOICE_SAMPLE={woman:"Hi! Let's learn English together!",man:"Hi! Let's learn English together!",robot:"Beep boop! I am a robot. Let's learn English!",squirrel:"Hi hi! I am a squirrel. Let's play!"};
+document.getElementById("voiceBtn").onclick=showVoicePicker;
 function speak(text,rate=0.85){
   if(!("speechSynthesis" in window))return;
   if(!voice)pickVoice();
@@ -647,7 +699,8 @@ function speak(text,rate=0.85){
   const u=new SpeechSynthesisUtterance(text);u.lang="en-US";
   // Neural voices already speak clearly, so slow them less than robotic ones.
   const natural=voice&&/Natural|Neural|Premium|Enhanced/i.test(voice.name);
-  u.rate=Math.min(1,rate*(natural?1.05:0.95));u.pitch=1.05;
+  const st=VOICE_STYLES[voiceStyle];
+  u.rate=Math.min(1.1,rate*(natural?1.05:0.95)*st.rate);u.pitch=voiceDeep?.7:st.pitch;
   if(voice)u.voice=voice;
   speechSynthesis.speak(u);
 }
