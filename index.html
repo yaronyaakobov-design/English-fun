@@ -988,7 +988,7 @@ const RANKS=[[0,"🐣","מתחיל","מתחילה"],[4,"🧭","חוקר","חוק
 function rankOf(passed,g){let r=RANKS[0];for(const x of RANKS)if(passed>=x[0])r=x;return r[1]+" "+(g==="m"?r[2]:r[3])}
 
 /* ---------- access code (paywall hook) ---------- */
-// Levels 1-8 are free. Set PAYWALL=true to require a code for the rest. Open the page with #paywall to preview it.
+// Everything is free for now. Setting PAYWALL=true makes levels 9-24 need an access code (the sales hook).
 let PAYWALL=false;
 const FREE_LEVELS=8;
 const SALT="yy-quest-2026";
@@ -1416,13 +1416,12 @@ function showPaywall(li){
 }
 
 /* ---------- boot ---------- */
-try{if(location.hash==="#paywall")PAYWALL=true}catch(e){}
 // Called by the tab bar each time the quest tab opens
 function open(){go(me()?showMap:showProfiles)}
 window.EQ={open,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
   go,startLevel,next,finish,showMap,showBoard,showProfiles,showPaywall,tx,nodeXY,get R(){return R},setPaywall:v=>{PAYWALL=v}};
 })();
-try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h);if(h==="paywall")showTab("quest")}catch(e){}
+try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h)}catch(e){}
 </script>
 
 </body>
