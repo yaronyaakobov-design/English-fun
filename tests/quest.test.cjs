@@ -189,6 +189,7 @@ const smallTargets = page => page.evaluate(() => [...document.querySelectorAll("
     check("speech is en-US", said.length > 0 && said.every(l => l === "en-US"));
     await advance(page);
     check("level 1 result: 3 stars", (await page.$$(".bigst .off")).length === 0 && (await page.textContent(".qres h2")).includes("מושלם"));
+    await page.waitForTimeout(900); // the points roll up first
     const gain1 = +(await page.textContent(".gain")).trim().slice(1);
     check("level 1 result: 110-140 points", gain1 >= 110 && gain1 <= 140, gain1);
     check("level 1 result: level 2 unlocked", (await page.textContent(".news")).includes("שלב 2"));
@@ -255,6 +256,10 @@ const smallTargets = page => page.evaluate(() => [...document.querySelectorAll("
     check("points grow with worlds", prog.pts > 100 * 40, prog.pts);
     await page.evaluate(() => EQ.go(EQ.showMap));
     check("map rank is legend", (await page.textContent(".rank")).includes("אגדה"));
+    const end = await page.evaluate(() => { const p = EQ.S.profiles[0]; return { st: Object.keys(p.stickers || {}), pet: EQ.petOf(p).e, chests: p.chests, extra: p.extra }; });
+    check("all 8 world stickers and the boss sticker after the whole journey", ["w1", "w2", "w3", "w4", "w5", "w6", "w7", "w8", "boss", "first", "perfect", "hatch"].every(s => end.st.includes(s)), end.st.join(","));
+    check("journey friend grew past the egg", end.pet !== "🥚", end.pet);
+    check("daily chest opened once in a day of 40 levels", end.chests === 1, JSON.stringify(end));
     check("days-in-a-row shown after playing", (await page.textContent(".hero .streak")).includes("1 יום"));
     check("touch targets >= 44px: map", (await smallTargets(page)).length === 0, (await smallTargets(page)).join(","));
     for (const w of [320, 430, 820]) { await page.setViewportSize({ width: w, height: 800 }); await page.waitForTimeout(100); await mapCheck(w + "px"); check(`no overflow: map at ${w}px`, await noOverflow(page)); }
@@ -433,6 +438,64 @@ const smallTargets = page => page.evaluate(() => [...document.querySelectorAll("
       { name: "far", passed: 30, pts: 500, stars: 30 }, { name: "busy", passed: 8, pts: 900, stars: 20 },
       { name: "tieA", passed: 5, pts: 400, stars: 9 }, { name: "tieB", passed: 9, pts: 400, stars: 12 }]).map(r => r.name));
     check("leaderboard: ranked by points, then stars", order.join() === "busy,far,tieB,tieA", order.join());
+    await pg.context().close();
+  }
+
+  // ---------- v12: journey friend, daily chest, mistake practice, stickers ----------
+  {
+    const pg = await withSave({ ver: 3, cur: "g7", friends: [], profiles: [{ id: "g7", name: "ליה", av: "🦊", g: "f", placed: { w: 1 }, best: {} }] });
+    check("v11 save without the new fields opens fine", await pg.isVisible(".hero .pet") && (await pg.textContent(".hero .pet")).includes("🥚"));
+    check("daily mission shown on the map", (await pg.textContent(".hero .goal")).includes("0/3"));
+    const win = async (li, wrongAt = -1) => {
+      await pg.evaluate(i => EQ.go(EQ.startLevel, i), li);
+      const qn = await pg.evaluate(() => EQ.R.qs.length);
+      let saved = 0;
+      for (let k = 0; k < qn; k++) {
+        await answerQ(pg, k !== wrongAt);
+        if (k === wrongAt) saved = await pg.evaluate(() => EQ.S.profiles[0].review.length);
+        await advance(pg);
+      }
+      return saved;
+    };
+    await win(0);
+    check("first 3-star win: the egg hatches", (await pg.textContent(".qres")).includes("גדל") && (await pg.evaluate(() => EQ.petOf(EQ.S.profiles[0]).e)) === "🐣");
+    check("first win: stickers shown on the result screen", (await pg.textContent(".qres")).includes("מדבקה חדשה"));
+    check("stars pop in, one per star", (await pg.$$(".bigst i")).length === 3 && (await pg.$$(".bigst i.off")).length === 0);
+    await pg.waitForTimeout(900);
+    const shown = +(await pg.textContent("#qx-gain")).slice(1), saved = await pg.evaluate(() => EQ.S.profiles[0].best["abc-case"].pts);
+    check("points roll up to the saved score", shown === saved, shown + " vs " + saved);
+    check("daily mission counts: 1/3", (await pg.textContent(".goalline")).includes("1/3"));
+    // A wrong answer goes to the practice list
+    // (the same word answered right later in the level would take it off the list again)
+    const rv = await win(1, 0);
+    await pg.evaluate(() => { const p = EQ.S.profiles[0]; if (!p.review.length) p.review = [EQ.makeQuestions(1)[0]]; });
+    check("a mistake is saved for practice", rv === 1, rv);
+    const before = await pg.evaluate(() => EQ.totalPts(EQ.S.profiles[0]));
+    await win(2);
+    check("3rd win of the day opens the chest", (await pg.textContent(".qres")).includes("תיבת הפתעה"));
+    check("chest adds 100 points", (await pg.evaluate(() => EQ.totalPts(EQ.S.profiles[0]))) - before - (await pg.evaluate(() => EQ.S.profiles[0].best["abc-start"].pts)) === 100);
+    await win(3);
+    check("only one chest a day", (await pg.evaluate(() => EQ.S.profiles[0].chests)) === 1 && !(await pg.textContent(".qres")).includes("תיבת הפתעה"));
+    await pg.click("#qx-toMap");
+    check("map: practice button shows how many words", (await pg.textContent("#qx-review")).includes("(1)"));
+    check("map: chest done for today", (await pg.textContent(".hero .goal")).includes("הושלמה"));
+    check("touch targets >= 44px: map with new buttons", (await smallTargets(pg)).length === 0, (await smallTargets(pg)).join(","));
+    await pg.click("#qx-review");
+    check("practice round: no hearts, no hourglass", (await pg.evaluate(() => EQ.R && EQ.R.review)) && !(await pg.isVisible(".hearts")) && !(await pg.isVisible(".hg")));
+    await answerQ(pg, true); await advance(pg);
+    check("practice: learned word leaves the list", (await pg.evaluate(() => EQ.S.profiles[0].review.length)) === 0);
+    check("practice: result says nothing left", (await pg.textContent(".qres")).includes("אין יותר טעויות"));
+    await pg.click("#qx-toMap");
+    check("map: practice button gone when nothing to practice", !(await pg.isVisible("#qx-review")));
+    await pg.click("#qx-album");
+    const album = await pg.evaluate(() => ({ got: document.querySelectorAll(".stkc.got").length, all: document.querySelectorAll(".stkc").length }));
+    check("sticker album lists all stickers, earned ones in color", album.all === 18 && album.got >= 4, JSON.stringify(album));
+    check("no overflow: album", await noOverflow(pg));
+    // Near miss: losing on one of the last questions says how close it was
+    await pg.evaluate(() => EQ.go(EQ.startLevel, 4));
+    for (let k = 0; k < 6 && (await pg.evaluate(() => !!EQ.R)); k++) { await answerQ(pg, k < 3); await advance(pg); }
+    check("near miss: 'so close' on a loss at the end", (await pg.textContent(".qres")).includes("כל כך קרוב"));
+    check("no JS errors (v12 features)", pg.errors.length === 0, pg.errors.join("; "));
     await pg.context().close();
   }
 

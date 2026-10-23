@@ -369,6 +369,28 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 .placecard{margin-bottom:14px}.placecard .row{margin-top:10px}
 .placeoffer .row{margin-top:6px}
 .brow .lv b{font-size:20px}
+.hero .pet{grid-column:1/-1;display:flex;gap:12px;align-items:center;background:var(--bg);border-radius:16px;padding:8px 12px}
+.pet .pe,.grow .pe{font-size:40px;line-height:1;animation:bob2 2.4s ease-in-out infinite}
+.pet b{display:block;font-size:15px}.pet small{color:var(--muted);font-size:13px}
+.pet>div{flex:1;min-width:0}
+.pbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:4px}
+.pbar i{display:block;height:100%;background:var(--sun);border-radius:999px}
+.hero .goal{grid-column:1/-1;font-size:14px;font-weight:600}
+.goalline{font-weight:600;color:var(--muted)}
+.news.chest{background:#FFF1C9;color:#5A4300}
+.news.stk{background:var(--bg)}
+.news.grow{display:flex;flex-direction:column;align-items:center;gap:4px}
+#sec-quest .btn.alt2{background:var(--berry)}
+.qres .bigst i{font-style:normal;display:inline-block;animation:starpop .55s var(--d) both}
+.qres .bigst i.off{color:var(--lock)}
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.stkc{background:var(--paper);border-radius:16px;box-shadow:var(--shadow);padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center}
+.stkc .se{font-size:38px;line-height:1.1;filter:grayscale(1);opacity:.35}
+.stkc small{font-size:12.5px;color:var(--muted);line-height:1.25}
+.stkc.got .se{filter:none;opacity:1}.stkc.got small{color:var(--ink);font-weight:600}
+@keyframes starpop{0%{transform:scale(0) rotate(-45deg);opacity:0}70%{transform:scale(1.35) rotate(8deg);opacity:1}100%{transform:scale(1)}}
+@keyframes bob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion: reduce){.pet .pe,.grow .pe,.qres .bigst i{animation:none}}
 </style>
 
 </head>
@@ -482,7 +504,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
   <!-- QUEST -->
   <section id="sec-quest" hidden><div id="questScreen"></div></section>
 
-  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v11</span></span></footer>
+  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v12</span></span></footer>
 </div>
 
 <script>
@@ -1057,7 +1079,8 @@ const done=(p,i)=>{const b=bestOf(p,i);return !!(b&&b.stars>0)};
 function passedCount(p){return LEVELS.filter((_,i)=>done(p,i)).length}
 // The first level not passed yet: where the player stands on the map
 function firstOpen(p){let i=0;while(i<LEVELS.length&&done(p,i))i++;return i}
-const totalPts=p=>Object.values(p.best).reduce((a,b)=>a+b.pts,0);
+// Best score of every level, plus bonus points from daily chests and mistake practice
+const totalPts=p=>Object.values(p.best).reduce((a,b)=>a+b.pts,0)+(p.extra||0);
 // Levels skipped by the opening challenge show 1 star on the map but count for nothing
 const totalStars=p=>Object.values(p.best).reduce((a,b)=>a+(b.skip?0:b.stars),0);
 // A level added later in the middle never locks levels the player already reached
@@ -1080,6 +1103,60 @@ function playedToday(p){
 }
 // Days in a row so far; 0 once a day was skipped
 const streakDays=p=>p.days&&(p.days.last===dayKey()||p.days.last===yesterday())?p.days.n:0;
+
+/* ---------- journey friend: an egg that hatches and grows with the stars earned ---------- */
+const PET=[[0,"🥚","ביצה מסתורית"],[3,"🐣","אפרוח קטן"],[12,"🐥","אפרוח אמיץ"],[30,"🦉","ינשוף חכם"],[60,"🦅","נשר מעופף"],[100,"🐉","דרקון אגדי"]];
+function petOf(p){
+  const s=totalStars(p);let i=0;while(i+1<PET.length&&s>=PET[i+1][0])i++;
+  const nx=PET[i+1];
+  return {i,e:PET[i][1],name:PET[i][2],next:nx?nx[1]:null,need:nx?nx[0]-s:0,frac:nx?(s-PET[i][0])/(nx[0]-PET[i][0]):1};
+}
+function petHTML(p){
+  const pt=petOf(p);
+  return `<div class="pet"><span class="pe">${pt.e}</span><div><b>חבר המסע: ${pt.name}</b>
+    <small>${pt.next?`עוד ${pt.need} ★ והוא יגדל ל-${pt.next}`:"הגיע לשיא! 🎉"}</small>
+    <div class="pbar"><i style="width:${Math.round(pt.frac*100)}%"></i></div></div></div>`;
+}
+
+/* ---------- daily mission: 3 levels a day open a surprise chest ---------- */
+const GOAL=3,CHEST=100;
+function goalOf(p){return p.goal&&p.goal.day===dayKey()?p.goal:{day:dayKey(),n:0,got:false}}
+// Count a won level; true when it opens today's chest
+function addGoal(p){
+  const g=goalOf(p);g.n++;p.goal=g;
+  if(g.n>=GOAL&&!g.got){g.got=true;p.extra=(p.extra||0)+CHEST;p.chests=(p.chests||0)+1;return true}
+  return false;
+}
+
+/* ---------- mistake practice ---------- */
+const rKey=q=>q.text+"|"+q.answer;
+function addReview(p,q){if(!p)return;p.review=[...(p.review||[]).filter(x=>rKey(x)!==rKey(q)),JSON.parse(JSON.stringify(q))].slice(-20)}
+function dropReview(p,q){if(p&&p.review)p.review=p.review.filter(x=>rKey(x)!==rKey(q))}
+
+/* ---------- sticker album ---------- */
+const realDone=(p,i)=>{const b=bestOf(p,i);return !!(b&&b.stars>0&&!b.skip)};
+const STICKERS=[
+ ["first","🌟","השלב הראשון",p=>LEVELS.some((_,i)=>realDone(p,i))],
+ ["perfect","⭐","3 כוכבים בשלב",p=>LEVELS.some((_,i)=>realDone(p,i)&&bestOf(p,i).stars===3)],
+ ...WORLDS.map((W,wi)=>["w"+(wi+1),W.e,W.name,p=>LEVELS.every((L,i)=>L.w!==wi+1||realDone(p,i))]),
+ ["boss","👑","ניצחון על הבוס",p=>realDone(p,LEVELS.length-1)],
+ ["days3","🔥","3 ימים ברצף",p=>streakDays(p)>=3],
+ ["days7","☄️","שבוע ברצף",p=>streakDays(p)>=7],
+ ["chest","🎁","תיבה יומית",p=>(p.chests||0)>=1],
+ ["review","🔁","10 מילים בתרגול",p=>(p.reviewed||0)>=10],
+ ["friend","🤝","חבר בטבלה",()=>S.friends.length>0],
+ ["hatch","🐣","הביצה בקעה",p=>petOf(p).i>=1],
+ ["dragon","🐉","דרקון אגדי",p=>petOf(p).i>=PET.length-1]
+];
+// Award stickers newly earned; returns them for the result screen
+function checkStickers(p){
+  p.stickers=p.stickers||{};
+  const got=STICKERS.filter(s=>!p.stickers[s[0]]&&s[3](p));
+  got.forEach(s=>p.stickers[s[0]]=dayKey());
+  if(got.length)save();
+  return got;
+}
+const stickerCount=p=>Object.keys(p.stickers||{}).length;
 
 /* ---------- share code for friends ---------- */
 const b64e=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
@@ -1271,7 +1348,8 @@ function mapHTML(p){
 function starStr(n,max=3){return "★".repeat(n)+(n<max?`<span class="off">${"★".repeat(max-n)}</span>`:"")}
 function showMap(scroll=true){
   const p=me();if(!p)return go(showProfiles);
-  const passed=passedCount(p),fo=firstOpen(p),nextLi=Math.min(fo,LEVELS.length-1),days=streakDays(p),st=standing(p);
+  checkStickers(p);
+  const goal=goalOf(p),rv=(p.review||[]).length,passed=passedCount(p),fo=firstOpen(p),nextLi=Math.min(fo,LEVELS.length-1),days=streakDays(p),st=standing(p);
   screen.innerHTML=`
     <div class="card hero">
       <span class="av">${p.av}</span>
@@ -1281,10 +1359,14 @@ function showMap(scroll=true){
         <div class="stat"><b class="en">${totalPts(p).toLocaleString("en-US")}</b><span>💎 נקודות</span></div>
         <div class="stat"><b class="en">${totalStars(p)}</b><span>★ כוכבים</span></div>
       </div>
+      ${petHTML(p)}
+      <div class="goal">${goal.got?"🎁 המשימה היומית הושלמה! נתראה מחר":`🎯 משימה יומית: ${goal.n}/${GOAL} שלבים, ${tx("ותפתחי","ותפתח")} תיבת הפתעה`}<div class="pbar"><i style="width:${Math.round(Math.min(goal.n,GOAL)/GOAL*100)}%"></i></div></div>
     </div>
     <div class="actions">
       <button class="btn big warm" id="qx-cont">▶ ${passed>=LEVELS.length?tx("עברת הכול! שחקי שוב","עברת הכול! שחק שוב"):"לשלב "+(fo+1)}</button>
       <button class="btn alt" id="qx-toBoard">🏆 טבלת אלופים${st.of>1?` · מקום ${st.place} מ-${st.of}`:""}</button>
+      ${rv?`<button class="btn alt2" id="qx-review">🔁 תרגול טעויות (${rv})</button>`:""}
+      <button class="btn alt2" id="qx-album">🏅 מדבקות ${stickerCount(p)}/${STICKERS.length}</button>
       <button class="btn ghost" id="qx-toProfiles">👥 החלפת שחקן</button>
     </div>
     ${PAYWALL&&!S.license?`<p class="muted" style="margin-top:-8px">שלבים 1–${FREE_LEVELS} פתוחים בחינם. 🔑 = נפתח עם קוד גישה.</p>`:""}
@@ -1295,6 +1377,8 @@ function showMap(scroll=true){
   $("qx-cont").onclick=()=>tryLevel(nextLi);
   $("qx-toBoard").onclick=()=>go(showBoard);
   $("qx-toProfiles").onclick=()=>go(showProfiles);
+  $("qx-album").onclick=()=>go(showStickers);
+  if(rv)$("qx-review").onclick=()=>go(startReview);
   if($("qx-placeGo")){$("qx-placeGo").onclick=()=>go(startPlacement);$("qx-placeNo").onclick=()=>{p.placed={w:1,declined:true};save();showMap(false)}}
   // Bring the player's spot on the map into view
   if(scroll)requestAnimationFrame(()=>{const n=screen.querySelector(".mnode.now");if(n&&n.offsetParent)n.scrollIntoView({block:"center"})});
@@ -1346,8 +1430,8 @@ function renderQ(){
     :`<div class="opts n${q.opts.length}">${q.opts.map((o,i)=>q.sw?`<button class="opt qsw" data-i="${i}" aria-label="${o}" style="--sw:${swatchOf(o)}"></button>`:`<button class="opt${q.he?" he":""}${q.emo?" emo":""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
   screen.innerHTML=`<div class="play">
     <div class="phead"><button class="x" id="qx-quit" aria-label="חזרה למפה">✕</button><button class="x" id="qx-mute" aria-label="צלילים">${S.mute?"🔇":"🔈"}</button>
-      <span class="lt">${R.place?"🧭 אתגר פתיחה":`${W.e} שלב ${R.li+1} · ${L.t}`}${R.easy?' <span class="help">🤝 עזרה</span>':""}</span>
-      ${R.place?"":`<span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="qx-pts">${R.pts}</span>`}</div>
+      <span class="lt">${R.free?L.t:`${W.e} שלב ${R.li+1} · ${L.t}`}${R.easy?' <span class="help">🤝 עזרה</span>':""}</span>
+      ${R.free?"":`<span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="qx-pts">${R.pts}</span>`}</div>
     <div class="dots">${dots}</div>
     ${qTime(L,q)?`<div class="tbox"><svg class="hg" viewBox="0 0 30 40" aria-hidden="true"><path d="M4 2h22M4 38h22M6 3c0 9 8 12 8 17s-8 8-8 17M24 3c0 9-8 12-8 17s8 8 8 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon id="qx-hgTop" fill="#F2B640"/><polygon id="qx-hgBot" fill="#F2B640"/><line id="qx-hgFlow" x1="15" y1="20" x2="15" y2="35" stroke="#F2B640" stroke-width="1.5"/></svg><div class="timer"><i id="qx-tbar"></i></div><span class="tsec en" id="qx-tsec"></span></div>`:""}
     <div class="prompt">
@@ -1414,18 +1498,19 @@ function answer(val,btn,timeout){
   if(btn&&!ok)btn.classList.add("wrong");
   if(q.build){$("qx-slots").classList.add(ok?"right":"wrong");screen.querySelectorAll(".tiles button").forEach(t=>t.disabled=true)}
   R.res[R.n]=ok;
-  if(!R.place){const p=me();p.recent=[...(p.recent||[]),ok].slice(-12)}
+  if(!R.free){const p=me();p.recent=[...(p.recent||[]),ok].slice(-12)}
+  if(ok)dropReview(me(),q);else if(!R.free)addReview(me(),q);
   const fb=$("qx-fb");
   if(ok){
     R.streak++;R.best=Math.max(R.best,R.streak);
-    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;if(!R.place)$("qx-pts").textContent=R.pts;
+    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;if(!R.free)$("qx-pts").textContent=R.pts;
     const p=PRAISE[rnd(PRAISE.length)];
-    fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span>${R.place?"":` +${gain}${R.streak>=3?` 🔥${R.streak}`:""}`}`;
+    fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span>${R.free?"":` +${gain}${R.streak>=3?` 🔥${R.streak}`:""}`}`;
     sfx("ok");speak(q.sayAfter||p,0.9);
     setTimeout(()=>{if(R&&R.qs[R.n]===q)next()},q.sayAfter&&q.sayAfter.length>12?1700:1100);
   }else{
     R.streak=0;R.hearts--;
-    if(!R.place)screen.querySelector(".hearts").textContent=heartsStr();
+    if(!R.free)screen.querySelector(".hearts").textContent=heartsStr();
     fb.className="feedback no";
     fb.innerHTML=`${timeout?"נגמר הזמן! ":"כמעט! "}התשובה: <span class="${q.he?"":"en"}">${esc(q.answer)}</span>`;
     sfx("no");
@@ -1444,12 +1529,15 @@ function next(){
 function finish(){
   stopTimer();
   if(R.place)return placeFinish();
+  if(R.review)return reviewFinish();
   const p=me(),li=R.li,L=R.L,won=R.hearts>0;
   const bonus=finishBonus(L.w,R.hearts),total=won?R.pts+bonus:0,stars=won?R.hearts:0;
-  const before=passedCount(p),prev=bestOf(p,li),openBefore=firstOpen(p);
+  const before=passedCount(p),prev=bestOf(p,li),openBefore=firstOpen(p),pet0=petOf(p).i;
   if(won)record(p,li,total,stars);
   p.fails=p.fails||{};p.fails[L.id]=won?0:(p.fails[L.id]||0)+1;
-  playedToday(p);save();
+  playedToday(p);
+  const chest=won&&addGoal(p),g=goalOf(p),pet=petOf(p),grew=pet.i>pet0,stk=checkStickers(p);
+  save();
   const after=passedCount(p),nf=firstOpen(p),isBest=won&&(!prev||total>prev.pts);
   const right=R.res.filter(x=>x).length;
   updateChip();
@@ -1461,12 +1549,15 @@ function finish(){
   const nextOk=won&&li+1<LEVELS.length;
   screen.innerHTML=`<div class="play qres">
     <h2>${won?(stars===3?"מושלם!":"עברת את השלב!"):"נגמרו הלבבות"}</h2>
-    <div class="bigst">${starStr(stars)}</div>
-    ${won?`<div class="gain en">+${total}</div><span class="muted">💎 נקודות${isBest&&prev?" · שיא חדש!":""}</span>`:`<p style="margin:0">${tx("לא נורא! כל ניסיון מלמד. נסי שוב, את יכולה!","לא נורא! כל ניסיון מלמד. נסה שוב, אתה יכול!")}</p>`}
+    <div class="bigst">${[0,1,2].map(i=>`<i class="${i<stars?"on":"off"}" style="--d:${i*.25}s">★</i>`).join("")}</div>
+    ${won?`<div class="gain en" id="qx-gain" data-v="${total}">+${total}</div><span class="muted">💎 נקודות${isBest&&prev?" · שיא חדש!":""}</span>`:(R.n>=qCount(L)-2?`<p style="margin:0"><b>כל כך קרוב!</b> הגעת לשאלה ${R.n+1} מתוך ${qCount(L)}. עוד ניסיון ${tx("אחד ואת שם!","אחד ואתה שם!")}</p>`:`<p style="margin:0">${tx("לא נורא! כל ניסיון מלמד. נסי שוב, את יכולה!","לא נורא! כל ניסיון מלמד. נסה שוב, אתה יכול!")}</p>`)}
     <table><tr><td>תשובות נכונות</td><td class="en">${right}/${R.res.length}</td></tr>
       <tr><td>רצף הכי ארוך</td><td class="en">${R.best}</td></tr>
       ${won?`<tr><td>בונוס לבבות</td><td class="en">+${bonus}</td></tr>`:""}</table>
     ${news?`<div class="news">${news}</div>`:""}
+    ${grew?`<div class="news grow"><span class="pe">${PET[pet0][1]} ➜ ${pet.e}</span>חבר המסע שלך גדל! עכשיו הוא ${pet.name}</div>`:""}
+    ${chest?`<div class="news chest">🎁 משימה יומית הושלמה! תיבת הפתעה: <b class="en">+${CHEST}</b> 💎</div>`:won?`<div class="goalline">🎯 משימה יומית: ${Math.min(g.n,GOAL)}/${GOAL} שלבים${g.got?" ✓":""}</div>`:""}
+    ${stk.map(s=>`<div class="news stk">🏅 מדבקה חדשה: ${s[1]} ${s[2]}</div>`).join("")}
     <div class="row">
       ${nextOk?`<button class="btn big warm" id="qx-nextL">לשלב ${li+2} ▶</button>`:""}
       <button class="btn${won?" ghost":" big warm"}" id="qx-again">${tx("שחקי שוב","שחק שוב")}</button>
@@ -1479,8 +1570,18 @@ function finish(){
   $("qx-toMap").onclick=()=>go(showMap);
   sfx(won?"win":"lose");
   speak(won?(stars===3?"Perfect! Three stars!":"Level complete!"):"Good try! Let's try again.",0.9);
-  if(won)confetti(stars===3||newWorld?28:12);
+  if(won)confetti(stars===3||newWorld||chest||grew?28:12);
+  if(grew)setTimeout(()=>speak("Wow! Your friend is growing!",0.9),1600);
+  countUp($("qx-gain"));
   R=null;
+}
+// Points roll up from 0 to the final number
+function countUp(el){
+  if(!el)return;
+  const v=+el.dataset.v,t0=performance.now();
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const step=now=>{const f=Math.min(1,(now-t0)/700);el.textContent="+"+Math.round(v*f*(2-f));if(f<1&&el.isConnected)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
 }
 function confetti(n=22){
   const c=document.createElement("div");c.className="confetti";
@@ -1496,7 +1597,7 @@ const PLACE_MAX=10;
 function placeProbe(w){return GEN[pick(LEVELS[w===WORLDS.length?37:(w-1)*PER_WORLD+4].g)](4)}
 function startPlacement(){
   // lo = highest world known, hi = lowest world not known yet
-  R={place:{lo:0,hi:WORLDS.length+1,w:2,right:0,wrong:0},li:-1,L:{w:2,t:"אתגר פתיחה",n:PLACE_MAX,g:[],k:4},n:0,hearts:99,pts:0,streak:0,best:0,res:[],locked:false};
+  R={place:{lo:0,hi:WORLDS.length+1,w:2,right:0,wrong:0},free:true,li:-1,L:{w:2,t:"🧭 אתגר פתיחה",n:PLACE_MAX,g:[],k:4},n:0,hearts:99,pts:0,streak:0,best:0,res:[],locked:false};
   R.qs=[placeProbe(2)];
   renderQ();
 }
@@ -1541,6 +1642,45 @@ function showPlaceOffer(){
       <button class="btn ghost" id="qx-placeNo">מתחילים מההתחלה</button></div></div>`;
   $("qx-placeGo").onclick=()=>go(startPlacement);
   $("qx-placeNo").onclick=()=>{p.placed={w:1,declined:true};save();go(showMap)};
+}
+
+/* ---------- mistake practice ---------- */
+const REVIEW_N=8;
+function startReview(){
+  const p=me(),qs=shuffle((p.review||[]).slice()).slice(0,REVIEW_N).map(q=>JSON.parse(JSON.stringify(q)));
+  if(!qs.length)return go(showMap);
+  const w=LEVELS[Math.min(firstOpen(p),LEVELS.length-1)].w;
+  R={review:true,free:true,li:-1,L:{w,t:"🔁 תרגול טעויות",n:qs.length,g:[],k:4},qs,n:0,hearts:99,pts:0,streak:0,best:0,res:[],locked:false};
+  renderQ();
+}
+function reviewFinish(){
+  stopTimer();
+  const p=me(),right=R.res.filter(x=>x).length,left=(p.review||[]).length,gain=right*5;
+  p.reviewed=(p.reviewed||0)+right;p.extra=(p.extra||0)+gain;
+  playedToday(p);
+  const pet0=petOf(p).i,stk=checkStickers(p);save();
+  screen.innerHTML=`<div class="play qres">
+    <h2>🔁 ${right===R.res.length?"כל הכבוד!":"תרגול טוב!"}</h2>
+    <p style="margin:0">${right} מתוך ${R.res.length} נכון${gain?` · <b class="en">+${gain}</b> 💎`:""}</p>
+    <div class="news">${left?`נשארו ${left} מילים לתרגול`:"אין יותר טעויות לתרגל! 🎉"}</div>
+    ${stk.map(s=>`<div class="news stk">🏅 מדבקה חדשה: ${s[1]} ${s[2]}</div>`).join("")}
+    <div class="row">${left?`<button class="btn big warm" id="qx-revAgain">עוד תרגול ▶</button>`:""}<button class="btn${left?" ghost":" big warm"}" id="qx-toMap">למפה</button></div></div>`;
+  if(left)$("qx-revAgain").onclick=()=>go(startReview);
+  $("qx-toMap").onclick=()=>go(showMap);
+  sfx("win");if(!left)confetti(20);
+  speak(right?"Great practice!":"Keep practicing!",0.9);
+  R=null;
+}
+
+/* ---------- sticker album ---------- */
+function showStickers(){
+  const p=me();checkStickers(p);
+  const have=p.stickers||{};
+  screen.innerHTML=`<h2>🏅 אלבום המדבקות</h2>
+    <p class="muted" style="margin-top:-6px">${stickerCount(p)} מתוך ${STICKERS.length}. כל הישג במסע מוסיף מדבקה.</p>
+    <div class="album">${STICKERS.map(s=>`<div class="stkc${have[s[0]]?" got":""}"><span class="se">${s[1]}</span><small>${s[2]}</small></div>`).join("")}</div>
+    <div class="row" style="margin-top:16px"><button class="btn ghost" id="qx-toMap">→ חזרה למפה</button></div>`;
+  $("qx-toMap").onclick=()=>go(showMap);
 }
 
 /* ---------- leaderboard ---------- */
@@ -1616,7 +1756,7 @@ function showPaywall(li){
 // Called by the tab bar each time the quest tab opens
 function open(){go(me()?showMap:showProfiles)}
 window.addEventListener("hashchange",()=>{try{const h=location.hash;if(h.startsWith("#eq=")){showTab("quest");fromLink(decodeURIComponent(h.slice(4)));history.replaceState(null,"",location.pathname+location.search)}}catch(e){}});
-window.EQ={open,fromLink,startPlacement,placeResult,needsHelp,totalStars,firstOpen,migrate,VER,BACKUP_KEY,streakDays,playedToday,standing,shareText,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
+window.EQ={startReview,showStickers,petOf,goalOf,addGoal,checkStickers,STICKERS,PET,open,fromLink,startPlacement,placeResult,needsHelp,totalStars,firstOpen,migrate,VER,BACKUP_KEY,streakDays,playedToday,standing,shareText,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
   go,startLevel,next,finish,showMap,showBoard,showProfiles,showPaywall,tx,nodeXY,get R(){return R},setPaywall:v=>{PAYWALL=v}};
 })();
 try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h);
