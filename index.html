@@ -26,7 +26,7 @@
   --grass:#2FA36B;
   --berry:#8C5BD6;
   --sky:#3B86D9;
-  --good-bg:#DDF5E8;
+  --good-bg:#DDF5E8;--lock:#B8C6D6;
   --bad-bg:#FDE3DC;
   --shadow:0 3px 0 rgba(30,42,68,.12);
   --f-display:"Fredoka","Varela Round",system-ui,sans-serif;
@@ -35,11 +35,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#13202E;--paper:#1C2C3E;--ink:#EAF1F8;--muted:#A3B3C6;--line:#2C4157;
   --tomato:#FF7A5C;--sun:#FFCD5C;--grass:#46C186;--berry:#A783EA;--sky:#5FA2EC;
-  --good-bg:#1D4433;--bad-bg:#4A2A24;--shadow:0 3px 0 rgba(0,0,0,.35);color-scheme:dark}}
+  --good-bg:#1D4433;--bad-bg:#4A2A24;--lock:#3A4E64;--shadow:0 3px 0 rgba(0,0,0,.35);color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#13202E;--paper:#1C2C3E;--ink:#EAF1F8;--muted:#A3B3C6;--line:#2C4157;
   --tomato:#FF7A5C;--sun:#FFCD5C;--grass:#46C186;--berry:#A783EA;--sky:#5FA2EC;
-  --good-bg:#1D4433;--bad-bg:#4A2A24;--shadow:0 3px 0 rgba(0,0,0,.35);color-scheme:dark}
+  --good-bg:#1D4433;--bad-bg:#4A2A24;--lock:#3A4E64;--shadow:0 3px 0 rgba(0,0,0,.35);color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
@@ -57,7 +57,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .stars{display:flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--sun);border-radius:999px;padding:4px 14px;font-family:var(--f-display);font-weight:600;font-size:18px}
 .stars b{color:var(--sun);font-size:22px;line-height:1}
 
-nav.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-block:4px 18px}
+nav.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-block:4px 18px}
 nav.tabs button{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 6px;font-size:17px;font-weight:600;box-shadow:var(--shadow)}
 nav.tabs button[aria-selected="true"]{background:var(--tomato);border-color:var(--tomato);color:#fff}
 
@@ -194,6 +194,165 @@ h2{font-family:var(--f-display);font-size:24px;margin:0 0 10px;text-wrap:balance
   .dotsrow{text-align:center}
 }
 .credit{margin-top:32px;text-align:center;color:var(--muted);font-size:13px}
+
+/* ===== English Quest (the "מסע" tab): levels game with an illustrated map ===== */
+[hidden]{display:none!important}
+#sec-quest h3{margin:0;text-wrap:balance}
+#sec-quest .muted{color:var(--muted)}
+.card{background:var(--paper);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+#sec-quest .btn.big{font-size:20px;padding:14px 26px}
+#sec-quest .btn.alt{background:var(--sky)}
+#sec-quest .btn.warm{background:var(--tomato)}
+#sec-quest .btn:active{transform:translateY(2px);box-shadow:none}
+nav.tabs button.qtab{border-color:var(--sun)}
+nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:var(--sun);color:#1E2A44}
+
+/* Profiles */
+.profiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.pcard{background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:var(--shadow)}
+.pcard .av{font-size:44px;line-height:1.1}
+.pcard b{font-size:19px;overflow-wrap:anywhere;text-align:center}
+.pcard small{color:var(--muted);font-size:14px}
+.form{display:flex;flex-direction:column;gap:12px}
+.form label{font-weight:600}
+#sec-quest input[type=text],#sec-quest textarea,.sheet input[type=text]{font:inherit;width:100%;border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--bg);color:var(--ink)}
+#sec-quest textarea{min-height:84px;resize:vertical;font-size:15px}
+.seg{display:flex;gap:8px}
+.seg button,.avs button{border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:8px 18px;font-weight:600}
+.seg button[aria-pressed="true"],.avs button[aria-pressed="true"]{border-color:var(--tomato);background:var(--bad-bg)}
+.avs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.avs button{font-size:28px;padding:6px 0;line-height:1.2}
+
+/* Player card */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-bottom:14px}
+.hero .av{font-size:58px;line-height:1}
+.hero .rank{color:var(--berry);font-weight:600;font-size:15px}
+.hero .hname{font-family:var(--f-display);font-size:26px;font-weight:700;line-height:1.1;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;grid-column:1/-1}
+.stat{background:var(--bg);border-radius:14px;padding:8px 4px;text-align:center;min-width:0}
+.stat b{display:block;font-family:var(--f-display);font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.actions .btn{flex:1 1 auto}
+
+/* Illustrated map: the SVG is the ground, levels and banners are HTML on top at the same coordinates */
+.qmap{position:relative;width:100%;max-width:100%;aspect-ratio:400/2780;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);border:3px solid var(--paper)}
+.mapsvg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mnode{position:absolute;transform:translate(-50%,-27px);display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;padding:0;width:104px;z-index:2}
+.mnode .ball{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:700;font-size:24px;background:var(--c);color:#fff;border:4px solid #fff;box-shadow:0 4px 0 rgba(30,42,68,.28);position:relative}
+.mnode.lock .ball{background:#C3CFDC;color:#5B6782;font-size:20px}
+.mnode.now .ball{outline:4px solid #FFC23D;outline-offset:2px;animation:pulse 1.6s ease-in-out infinite}
+.mnode.boss .ball{width:62px;height:62px;font-size:28px}
+.mnode .tm{position:absolute;top:-8px;inset-inline-end:-10px;font-style:normal;font-size:11px;background:#FFC23D;color:#1E2A44;border-radius:999px;padding:1px 5px;border:2px solid #fff}
+.mnode .nst{font-size:15px;line-height:1;color:#FFB300;text-shadow:0 1px 0 #fff,0 0 3px #fff;min-height:15px;letter-spacing:1px}
+.mnode .nst .off{color:rgba(30,42,68,.25)}
+.mnode .nt{font-size:12px;line-height:1.2;background:rgba(255,255,255,.92);color:#1E2A44;border-radius:10px;padding:2px 7px;max-width:104px;text-align:center}
+.mnode.lock .nt{opacity:.8}
+.wban{position:absolute;transform:translateX(-50%);z-index:3;background:rgba(255,255,255,.94);color:#1E2A44;border-radius:999px;padding:4px 14px;font-size:15px;white-space:nowrap;box-shadow:0 3px 0 rgba(30,42,68,.18)}
+.wban b{font-family:var(--f-display)}
+.wban span{color:#B07A00;font-size:13px;font-weight:600}
+.wban.closed{background:rgba(255,255,255,.75);color:#5B6782}
+.me-av{position:absolute;transform:translate(-50%,-50%);font-size:40px;line-height:1;z-index:4;pointer-events:none;filter:drop-shadow(0 4px 2px rgba(0,0,0,.25));animation:bob 1.4s ease-in-out infinite}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mapsvg{filter:brightness(.82) saturate(.92)}}
+:root[data-theme="dark"] .mapsvg{filter:brightness(.82) saturate(.92)}
+
+/* Play */
+.play{background:var(--paper);border-radius:22px;padding:14px 16px 16px;box-shadow:var(--shadow)}
+.phead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.phead .x{border:2px solid var(--line);background:var(--bg);border-radius:999px;width:38px;height:38px;font-size:16px}
+.phead .lt{flex:1;min-width:0;font-weight:600;font-size:15px}
+.hearts{font-size:20px;letter-spacing:2px;white-space:nowrap}
+.pts{font-family:var(--f-display);font-weight:700;color:var(--berry);font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.play .dots{display:flex;gap:4px;margin-top:10px;flex-wrap:nowrap}
+.play .dots i{flex:1;width:auto;height:8px;border-radius:999px;background:var(--line)}
+.play .dots i.ok{background:var(--grass)}.play .dots i.no{background:var(--tomato)}.play .dots i.now{background:var(--sky);outline:none}
+.timer{height:10px;border-radius:999px;background:var(--line);margin-top:8px;overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--sun);border-radius:999px;transform-origin:right;transition:background .3s}
+.timer i.low{background:var(--tomato)}
+.play .prompt{text-align:center;padding-block:14px 10px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.play .prompt .qq{font-size:20px;font-weight:600}
+.play .prompt .pic{font-size:52px;line-height:1.1}
+.play .prompt .qhint{color:var(--muted);font-size:17px}
+.play .prompt .bigq{font-family:var(--f-display);font-weight:700;font-size:58px;line-height:1.1;direction:ltr;color:var(--tomato);overflow-wrap:anywhere}
+.play .prompt .sent{font-family:var(--f-display);font-weight:600;font-size:30px;line-height:1.25;direction:ltr;overflow-wrap:anywhere}
+.play .prompt .sent u{text-decoration:none;display:inline-block;min-width:2.6em;border-bottom:4px solid var(--tomato);color:var(--tomato)}
+.swbig{width:96px;height:96px;border-radius:50%;background:var(--sw);border:3px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:42px}
+.play .opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.play .opts.n3{grid-template-columns:1fr}
+.play .opt{border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:12px 8px;font-family:var(--f-display);font-weight:600;font-size:28px;direction:ltr;min-height:64px;overflow-wrap:anywhere}
+.play .opts.n6 .opt{font-size:24px;min-height:58px}
+.play .opt.he{font-family:var(--f-body);direction:rtl;font-size:21px}
+.play .opt.qsw{background:var(--sw);min-height:76px}
+.play .opt.right{border-color:var(--grass);background:var(--good-bg)}
+.play .opt.wrong{border-color:var(--tomato);background:var(--bad-bg);animation:shake .35s}
+.play .opt.qsw.right{background:var(--sw);box-shadow:0 0 0 4px var(--grass)}
+.play .opt.qsw.wrong{background:var(--sw);box-shadow:0 0 0 4px var(--tomato)}
+.slots{display:flex;gap:6px;justify-content:center;direction:ltr;flex-wrap:wrap;margin-bottom:12px}
+.slots button{width:46px;height:54px;border-radius:12px;border:3px dashed var(--line);background:var(--bg);font-family:var(--f-display);font-weight:700;font-size:28px}
+.slots button.full{border-style:solid;border-color:var(--sky)}
+.slots.right button{border-color:var(--grass);background:var(--good-bg)}
+.slots.wrong button{border-color:var(--tomato);background:var(--bad-bg)}
+.tiles{display:flex;gap:8px;justify-content:center;direction:ltr;flex-wrap:wrap}
+.tiles button{width:50px;height:54px;border-radius:12px;border:2px solid var(--line);background:var(--paper);box-shadow:var(--shadow);font-family:var(--f-display);font-weight:700;font-size:28px}
+.tiles button:disabled{visibility:hidden}
+.play .feedback{min-height:34px;margin-top:12px}
+.play .foot{display:flex;justify-content:center;margin-top:6px;min-height:48px}
+
+/* Result */
+.qres{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.qres .bigst{font-size:46px;letter-spacing:6px;color:var(--sun)}
+.qres .bigst .off{color:var(--lock)}
+.qres .gain{font-family:var(--f-display);font-size:48px;font-weight:700;color:var(--berry);line-height:1}
+.qres table{border-collapse:collapse;font-size:15px;margin-block:4px}
+.qres td{padding:3px 10px}
+.qres td:last-child{font-variant-numeric:tabular-nums;font-weight:600;text-align:left}
+.qres .row{justify-content:center}
+.news{background:var(--good-bg);border-radius:14px;padding:8px 14px;font-weight:600}
+
+/* Leaderboard */
+.board{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.brow{display:grid;grid-template-columns:34px 40px 1fr auto auto;gap:8px;align-items:center;background:var(--paper);border-radius:16px;padding:10px 12px;box-shadow:var(--shadow)}
+.brow.me{outline:3px solid var(--sun)}
+.brow .pl{font-family:var(--f-display);font-weight:700;font-size:20px;text-align:center}
+.brow .av{font-size:30px;text-align:center}
+.brow .nm{min-width:0}
+.brow .nm b{display:block;overflow-wrap:anywhere;line-height:1.2}
+.brow .nm small{color:var(--muted);font-size:13px}
+.brow .lv{text-align:center;font-family:var(--f-display);line-height:1.1}
+.brow .lv b{display:block;font-size:22px;color:var(--tomato)}
+.brow .lv small{font-size:12px;color:var(--muted)}
+.brow .del{border:none;background:none;color:var(--muted);font-size:16px;padding:4px}
+.codebox{font-size:14px;direction:rtl;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);border-radius:12px;padding:10px;user-select:all}
+.msg{font-weight:600;min-height:1.5em}
+.msg:empty{display:none}
+.msg.ok{color:var(--grass)}.msg.no{color:var(--tomato)}
+
+/* Paywall */
+.sheet{position:fixed;inset:0;background:rgba(15,25,40,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
+.sheet .card{width:100%;max-width:460px;display:flex;flex-direction:column;gap:10px}
+.sheet h2{margin:0}
+.sheet ul{margin:0;padding-inline-start:20px}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.confetti i{position:absolute;top:-40px;font-style:normal;font-size:26px;animation:fall 1.8s ease-in forwards}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes bob{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-62%)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(300deg)}}
+@media (prefers-reduced-motion: reduce){.mnode.now .ball,.me-av{animation:none}.confetti{display:none}}
+@media (max-width:560px){
+  nav.tabs{grid-template-columns:repeat(4,1fr)}
+  .mnode .ball{width:48px;height:48px;font-size:21px;border-width:3px}
+  .mnode{transform:translate(-50%,-24px);width:92px}
+  .mnode.boss .ball{width:56px;height:56px}
+  .mnode .nt{font-size:11px;padding:1px 6px}
+  .wban{font-size:14px;padding:3px 12px}
+  .me-av{font-size:34px}
+  .play .prompt .bigq{font-size:48px}
+  .play .opt{font-size:24px}
+  .brow{grid-template-columns:28px 32px 1fr auto auto;gap:6px;padding:8px}
+  .brow .av{font-size:24px}
+  .slots button{width:40px;height:50px;font-size:24px}
+  .tiles button{width:44px;height:50px;font-size:24px}
+}
 </style>
 
 </head>
@@ -205,6 +364,7 @@ h2{font-family:var(--f-display);font-size:24px;margin:0 0 10px;text-wrap:balance
   </header>
 
   <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-quest" class="qtab" aria-selected="false" data-tab="quest">🗺️ מסע</button>
     <button role="tab" id="tab-letters" aria-selected="true" data-tab="letters">אותיות</button>
     <button role="tab" id="tab-days" aria-selected="false" data-tab="days">ימים</button>
     <button role="tab" id="tab-numbers" aria-selected="false" data-tab="numbers">מספרים</button>
@@ -303,7 +463,10 @@ h2{font-family:var(--f-display);font-size:24px;margin:0 0 10px;text-wrap:balance
     <div id="gamePlay" hidden></div>
   </section>
 
-  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span><span class="en" id="voiceName" style="opacity:.6"></span><span class="en" style="opacity:.6"> · v8</span></footer>
+  <!-- QUEST -->
+  <section id="sec-quest" hidden><div id="questScreen"></div></section>
+
+  <footer class="credit"><span class="en">Made with ❤ by Yaron Y · © 2026</span><span class="en" id="voiceName" style="opacity:.6"></span><span class="en" style="opacity:.6"> · v9</span></footer>
 </div>
 
 <script>
@@ -459,8 +622,10 @@ const letterSpeech=L=>L==="Z"?"zee":L.toUpperCase()+".";
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function showTab(t){
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
-  ["letters","days","numbers","colors","words","games"].forEach(s=>$("sec-"+s).hidden=s!==t);
+  ["letters","days","numbers","colors","words","games","quest"].forEach(s=>$("sec-"+s).hidden=s!==t);
+  document.querySelector(".today").hidden=t==="quest";
   if(t==="games")showMenu();
+  if(t==="quest")EQ.open();
 }
 
 /* ---------- today ---------- */
@@ -672,7 +837,592 @@ function finish(){
 /* ---------- boot ---------- */
 setStars();renderDays();renderColors();renderWords();
 cur=0;{const [L,name,word,emo,he]=LETTERS[0];$("fWord").innerHTML=highlight(word,L)}renderGrid();
-try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games"].includes(h))showTab(h)}catch(e){}
+
+/* ========== English Quest: levels game (the "מסע" tab) ========== */
+(()=>{
+/* ---------- sentences for the last world ---------- */
+const SENTENCES=[
+ {s:"I ___ a dog.",a:"have",o:["have","is","am"],he:"יש לי כלב.",e:"🐶"},
+ {s:"I ___ happy.",a:"am",o:["am","is","are"],he:"אני שמח/ה.",e:"😊"},
+ {s:"The cat ___ black.",a:"is",o:["is","are","am"],he:"החתול שחור.",e:"🐈‍⬛"},
+ {s:"The cats ___ black.",a:"are",o:["are","is","am"],he:"החתולים שחורים.",e:"🐈‍⬛🐈‍⬛"},
+ {s:"She ___ a girl.",a:"is",o:["is","are","am"],he:"היא ילדה.",e:"👧"},
+ {s:"He ___ a boy.",a:"is",o:["is","am","are"],he:"הוא ילד.",e:"👦"},
+ {s:"We ___ friends.",a:"are",o:["are","is","am"],he:"אנחנו חברים.",e:"🤝"},
+ {s:"They ___ happy.",a:"are",o:["are","am","is"],he:"הם שמחים.",e:"😊😊"},
+ {s:"I ___ pizza.",a:"like",o:["like","look","is"],he:"אני אוהב/ת פיצה.",e:"🍕"},
+ {s:"I ___ ice cream.",a:"want",o:["want","are","see"],he:"אני רוצה גלידה.",e:"🍦"},
+ {s:"I ___ swim.",a:"can",o:["can","is","have"],he:"אני יכול/ה לשחות.",e:"🏊"},
+ {s:"___ at the dog!",a:"Look",o:["Look","Eat","Are"],he:"תסתכלו על הכלב!",e:"👀"},
+ {s:"This is ___ book.",a:"my",o:["my","I","is"],he:"זה הספר שלי.",e:"📖"},
+ {s:"The cat is ___ the box.",a:"in",o:["in","on","is"],he:"החתול בתוך הקופסה.",e:"📦"},
+ {s:"The book is ___ the table.",a:"on",o:["on","in","are"],he:"הספר על השולחן.",e:"📖"},
+ {s:"I go to ___.",a:"school",o:["school","happy","red"],he:"אני הולך/ת לבית הספר.",e:"🏫"},
+ {s:"I ___ a bird.",a:"see",o:["see","am","are"],he:"אני רואה ציפור.",e:"🐦"},
+ {s:"We ___ ball.",a:"play",o:["play","is","sad"],he:"אנחנו משחקים בכדור.",e:"⚽"},
+ {s:"I ___ an apple.",a:"eat",o:["eat","are","big"],he:"אני אוכל/ת תפוח.",e:"🍎"},
+ {s:"The sun is ___.",a:"yellow",o:["yellow","blue","sad"],he:"השמש צהובה.",e:"☀️"},
+ {s:"___ is my mother.",a:"She",o:["She","He","They"],he:"היא אמא שלי.",e:"👩"},
+ {s:"___ is my father.",a:"He",o:["He","She","We"],he:"הוא אבא שלי.",e:"👨"}
+];
+const SENT_EXTRA=["the","and","no","yes","what","go","it"];
+const fullSentence=x=>x.s.replace("___",x.a);
+
+/* ---------- helpers ---------- */
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const uniq=a=>[...new Set(a)];
+function pickOpts(answer,pool,n){return shuffle([answer,...shuffle(uniq(pool).filter(x=>x!==answer)).slice(0,n-1)])}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ABC=LETTERS.map(l=>l[0]),abc=ABC.map(x=>x.toLowerCase());
+const NUMW=NUMS.map(n=>n[0]);
+const KNOWN=new Set([...WORDS.map(w=>w.en),...NUMW,...COLORS.map(c=>c[0]),...DAYS.map(d=>d.en)].map(x=>x.toLowerCase()));
+// Plausible misspellings: swap, drop, double, vowel change. Never a real word from the app.
+function misspell(w){
+  const out=new Set(),V="aeiou";
+  for(let i=0;i<w.length-1;i++)if(w[i]!==w[i+1])out.add(w.slice(0,i)+w[i+1]+w[i]+w.slice(i+2));
+  for(let i=1;i<w.length;i++)out.add(w.slice(0,i)+w.slice(i+1));
+  for(let i=0;i<w.length;i++)if(/[a-z]/i.test(w[i])&&w[i]!==w[i-1])out.add(w.slice(0,i)+w[i]+w.slice(i));
+  for(let i=0;i<w.length;i++)if(V.includes(w[i]))for(const v of V)if(v!==w[i])out.add(w.slice(0,i)+v+w.slice(i+1));
+  out.delete(w);
+  return [...out].filter(x=>x.length>1&&!KNOWN.has(x.toLowerCase()));
+}
+const spellOpts=(w,n)=>shuffle([w,...shuffle(misspell(w)).slice(0,n-1)]);
+const pickWord=()=>{const c=WORDS.filter(w=>w.cls);return Math.random()<0.5?c[rnd(c.length)]:WORDS[rnd(WORDS.length)]};
+const BUILD_WORDS=[...WORDS.filter(w=>/^[a-z]{3,6}$/.test(w.en)).map(w=>({en:w.en,he:w.he,emoji:w.emoji})),
+  ...LETTERS.filter(l=>/^[A-Za-z]{3,6}$/.test(l[2])).map(l=>({en:l[2].toLowerCase(),he:l[4],emoji:l[3]}))];
+const swatchOf=name=>COLORS.find(c=>c[0]===name)[3];
+
+/* ---------- question generators: k = number of options ---------- */
+// Each returns {text, answer, opts|build, say?, sayAfter?, he?, sw?, big?, pic?, hint?, sent?}
+const GEN={
+ lCase(k){const a=ABC[rnd(26)];return{text:"מה האות הקטנה של:",big:a,say:letterSpeech(a),opts:pickOpts(a.toLowerCase(),abc,k),answer:a.toLowerCase()}},
+ lHear(k){const a=ABC[rnd(26)];return{text:"איזו אות שמעת?",say:letterSpeech(a),opts:pickOpts(a,ABC,k),answer:a}},
+ lStart(k){let l;do{l=LETTERS[rnd(26)]}while(l[0]==="X");return{text:"באיזו אות מתחילה המילה?",pic:l[3],hint:l[4],big:"_"+l[2].slice(1).toLowerCase(),say:l[2],opts:pickOpts(l[0],ABC,k),answer:l[0],sayAfter:l[2]}},
+ lNext(k){const i=rnd(24),a=ABC[i+2];return{text:"איזו אות באה אחרי?",big:`${ABC[i]} ${ABC[i+1]} _`,opts:pickOpts(a,ABC.slice(Math.max(0,i-2),i+9),k),answer:a,sayAfter:letterSpeech(a)}},
+ nHear10(k){const i=rnd(10);return{text:"איזה מספר שמעת?",say:NUMW[i],opts:pickOpts(String(i+1),NUMW.slice(0,10).map((_,j)=>String(j+1)),k),answer:String(i+1),sayAfter:NUMW[i]}},
+ nHear20(k){const i=rnd(20);const near=NUMW.map((_,j)=>String(j+1)).filter((_,j)=>Math.abs(j-i)<=4||Math.abs(j-i)===10);return{text:"איזה מספר שמעת?",say:NUMW[i],opts:pickOpts(String(i+1),near,k),answer:String(i+1),sayAfter:NUMW[i]}},
+ nWord10(k){const i=rnd(10);return{text:"איך כותבים באנגלית:",big:String(i+1),opts:pickOpts(NUMW[i],NUMW.slice(0,12),k),answer:NUMW[i],sayAfter:NUMW[i]}},
+ nWord20(k){const i=rnd(20);const near=NUMW.filter((_,j)=>Math.abs(j-i)<=4||Math.abs(j-i)===10);return{text:"איך כותבים באנגלית:",big:String(i+1),opts:pickOpts(NUMW[i],near,k),answer:NUMW[i],sayAfter:NUMW[i]}},
+ nCount(k){const i=rnd(12),e=["🐟","🍎","⭐","🎈","🐞","🌸"][rnd(6)];return{text:"How many? כמה יש?",pic:`<span style="font-size:28px;letter-spacing:3px;display:block;max-width:300px;overflow-wrap:anywhere">${e.repeat(i+1)}</span>`,opts:pickOpts(NUMW[i],NUMW.slice(0,15),k),answer:NUMW[i],sayAfter:NUMW[i]}},
+ nSpell(k){const i=2+rnd(18);return{text:"איך כותבים נכון?",big:String(i+1),say:NUMW[i],opts:spellOpts(NUMW[i],k),answer:NUMW[i],sayAfter:NUMW[i]}},
+ cName(k){const c=COLORS[rnd(COLORS.length)];return{text:"What color is it? איזה צבע?",pic:`<span class="swbig" style="--sw:${c[3]}">${c[4]}</span>`,opts:pickOpts(c[0],COLORS.map(x=>x[0]),k),answer:c[0],sayAfter:c[0]}},
+ cHear(k){const c=COLORS[rnd(COLORS.length)];return{text:"איזה צבע שמעת?",say:c[0],opts:pickOpts(c[0],COLORS.map(x=>x[0]),k),answer:c[0],sw:true}},
+ cSent(k){const c=COLORS[rnd(COLORS.length)],s=colorSentence(c);return{text:"השלימו את המשפט:",pic:c[4],sent:s.replace(c[0]+".","___."),opts:pickOpts(c[0],COLORS.map(x=>x[0]),k),answer:c[0],sayAfter:s}},
+ cSpell(k){const c=COLORS[rnd(COLORS.length)];return{text:"איך כותבים נכון?",pic:`<span class="swbig" style="--sw:${c[3]}">${c[4]}</span>`,say:c[0],opts:spellOpts(c[0],k),answer:c[0],sayAfter:c[0]}},
+ dHear(k){const d=DAYS[rnd(7)];return{text:"איזה יום שמעת?",say:d.en,opts:pickOpts(d.he,DAYS.map(x=>x.he),k),answer:d.he,he:true}},
+ dTr(k){const d=DAYS[rnd(7)];return{text:`איך אומרים באנגלית "${d.he}"?`,opts:pickOpts(d.en,DAYS.map(x=>x.en),k),answer:d.en,sayAfter:d.en}},
+ dAfter(k){const i=rnd(7),a=DAYS[(i+1)%7].en;return{text:"איזה יום בא אחרי?",sent:DAYS[i].en+", ___",say:DAYS[i].en,opts:pickOpts(a,DAYS.map(x=>x.en),k),answer:a,sayAfter:a}},
+ dSpell(k){const d=DAYS[rnd(7)];return{text:`איך כותבים נכון "${d.he}"?`,say:d.en,opts:spellOpts(d.en,k),answer:d.en,sayAfter:d.en}},
+ wTr(k){const w=pickWord();return{text:"איך אומרים באנגלית?",pic:w.emoji||"",hint:w.he,opts:pickOpts(w.en,WORDS.map(x=>x.en),k),answer:w.en,sayAfter:w.en}},
+ wHear(k){const w=pickWord();return{text:"איזו מילה שמעת?",say:w.en,opts:pickOpts(w.he,WORDS.map(x=>x.he),k),answer:w.he,he:true}},
+ wSpell(k){let w;do{w=pickWord()}while(!/^[a-z]{3,}$/.test(w.en));return{text:"איך כותבים נכון?",pic:w.emoji||"",hint:w.he,say:w.en,opts:spellOpts(w.en,k),answer:w.en,sayAfter:w.en}},
+ wBuild(){const w=BUILD_WORDS[rnd(BUILD_WORDS.length)];return{text:"סדרו את האותיות:",pic:w.emoji||"",hint:w.he,build:shuffle(w.en.split("")),answer:w.en,sayAfter:w.en}},
+ wBuildHear(){const w=BUILD_WORDS[rnd(BUILD_WORDS.length)];const extra=shuffle("aeioustrnm".split("").filter(c=>!w.en.includes(c))).slice(0,2);return{text:"מה שמעתם? בנו את המילה:",say:w.en,build:shuffle([...w.en.split(""),...extra]),answer:w.en,sayAfter:w.en}},
+ sFill(k){const x=SENTENCES[rnd(SENTENCES.length)];const pool=uniq([...x.o,...shuffle(SENT_EXTRA)]).filter(o=>o.toLowerCase()!==x.a.toLowerCase());return{text:"השלימו את המשפט:",pic:x.e,sent:x.s,hint:x.he,opts:shuffle([x.a,...pool.slice(0,Math.max(2,k-1))]),answer:x.a,sayAfter:fullSentence(x)}}
+};
+const ALL_CHOICE=["lHear","lStart","nHear20","nWord20","nSpell","cHear","cSent","cSpell","dTr","dAfter","dSpell","wTr","wHear","wSpell","sFill"];
+
+/* ---------- worlds and levels ---------- */
+const WORLDS=[
+ {name:"אי האותיות",e:"🔤",c:"var(--tomato)"},
+ {name:"הר המספרים",e:"🔢",c:"var(--sky)"},
+ {name:"יער הצבעים",e:"🎨",c:"var(--grass)"},
+ {name:"עיר הימים",e:"📅",c:"var(--sun)"},
+ {name:"ממלכת המילים",e:"📚",c:"var(--berry)"},
+ {name:"טירת האלופים",e:"🏰",c:"var(--tomato)"}
+];
+// w: world (1-6), g: generators, k: options per question, time: seconds per question (0 = no timer), n: questions
+const LEVELS=[
+ {w:1,t:"גדולה וקטנה",g:["lCase"],k:3},
+ {w:1,t:"אוזן קשבת",g:["lHear"],k:3},
+ {w:1,t:"באיזו אות מתחילה?",g:["lStart"],k:4},
+ {w:1,t:"סדר ה-ABC",g:["lNext","lHear","lCase"],k:4,time:20},
+ {w:2,t:"סופרים עד 10",g:["nHear10"],k:3},
+ {w:2,t:"כותבים מספרים",g:["nWord10","nCount"],k:4},
+ {w:2,t:"עד 20!",g:["nHear20","nWord20"],k:4,time:20},
+ {w:2,t:"אלופי המספרים",g:["nSpell","nHear20","nCount"],k:4,time:15},
+ {w:3,t:"איזה צבע?",g:["cName"],k:3},
+ {w:3,t:"שומעים צבעים",g:["cHear"],k:4},
+ {w:3,t:"משפטי צבע",g:["cSent"],k:4,time:20},
+ {w:3,t:"קשת בענן",g:["cSpell","cHear","cSent"],k:4,time:15},
+ {w:4,t:"ימי השבוע",g:["dHear"],k:3},
+ {w:4,t:"מתרגמים ימים",g:["dTr"],k:4},
+ {w:4,t:"מה בא אחרי?",g:["dAfter","dHear"],k:4,time:20},
+ {w:4,t:"שבוע שלם",g:["dSpell","dTr","dAfter"],k:4,time:15},
+ {w:5,t:"מילים ראשונות",g:["wTr"],k:3},
+ {w:5,t:"אוזן למילים",g:["wHear"],k:4},
+ {w:5,t:"כתיב נכון",g:["wSpell"],k:4,time:20},
+ {w:5,t:"בונים מילים",g:["wBuild"],k:0},
+ {w:6,t:"משלימים משפט",g:["sFill"],k:3},
+ {w:6,t:"שומעים ובונים",g:["wBuildHear","sFill","wSpell"],k:4,time:25},
+ {w:6,t:"מבחן האלופים",g:ALL_CHOICE,k:6,time:12},
+ {w:6,t:"הבוס הגדול",g:[...ALL_CHOICE,"wBuildHear"],k:6,time:10,n:10,boss:true}
+];
+const HEARTS=3,QN=8;
+const qCount=L=>L.n||QN;
+// Building a word takes longer than tapping an answer
+const qTime=(L,q)=>L.time?(q.build?L.time+12:L.time):0;
+
+function makeQuestions(li){
+  const L=LEVELS[li],qs=[];let last=null;
+  for(let i=0;i<qCount(L);i++){
+    let q,tries=0;
+    do{q=GEN[L.g[(i+rnd(L.g.length))%L.g.length]](L.k);tries++}while(q.answer===last&&tries<12);
+    last=q.answer;qs.push(q);
+  }
+  return qs;
+}
+
+/* ---------- scoring ---------- */
+// Per correct answer: 10 × world, plus up to 5 × world for speed on timed levels, plus 5 × world on a streak of 3+.
+function scoreAnswer(w,timeFrac,streak){
+  let p=10*w;
+  if(timeFrac>0)p+=Math.round(5*w*Math.min(1,timeFrac));
+  if(streak>=3)p+=5*w;
+  return p;
+}
+// Finishing a level: 10 × world for every heart left. Stars = hearts left.
+const finishBonus=(w,hearts)=>hearts>0?hearts*10*w:0;
+const RANKS=[[0,"🐣","מתחיל","מתחילה"],[4,"🧭","חוקר","חוקרת"],[8,"🦸","גיבור","גיבורה"],[12,"🥇","אלוף","אלופה"],[16,"🎓","מאסטר","מאסטרית"],[20,"🧙","קוסם אנגלית","קוסמת אנגלית"],[24,"👑","אגדה","אגדה"]];
+function rankOf(passed,g){let r=RANKS[0];for(const x of RANKS)if(passed>=x[0])r=x;return r[1]+" "+(g==="m"?r[2]:r[3])}
+
+/* ---------- access code (paywall hook) ---------- */
+// Levels 1-8 are free. Set PAYWALL=true to require a code for the rest. Open the page with #paywall to preview it.
+let PAYWALL=false;
+const FREE_LEVELS=8;
+const SALT="yy-quest-2026";
+function h32(s){let h=0x811c9dc5;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,0x01000193)>>>0}return h>>>0}
+const CODE_ABC="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function code4(n){let s="";for(let i=0;i<4;i++){s+=CODE_ABC[n&31];n>>>=5}return s}
+function makeCode(id){id=String(id).toUpperCase();return`EQ-${id}-${code4(h32(id+SALT))}`}
+function validCode(c){const m=String(c).trim().toUpperCase().replace(/\s+/g,"").match(/^EQ-?([A-Z0-9]{4})-?([A-Z0-9]{4})$/);return !!m&&code4(h32(m[1]+SALT))===m[2]}
+
+/* ---------- storage ---------- */
+const KEY="englishquest.v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const S=Object.assign({profiles:[],cur:null,friends:[],license:null},load());
+const me=()=>S.profiles.find(p=>p.id===S.cur)||null;
+const tx=(f,m)=>me()&&me().g==="m"?m:f;
+function passedCount(p){let n=0;while(n<LEVELS.length&&p.best[n]&&p.best[n].stars>0)n++;return n}
+const totalPts=p=>Object.values(p.best).reduce((a,b)=>a+b.pts,0);
+const totalStars=p=>Object.values(p.best).reduce((a,b)=>a+b.stars,0);
+const unlocked=(p,i)=>i===0||!!(p.best[i-1]&&p.best[i-1].stars>0);
+const paywalled=i=>PAYWALL&&i>=FREE_LEVELS&&!S.license;
+function record(p,li,pts,stars){
+  // Keep the best of each: replaying can raise a level's points and stars, never lower them
+  const b=p.best[li]||{pts:0,stars:0};
+  p.best[li]={pts:Math.max(pts,b.pts),stars:Math.max(stars,b.stars)};
+  save();
+}
+
+/* ---------- share code for friends ---------- */
+const b64e=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0)));
+function encodeShare(p){
+  const j=JSON.stringify([1,p.name,p.av,p.g,passedCount(p),totalPts(p),totalStars(p),Math.floor(Date.now()/1000)]);
+  return "EQ:"+b64e(j)+"."+h32(j+SALT).toString(36).slice(-4);
+}
+function parseShare(text){
+  const m=String(text).match(/EQ:([A-Za-z0-9_-]+)\.([a-z0-9]{1,4})/);
+  if(!m)return null;
+  try{
+    const j=b64d(m[1]);if(h32(j+SALT).toString(36).slice(-4)!==m[2])return null;
+    const a=JSON.parse(j);if(a[0]!==1)return null;
+    const [,name,av,g,passed,pts,stars,ts]=a;
+    if(typeof name!=="string"||!name.trim()||passed<0||passed>LEVELS.length||pts<0||stars<0||stars>LEVELS.length*3)return null;
+    return {name:name.slice(0,14),av,g,passed,pts,stars,ts};
+  }catch(e){return null}
+}
+function shareText(p){
+  const n=passedCount(p);
+  return `🏆 ${p.name} ${p.g==="m"?"עבר":"עברה"} ${n} שלבים ב-English Quest וצבר${p.g==="m"?"":"ה"} ${totalPts(p)} נקודות! מי ${p.g==="m"?"מנצח":"מנצחת"}?\nהקוד שלי לטבלת האלופים: ${encodeShare(p)}`;
+}
+function addFriend(f){
+  if(S.profiles.some(p=>p.name===f.name&&p.av===f.av))return "self";
+  const i=S.friends.findIndex(x=>x.name===f.name&&x.av===f.av);
+  if(i>=0){if(f.ts<S.friends[i].ts)return "old";S.friends[i]=f}else S.friends.push(f);
+  save();return "ok";
+}
+// Rank by levels passed, then points, then stars
+function sortBoard(rows){return rows.slice().sort((a,b)=>b.passed-a.passed||b.pts-a.pts||b.stars-a.stars||a.name.localeCompare(b.name))}
+function boardRows(){
+  return sortBoard([...S.profiles.map(p=>({name:p.name,av:p.av,g:p.g,passed:passedCount(p),pts:totalPts(p),stars:totalStars(p),local:true,id:p.id})),
+    ...S.friends.map((f,i)=>({...f,friend:i}))]);
+}
+
+/* ---------- screens ---------- */
+const screen=$("questScreen");
+let timerId=null;
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function go(fn,...a){stopTimer();closeSheet();window.scrollTo(0,0);fn(...a)}
+function updateChip(){}
+
+const AVATARS=["🦊","🐼","🦁","🐸","🐵","🦄","🐯","🐨","🐙","🐬","🦖","🐝"];
+function showProfiles(){
+  updateChip();
+  const list=S.profiles.map(p=>`<button class="pcard" data-id="${p.id}"><span class="av">${p.av}</span><b>${esc(p.name)}</b><small>שלב ${Math.min(passedCount(p)+1,LEVELS.length)} · ${totalPts(p)} 💎</small></button>`).join("");
+  screen.innerHTML=`
+    ${S.profiles.length?`<h2>מי משחק עכשיו?</h2><div class="profiles">${list}</div>`:`<div class="card" style="margin-bottom:16px"><h2>ברוכים הבאים ל-<span class="en">English Quest</span>!</h2><p class="muted" style="margin:0">24 שלבים ב-6 עולמות. כל שלב קשה קצת יותר מהקודם. צוברים נקודות וכוכבים ומתחרים בחברים.</p></div>`}
+    ${S.profiles.length<6?`<form class="card form" id="newP">
+      <h2 style="margin:0">${S.profiles.length?"שחקן חדש":"יוצרים שחקן"}</h2>
+      <label for="pName">שם</label><input type="text" id="pName" maxlength="14" autocomplete="off" placeholder="למשל: נועה">
+      <div class="seg" role="group" aria-label="פנייה"><button type="button" data-g="f" aria-pressed="true">בת</button><button type="button" data-g="m" aria-pressed="false">בן</button></div>
+      <label>דמות</label><div class="avs">${AVATARS.map((a,i)=>`<button type="button" data-a="${a}" aria-pressed="${i===0}">${a}</button>`).join("")}</div>
+      <div class="msg no" id="pMsg"></div>
+      <button class="btn big" type="submit">יוצאים לדרך ▶</button></form>`:""}`;
+  screen.querySelectorAll(".pcard").forEach(b=>b.onclick=()=>{S.cur=b.dataset.id;save();go(showMap)});
+  const f=$("newP");if(!f)return;
+  let g="f",av=AVATARS[0];
+  f.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{g=b.dataset.g;f.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  f.querySelectorAll(".avs button").forEach(b=>b.onclick=()=>{av=b.dataset.a;f.querySelectorAll(".avs button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  f.onsubmit=e=>{
+    e.preventDefault();const name=$("pName").value.trim();
+    if(!name){$("pMsg").textContent="כתבו שם כדי להתחיל";return}
+    if(S.profiles.some(p=>p.name===name)){$("pMsg").textContent="השם הזה כבר קיים במכשיר";return}
+    const p={id:"p"+Date.now().toString(36)+rnd(1e4),name,g,av,best:{}};
+    S.profiles.push(p);S.cur=p.id;save();speak("Hello "+name+"! Let's play!");go(showMap);
+  };
+}
+
+/* ---------- illustrated map ---------- */
+// The map is one tall SVG drawn bottom-up: level 1 at the bottom, the castle at the top.
+// Level buttons are HTML laid over it at the same coordinates, so they stay tappable and accessible.
+const MW=400,ZH=430,MH=ZH*6+200;
+const zoneTop=wi=>MH-40-(wi+1)*ZH;
+const nodeXY=li=>{const wi=Math.floor(li/4),j=li%4;return[Math.round(200+118*Math.sin(li*1.2+0.4)),zoneTop(wi)+ZH-60-j*92]};
+const ZONES=[
+ {bg:["#8FD3F0","#5DB6E3"],decor:[["🌴",52,250,34],["⛵",345,120,30],["🐠",350,330,24],["🐚",40,385,22],["🦀",330,400,22],["🌊",60,90,26]]},
+ {bg:["#CFE6B4","#A9D08E"],decor:[["🌲",40,300,30],["🐐",350,360,26],["🌲",360,190,28],["🦅",60,80,24],["🪨",340,60,22]]},
+ {bg:["#9ED98A","#6FBF63"],decor:[["🌳",38,330,34],["🍄",355,380,24],["🦋",340,160,24],["🌳",360,260,32],["🌻",50,90,30],["🐿️",40,200,24]]},
+ {bg:["#F1E3C3","#E3CF9F"],decor:[["🏫",48,320,32],["🚌",345,390,28],["🏠",355,230,30],["🌭",40,170,22],["🚲",345,80,24]]},
+ {bg:["#E2D3F7","#C9B2EE"],decor:[["📚",45,340,30],["🦄",350,300,32],["🌸",40,190,24],["✏️",355,150,24],["🎒",50,70,26]]},
+ {bg:["#FFF1C9","#FFDB8A"],decor:[["☁️",55,330,38],["✨",350,360,24],["☁️",345,170,34],["👑",45,170,26],["🐉",350,70,30]]}
+];
+function mapPathD(pts){
+  // Catmull-Rom through the points, as cubic Béziers
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    d+=` C${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)},${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)} ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)},${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+function zoneArt(wi){
+  const y=zoneTop(wi),Z=ZONES[wi],g=`zg${wi}`;
+  let s=`<defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${Z.bg[1]}"/><stop offset="1" stop-color="${Z.bg[0]}"/></linearGradient></defs>`;
+  s+=wi===5?`<rect x="0" y="0" width="${MW}" height="${y+ZH+2}" fill="url(#${g})"/>`:`<rect x="0" y="${y-2}" width="${MW}" height="${ZH+4}" fill="url(#${g})"/>`;
+  if(wi===0){ // island in the sea, with surf
+    s+=`<ellipse cx="200" cy="${y+235}" rx="185" ry="175" fill="#F5E2A8"/><ellipse cx="200" cy="${y+235}" rx="160" ry="152" fill="#B9DD83"/>`;
+    for(let k=0;k<5;k++)s+=`<path d="M${20+k*80},${y+28+(k%2)*20} q10,-8 20,0 t20,0" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>`;
+  }
+  if(wi===1){ // snowy mountains behind the meadow
+    [[70,150,95],[200,110,120],[330,150,95]].forEach(([cx,h,w])=>{
+      s+=`<polygon points="${cx-w},${y+h+130} ${cx},${y+h-50} ${cx+w},${y+h+130}" fill="#8FA5A0"/><polygon points="${cx-26},${y+h-12} ${cx},${y+h-50} ${cx+26},${y+h-12} ${cx+10},${y+h-20} ${cx-8},${y+h-8}" fill="#fff"/>`;
+    });
+    s+=`<ellipse cx="200" cy="${y+ZH}" rx="260" ry="160" fill="#A9D08E"/>`;
+  }
+  if(wi===2){ // rainbow over the forest
+    ["#E53935","#FB8C00","#FDD835","#43A047","#1E88E5","#8E24AA"].forEach((c,k)=>s+=`<path d="M${60+k*9},${y+190} A${140-k*9},${120-k*9} 0 0 1 ${340-k*9},${y+190}" stroke="${c}" stroke-width="9" fill="none" opacity=".55"/>`);
+  }
+  if(wi===3){ // little houses along the streets
+    [[30,"#F28B6B"],[95,"#7FB2E5"],[300,"#F6C453"],[355,"#9C8BD9"]].forEach(([x,c],k)=>{
+      const h=60+(k%2)*22,by=y+70;
+      s+=`<rect x="${x-24}" y="${by+90-h}" width="48" height="${h}" rx="4" fill="${c}"/><rect x="${x-14}" y="${by+100-h}" width="10" height="10" fill="#fff" opacity=".8"/><rect x="${x+4}" y="${by+100-h}" width="10" height="10" fill="#fff" opacity=".8"/>`;
+    });
+    s+=`<rect x="0" y="${y+165}" width="${MW}" height="14" fill="#CDB98C" opacity=".6"/>`;
+  }
+  if(wi===4){ // rolling lavender hills
+    s+=`<ellipse cx="80" cy="${y+ZH}" rx="190" ry="120" fill="#B89BE6" opacity=".6"/><ellipse cx="330" cy="${y+ZH-20}" rx="170" ry="110" fill="#B89BE6" opacity=".5"/>`;
+  }
+  if(wi===5){ // the champions' castle at the very top
+    s+=`<g transform="translate(200 ${y-50})"><rect x="-60" y="-10" width="120" height="70" fill="#C9A7E8"/><rect x="-80" y="-40" width="32" height="100" fill="#B48FE0"/><rect x="48" y="-40" width="32" height="100" fill="#B48FE0"/>
+      <polygon points="-84,-40 -64,-78 -44,-40" fill="#F2603F"/><polygon points="44,-40 64,-78 84,-40" fill="#F2603F"/><rect x="-14" y="22" width="28" height="38" rx="14" fill="#6E4AA8"/>
+      <rect x="-60" y="-24" width="14" height="14" fill="#C9A7E8"/><rect x="-30" y="-24" width="14" height="14" fill="#C9A7E8"/><rect x="0" y="-24" width="14" height="14" fill="#C9A7E8"/><rect x="30" y="-24" width="14" height="14" fill="#C9A7E8"/>
+      <line x1="64" y1="-78" x2="64" y2="-100" stroke="#6E4AA8" stroke-width="3"/><polygon points="64,-100 84,-93 64,-86" fill="#FFC23D"/></g>`;
+  }
+  Z.decor.forEach(([e,x,yy,sz])=>s+=`<text x="${x}" y="${y+yy}" font-size="${sz}" text-anchor="middle" dominant-baseline="central">${e}</text>`);
+  // wavy edge into the next zone
+  if(wi<5)s+=`<path d="M0,${y+8} Q50,${y-14} 100,${y+4} T200,${y+2} T300,${y+6} T400,${y} V${y+14} H0Z" fill="${Z.bg[1]}"/>`;
+  return s;
+}
+function mapHTML(p){
+  const passed=passedCount(p),cur=Math.min(passed,LEVELS.length-1);
+  const pts=[[200,MH-8],...LEVELS.map((_,i)=>nodeXY(i)),[200,zoneTop(5)+12]];
+  const d=mapPathD(pts);
+  // How far along the road the player is: the path segment up to the current node
+  const doneD=mapPathD(pts.slice(0,cur+2));
+  let svg=`<svg class="mapsvg" viewBox="0 0 ${MW} ${MH}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">`;
+  for(let wi=0;wi<6;wi++)svg+=zoneArt(wi);
+  svg+=`<path d="${d}" stroke="#7A5A3A" stroke-opacity=".35" stroke-width="30" fill="none" stroke-linecap="round"/>
+    <path d="${d}" stroke="#F6E7C1" stroke-width="22" fill="none" stroke-linecap="round"/>
+    <path d="${d}" stroke="#D9C08A" stroke-width="3" stroke-dasharray="2 12" fill="none" stroke-linecap="round"/>
+    <path d="${doneD}" stroke="#FFC23D" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="1 14"/>`;
+  // fog over worlds that are still closed
+  for(let wi=0;wi<6;wi++)if(!unlocked(p,wi*4))svg+=`<rect x="0" y="${wi===5?0:zoneTop(wi)}" width="${MW}" height="${wi===5?zoneTop(5)+ZH:ZH}" fill="#fff" opacity=".38"/>`;
+  svg+=`</svg>`;
+  const pct=(x,y)=>`left:${(x/MW*100).toFixed(2)}%;top:${(y/MH*100).toFixed(3)}%`;
+  const banners=WORLDS.map((W,wi)=>{
+    const st=[0,1,2,3].reduce((a,j)=>a+(p.best[wi*4+j]?p.best[wi*4+j].stars:0),0),open=unlocked(p,wi*4);
+    return `<div class="wban${open?"":" closed"}" style="${pct(200,zoneTop(wi)+(wi===5?-30:12))}">${open?W.e:"🔒"} <b>${W.name}</b> <span>★${st}/12</span></div>`;
+  }).join("");
+  const nodes=LEVELS.map((L,i)=>{
+    const [x,y]=nodeXY(i),op=unlocked(p,i),pw=paywalled(i),b=p.best[i];
+    return `<button class="mnode${op&&!pw?"":" lock"}${i===cur&&op&&!pw?" now":""}${b?" done":""}${L.boss?" boss":""}" style="${pct(x,y)};--c:${WORLDS[L.w-1].c}" data-li="${i}" aria-label="שלב ${i+1}: ${L.t}${b?`, ${b.stars} כוכבים`:""}">
+      <span class="ball">${pw?"🔑":op?(L.boss?"👑":i+1):"🔒"}${L.time&&op&&!pw?`<i class="tm">⏱</i>`:""}</span>
+      <span class="nst">${b?starStr(b.stars):""}</span><span class="nt">${L.t}</span></button>`;
+  }).join("");
+  const [ax,ay]=nodeXY(cur);
+  return `<div class="qmap" id="qmap">${svg}${banners}${nodes}<div class="me-av" style="${pct(ax,ay-58)}" aria-hidden="true">${p.av}</div></div>`;
+}
+
+function starStr(n,max=3){return "★".repeat(n)+(n<max?`<span class="off">${"★".repeat(max-n)}</span>`:"")}
+function showMap(scroll=true){
+  const p=me();if(!p)return go(showProfiles);
+  const passed=passedCount(p),nextLi=Math.min(passed,LEVELS.length-1);
+  screen.innerHTML=`
+    <div class="card hero">
+      <span class="av">${p.av}</span>
+      <div style="min-width:0"><div class="hname">${esc(p.name)}</div><div class="rank">${rankOf(passed,p.g)}</div></div>
+      <div class="stats">
+        <div class="stat"><b class="en">${Math.min(passed+1,LEVELS.length)}<small style="font-size:14px;color:var(--muted)">/${LEVELS.length}</small></b><span>שלב</span></div>
+        <div class="stat"><b class="en">${totalPts(p).toLocaleString("en-US")}</b><span>💎 נקודות</span></div>
+        <div class="stat"><b class="en">${totalStars(p)}</b><span>★ כוכבים</span></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn big warm" id="cont">▶ ${passed>=LEVELS.length?"עברת הכול! שחקו שוב":"לשלב "+(passed+1)}</button>
+      <button class="btn alt" id="toBoard">🏆 טבלת אלופים</button>
+      <button class="btn ghost" id="toProfiles">👥 החלפת שחקן</button>
+    </div>
+    ${PAYWALL&&!S.license?`<p class="muted" style="margin-top:-8px">שלבים 1–${FREE_LEVELS} פתוחים בחינם. 🔑 = נפתח עם קוד גישה.</p>`:""}
+    ${mapHTML(p)}`;
+  screen.querySelectorAll(".mnode").forEach(b=>b.onclick=()=>tryLevel(+b.dataset.li));
+  $("cont").onclick=()=>tryLevel(nextLi);
+  $("toBoard").onclick=()=>go(showBoard);
+  $("toProfiles").onclick=()=>go(showProfiles);
+  // Bring the player's spot on the map into view
+  if(scroll)requestAnimationFrame(()=>{const n=screen.querySelector(".mnode.now");if(n&&n.offsetParent)n.scrollIntoView({block:"center"})});
+}
+function tryLevel(li){
+  const p=me();
+  if(paywalled(li))return showPaywall(li);
+  if(!unlocked(p,li)){speak("Locked!");const n=screen.querySelector(`.mnode[data-li="${li}"] .ball`);if(n){n.style.animation="shake .35s";setTimeout(()=>n.style.animation="",400)}return}
+  go(startLevel,li);
+}
+
+/* ---------- playing a level ---------- */
+let R=null;
+const PRAISE=["Great job!","Excellent!","Well done!","Super!","Amazing!","Awesome!"];
+function startLevel(li){
+  R={li,L:LEVELS[li],qs:makeQuestions(li),n:0,hearts:HEARTS,pts:0,streak:0,best:0,res:[],locked:false};
+  renderQ();
+}
+function heartsStr(){return "❤️".repeat(R.hearts)+"🤍".repeat(HEARTS-R.hearts)}
+function renderQ(){
+  const q=R.qs[R.n],L=R.L,W=WORLDS[L.w-1],qn=qCount(L);
+  const dots=Array.from({length:qn},(_,i)=>`<i class="${R.res[i]===true?"ok":R.res[i]===false?"no":i===R.n?"now":""}"></i>`).join("");
+  const opts=q.build?`<div class="slots" id="slots">${q.answer.split("").map((_,i)=>`<button data-s="${i}" aria-label="מקום ${i+1}"></button>`).join("")}</div>
+      <div class="tiles" id="tiles">${q.build.map((c,i)=>`<button data-t="${i}">${c}</button>`).join("")}</div>`
+    :`<div class="opts n${q.opts.length}">${q.opts.map((o,i)=>q.sw?`<button class="opt qsw" data-i="${i}" aria-label="${o}" style="--sw:${swatchOf(o)}"></button>`:`<button class="opt${q.he?" he":""}" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
+  screen.innerHTML=`<div class="play">
+    <div class="phead"><button class="x" id="quit" aria-label="חזרה למפה">✕</button>
+      <span class="lt">${W.e} שלב ${R.li+1} · ${L.t}</span>
+      <span class="hearts" aria-label="${R.hearts} לבבות">${heartsStr()}</span><span class="pts en" id="pts">${R.pts}</span></div>
+    <div class="dots">${dots}</div>
+    ${qTime(L,q)?`<div class="timer"><i id="tbar"></i></div>`:""}
+    <div class="prompt">
+      <div class="qq">${q.text}</div>
+      ${q.pic?`<div class="pic">${q.pic}</div>`:""}
+      ${q.hint?`<div class="qhint">${esc(q.hint)}</div>`:""}
+      ${q.big?`<div class="bigq">${esc(q.big)}</div>`:""}
+      ${q.sent?`<div class="sent">${esc(q.sent).replace("___","<u>&nbsp;</u>")}</div>`:""}
+      ${q.say?`<button class="say" id="qSay">🔊 שוב</button>`:""}
+    </div>
+    ${opts}
+    <div class="feedback" id="fb" aria-live="polite">${R.streak>=3?`🔥 רצף של ${R.streak}!`:""}</div>
+    <div class="foot"><button class="btn" id="nextQ" hidden>הבא ←</button></div>
+  </div>`;
+  R.locked=false;
+  $("quit").onclick=()=>go(showMap);
+  if(q.say){$("qSay").onclick=()=>speak(q.say);setTimeout(()=>{if(R&&R.qs[R.n]===q)speak(q.say)},250)}
+  if(q.build)wireBuild(q);
+  else screen.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(q.opts[+b.dataset.i],b));
+  $("nextQ").onclick=next;
+  const T=qTime(L,q);
+  if(T){
+    // Listening questions get a short grace period while the word is spoken
+    const t0=Date.now()+(q.say?1200:0),bar=$("tbar");
+    R.deadline=t0+T*1000;R.T=T;
+    timerId=setInterval(()=>{
+      const left=Math.max(0,R.deadline-Date.now()),frac=Math.min(1,left/(T*1000));
+      bar.style.transform=`scaleX(${frac})`;bar.classList.toggle("low",frac<.3);
+      if(left<=0){stopTimer();answer(null,null,true)}
+    },100);
+  }
+}
+function wireBuild(q){
+  const picked=[];
+  const slots=[...$("slots").children],tiles=[...$("tiles").children];
+  const paint=()=>slots.forEach((s,i)=>{s.textContent=picked[i]!=null?q.build[picked[i]]:"";s.classList.toggle("full",picked[i]!=null)});
+  tiles.forEach(t=>t.onclick=()=>{
+    if(R.locked||picked.length>=slots.length)return;
+    picked.push(+t.dataset.t);t.disabled=true;paint();
+    if(picked.length===slots.length)answer(picked.map(i=>q.build[i]).join(""));
+  });
+  slots.forEach(s=>s.onclick=()=>{
+    if(R.locked||!picked.length)return;
+    tiles[picked.pop()].disabled=false;paint();
+  });
+}
+function answer(val,btn,timeout){
+  if(R.locked)return;R.locked=true;
+  const q=R.qs[R.n],L=R.L,ok=!timeout&&val===q.answer;
+  let frac=0;
+  if(qTime(L,q)){frac=Math.max(0,(R.deadline-Date.now())/(R.T*1000));stopTimer()}
+  screen.querySelectorAll(".opt").forEach((b,i)=>{b.disabled=true;if(q.opts[i]===q.answer)b.classList.add("right")});
+  if(btn&&!ok)btn.classList.add("wrong");
+  if(q.build){$("slots").classList.add(ok?"right":"wrong");screen.querySelectorAll(".tiles button").forEach(t=>t.disabled=true)}
+  R.res[R.n]=ok;
+  const fb=$("fb");
+  if(ok){
+    R.streak++;R.best=Math.max(R.best,R.streak);
+    const gain=scoreAnswer(L.w,frac,R.streak);R.pts+=gain;$("pts").textContent=R.pts;
+    const p=PRAISE[rnd(PRAISE.length)];
+    fb.className="feedback ok";fb.innerHTML=`<span class="en">${p}</span> +${gain}${R.streak>=3?` 🔥${R.streak}`:""}`;
+    speak(q.sayAfter||p,0.9);
+    setTimeout(()=>{if(R&&R.qs[R.n]===q)next()},q.sayAfter&&q.sayAfter.length>12?1900:1200);
+  }else{
+    R.streak=0;R.hearts--;
+    screen.querySelector(".hearts").textContent=heartsStr();
+    fb.className="feedback no";
+    fb.innerHTML=`${timeout?"נגמר הזמן! ":"כמעט! "}התשובה: <span class="${q.he?"":"en"}">${esc(q.answer)}</span>`;
+    if(!q.he)speak(q.sayAfter||(q.answer.length===1?letterSpeech(q.answer.toUpperCase()):q.answer));
+    const nb=$("nextQ");nb.hidden=false;nb.textContent=R.hearts<=0?"לתוצאה ←":"הבא ←";nb.focus();
+  }
+}
+function next(){
+  if(!R)return;
+  if(R.hearts<=0||R.n>=qCount(R.L)-1)return finish();
+  R.n++;renderQ();
+}
+function finish(){
+  stopTimer();
+  const p=me(),li=R.li,L=R.L,won=R.hearts>0;
+  const bonus=finishBonus(L.w,R.hearts),total=won?R.pts+bonus:0,stars=won?R.hearts:0;
+  const before=passedCount(p),prev=p.best[li];
+  if(won)record(p,li,total,stars);
+  const after=passedCount(p),isBest=won&&(!prev||total>prev.pts);
+  const right=R.res.filter(x=>x).length;
+  updateChip();
+  let news="";
+  if(won&&after>before&&after<LEVELS.length)news=`🔓 נפתח שלב ${after+1}: ${LEVELS[after].t}`;
+  if(won&&after>before&&LEVELS[after]&&LEVELS[after].w!==L.w)news=`🗺️ עולם חדש נפתח: ${WORLDS[LEVELS[after].w-1].name}!`;
+  if(won&&after===LEVELS.length&&before<LEVELS.length)news="👑 סיימת את כל המסע! את/ה אגדה!";
+  const nextOk=won&&li+1<LEVELS.length;
+  screen.innerHTML=`<div class="play qres">
+    <h2>${won?(stars===3?"מושלם!":"עברת את השלב!"):"נגמרו הלבבות"}</h2>
+    <div class="bigst">${starStr(stars)}</div>
+    ${won?`<div class="gain en">+${total}</div><span class="muted">💎 נקודות${isBest&&prev?" · שיא חדש!":""}</span>`:`<p style="margin:0">${tx("לא נורא! כל ניסיון מלמד. נסי שוב, את יכולה!","לא נורא! כל ניסיון מלמד. נסה שוב, אתה יכול!")}</p>`}
+    <table><tr><td>תשובות נכונות</td><td class="en">${right}/${R.res.length}</td></tr>
+      <tr><td>רצף הכי ארוך</td><td class="en">${R.best}</td></tr>
+      ${won?`<tr><td>בונוס לבבות</td><td class="en">+${bonus}</td></tr>`:""}</table>
+    ${news?`<div class="news">${news}</div>`:""}
+    <div class="row">
+      ${nextOk?`<button class="btn big warm" id="nextL">לשלב ${li+2} ▶</button>`:""}
+      <button class="btn${won?" ghost":" big warm"}" id="again">${tx("שחקי שוב","שחק שוב")}</button>
+      <button class="btn ghost" id="toMap">למפה</button>
+    </div></div>`;
+  if(nextOk)$("nextL").onclick=()=>tryLevel(li+1);
+  $("again").onclick=()=>go(startLevel,li);
+  $("toMap").onclick=()=>go(showMap);
+  speak(won?(stars===3?"Perfect! Three stars!":"Level complete!"):"Good try! Let's try again.",0.9);
+  if(won&&stars===3)confetti();
+  R=null;
+}
+function confetti(){
+  const c=document.createElement("div");c.className="confetti";
+  c.innerHTML=Array.from({length:22},()=>`<i style="left:${rnd(96)}%;animation-delay:${rnd(600)}ms">${["⭐","🎉","💎","✨"][rnd(4)]}</i>`).join("");
+  document.body.appendChild(c);setTimeout(()=>c.remove(),2600);
+}
+
+/* ---------- leaderboard ---------- */
+function showBoard(){
+  const p=me();updateChip();
+  const rows=boardRows();
+  const medal=i=>["🥇","🥈","🥉"][i]||i+1;
+  const txt=p?shareText(p):"";
+  screen.innerHTML=`
+    <h2>🏆 טבלת אלופים</h2>
+    <p class="muted" style="margin-top:-6px">מדרגים לפי השלב הכי גבוה, ואחר כך לפי נקודות.</p>
+    <div class="board">${rows.map((r,i)=>`<div class="brow${p&&r.id===p.id?" me":""}">
+      <span class="pl">${medal(i)}</span><span class="av">${r.av}</span>
+      <span class="nm"><b>${esc(r.name)}</b><small>${r.local?"במכשיר הזה":"חבר/ה"} · ${r.pts.toLocaleString("en-US")} 💎 · ★${r.stars}</small></span>
+      <span class="lv"><b>${Math.min(r.passed+1,LEVELS.length)}</b><small>שלב</small></span>
+      ${r.friend!=null?`<button class="del" data-f="${r.friend}" aria-label="הסרה">✕</button>`:"<span></span>"}</div>`).join("")}</div>
+    ${p?`<div class="card form" style="margin-bottom:14px">
+      <h3>📤 שולחים את ההישג לחברים</h3>
+      <p class="muted" style="margin:0">החברים מדביקים את ההודעה אצלם, ואתם מופיעים בטבלה שלהם.</p>
+      <div class="codebox" id="myCode">${esc(txt)}</div>
+      <div class="row"><button class="btn" id="copy">העתקה</button>
+        <a class="btn alt" style="text-decoration:none" id="wa" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">שליחה בוואטסאפ</a></div>
+      <div class="msg ok" id="copyMsg"></div></div>`:""}
+    <form class="card form" id="addF">
+      <h3>➕ מוסיפים חבר/ה לטבלה</h3>
+      <label for="fCode">מדביקים כאן את ההודעה שקיבלתם</label>
+      <textarea id="fCode" placeholder="🏆 ... הקוד שלי לטבלת האלופים: EQ:..."></textarea>
+      <div class="msg" id="fMsg"></div>
+      <button class="btn" type="submit">הוספה לטבלה</button></form>
+    <div class="row" style="margin-top:16px"><button class="btn ghost" id="toMap">→ חזרה למפה</button></div>`;
+  screen.querySelectorAll(".del").forEach(b=>b.onclick=()=>{S.friends.splice(+b.dataset.f,1);save();showBoard()});
+  $("toMap").onclick=()=>go(p?showMap:showProfiles);
+  if(p)$("copy").onclick=()=>{
+    const ok=()=>$("copyMsg").textContent="הועתק! אפשר להדביק בוואטסאפ.";
+    try{navigator.clipboard.writeText(txt).then(ok,()=>selectCode())}catch(e){selectCode()}
+  };
+  $("addF").onsubmit=e=>{
+    e.preventDefault();const f=parseShare($("fCode").value),m=$("fMsg");
+    if(!f){m.className="msg no";m.textContent="לא מצאתי קוד תקין. צריך להדביק את כל ההודעה, כולל EQ:...";return}
+    const r=addFriend(f);
+    if(r==="self"){m.className="msg no";m.textContent="זה שחקן שכבר נמצא במכשיר הזה.";return}
+    m.className="msg ok";m.textContent=r==="old"?"יש כבר תוצאה חדשה יותר של "+f.name:f.name+" נוסף/ה לטבלה!";
+    if(r==="ok")setTimeout(showBoard,900);
+  };
+}
+function selectCode(){const r=document.createRange();r.selectNodeContents($("myCode"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="סמנו והעתיקו את הטקסט."}
+
+/* ---------- paywall sheet ---------- */
+function closeSheet(){const s=$("sheet");if(s)s.remove()}
+function showPaywall(li){
+  closeSheet();
+  const d=document.createElement("div");d.className="sheet";d.id="sheet";
+  d.innerHTML=`<form class="card" id="payF" role="dialog" aria-label="פתיחת המסע המלא">
+    <h2 style="margin:0">🔑 פותחים את המסע המלא</h2>
+    <p style="margin:0">שלבים 1–${FREE_LEVELS} חינם. כדי להמשיך לשלב ${li+1} ולכל ${LEVELS.length} השלבים צריך קוד גישה.</p>
+    <ul><li>4 עולמות נוספים: צבעים, ימים, מילים ומשפטים</li><li>מבחן האלופים והבוס הגדול</li><li>כל הילדים במכשיר, תשלום חד-פעמי</li></ul>
+    <label for="acc">קוד גישה</label><input type="text" id="acc" class="en" placeholder="EQ-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
+    <div class="msg" id="accMsg"></div>
+    <div class="row"><button class="btn" type="submit">פתיחה</button><button class="btn ghost" type="button" id="accX">אחר כך</button></div></form>`;
+  document.body.appendChild(d);
+  d.onclick=e=>{if(e.target===d)closeSheet()};
+  $("accX").onclick=closeSheet;
+  $("payF").onsubmit=e=>{
+    e.preventDefault();const c=$("acc").value;
+    if(!validCode(c)){$("accMsg").className="msg no";$("accMsg").textContent="הקוד לא תקין. בדקו שהוקלד בדיוק כמו שקיבלתם.";return}
+    S.license=c.trim().toUpperCase();save();$("accMsg").className="msg ok";$("accMsg").textContent="המסע המלא נפתח! 🎉";
+    setTimeout(()=>{closeSheet();showMap()},900);
+  };
+}
+
+/* ---------- boot ---------- */
+try{if(location.hash==="#paywall")PAYWALL=true}catch(e){}
+// Called by the tab bar each time the quest tab opens
+function open(){go(me()?showMap:showProfiles)}
+window.EQ={open,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
+  go,startLevel,next,finish,showMap,showBoard,showProfiles,showPaywall,tx,nodeXY,get R(){return R},setPaywall:v=>{PAYWALL=v}};
+})();
+try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h);if(h==="paywall")showTab("quest")}catch(e){}
 </script>
 
 </body>

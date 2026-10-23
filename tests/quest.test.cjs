@@ -1,11 +1,11 @@
-// End-to-end checks for quest.html (English Quest levels game).
-// Run: node tests/quest.test.cjs [path/to/quest.html]
+// End-to-end checks for English Quest, the levels game in the "מסע" tab of index.html.
+// Run: node tests/quest.test.cjs [path/to/index.html]
 // Needs Playwright and a Chromium build. speechSynthesis is replaced by a recorder.
 const path = require("path");
 let chromium;
 try { ({ chromium } = require("playwright")); } catch { ({ chromium } = require("/opt/node22/lib/node_modules/playwright")); }
 
-const FILE = path.resolve(process.argv[2] || path.join(__dirname, "..", "quest.html"));
+const FILE = path.resolve(process.argv[2] || path.join(__dirname, "..", "index.html"));
 const URL = "file://" + FILE;
 
 function stub() {
@@ -27,6 +27,7 @@ async function newPage(browser) {
   page.on("pageerror", e => page.errors.push(e.message));
   await page.addInitScript(stub);
   await page.goto(URL);
+  await page.click("#tab-quest");
   return page;
 }
 const noOverflow = page => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
@@ -54,7 +55,7 @@ async function answerQ(page, right) {
   }
   return q;
 }
-const advance = page => page.evaluate(() => next());
+const advance = page => page.evaluate(() => EQ.next());
 
 (async () => {
   const browser = await chromium.launch();
@@ -152,8 +153,27 @@ const advance = page => page.evaluate(() => next());
     await createPlayer(page, "נועה");
     check("map shown after creating player", await page.isVisible(".hero"));
     check("hero shows level 1", (await page.textContent(".hero .stat b")).startsWith("1"));
-    check("only level 1 open", (await page.$$(".node:not(.lock)")).length === 1);
+    check("only level 1 open", (await page.$$(".mnode:not(.lock)")).length === 1);
     check("no overflow: map", await noOverflow(page));
+    const mapCheck = async label => {
+      const m = await page.evaluate(() => {
+        const box = document.querySelector("#qmap").getBoundingClientRect();
+        const balls = [...document.querySelectorAll(".mnode .ball")].map(b => b.getBoundingClientRect());
+        const bans = [...document.querySelectorAll(".wban")].map(b => b.getBoundingClientRect());
+        const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+        const inside = r => r.left >= box.left - 1 && r.right <= box.right + 1 && r.top >= box.top - 1 && r.bottom <= box.bottom + 1;
+        let overlaps = 0, outside = 0, banHits = 0;
+        balls.forEach((a, i) => { if (!inside(a)) outside++; balls.slice(i + 1).forEach(b => { if (hit(a, b)) overlaps++; }); bans.forEach(b => { if (hit(a, b)) banHits++; }); });
+        bans.forEach(b => { if (!inside(b)) outside++; });
+        return { n: balls.length, overlaps, outside, banHits, avatar: !!document.querySelector(".me-av"), now: document.querySelectorAll(".mnode.now").length };
+      });
+      check(`map ${label}: 24 level buttons`, m.n === 24, m.n);
+      check(`map ${label}: level circles never overlap`, m.overlaps === 0, m.overlaps);
+      check(`map ${label}: world banners never cover a level`, m.banHits === 0, m.banHits);
+      check(`map ${label}: everything inside the map`, m.outside === 0, m.outside);
+      check(`map ${label}: avatar and one current level`, m.avatar && m.now === 1, JSON.stringify(m));
+    };
+    await mapCheck("phone");
     check("footer credit", (await page.textContent("footer")).includes("Made with ❤ by Yaron Y"));
 
     // Level 1: all right -> 3 stars, 140 points (8x10 + 6 streak bonuses of 5 + 3 hearts x 10)
@@ -164,7 +184,7 @@ const advance = page => page.evaluate(() => next());
     const said = await page.evaluate(() => window.__said.map(u => u.lang));
     check("speech is en-US", said.length > 0 && said.every(l => l === "en-US"));
     await advance(page);
-    check("level 1 result: 3 stars", (await page.$$(".bigst .off")).length === 0 && (await page.textContent(".result h2")).includes("מושלם"));
+    check("level 1 result: 3 stars", (await page.$$(".bigst .off")).length === 0 && (await page.textContent(".qres h2")).includes("מושלם"));
     check("level 1 result: +140", (await page.textContent(".gain")).trim() === "+140", await page.textContent(".gain"));
     check("level 1 result: level 2 unlocked", (await page.textContent(".news")).includes("שלב 2"));
     check("no overflow: result", await noOverflow(page));
@@ -174,17 +194,17 @@ const advance = page => page.evaluate(() => next());
     // Replay level 1 and lose: 3 wrong answers end the level, best score is kept
     await page.click("#again");
     for (let n = 0; n < 3; n++) { await answerQ(page, false); await advance(page); }
-    check("3 mistakes end the level", (await page.textContent(".result h2")).includes("נגמרו הלבבות"));
+    check("3 mistakes end the level", (await page.textContent(".qres h2")).includes("נגמרו הלבבות"));
     check("losing keeps the best score", (await page.evaluate(() => EQ.S.profiles[0].best[0].pts)) === 140);
     await page.click("#toMap");
 
     // Locked level does nothing
-    await page.click('.node[data-li="5"]');
+    await page.click('.mnode[data-li="5"]');
     check("locked level stays on map", await page.isVisible(".hero"));
 
     // Play every level to the end with one mistake each (2 stars), forcing one timeout on timed levels
     for (let li = 1; li < 24; li++) {
-      await page.evaluate(i => { go(startLevel, i); }, li);
+      await page.evaluate(i => { EQ.go(EQ.startLevel, i); }, li);
       const L = await page.evaluate(i => EQ.LEVELS[i], li);
       const qn = L.n || 8;
       for (let n = 0; n < qn; n++) {
@@ -202,15 +222,17 @@ const advance = page => page.evaluate(() => next());
         await advance(page);
       }
       await advance(page);
-      const h = await page.textContent(".result h2");
+      const h = await page.textContent(".qres h2");
       check(`level ${li + 1}: passed with 2 stars`, h.includes("עברת") && (await page.$$(".bigst .off")).length === 1, h);
       if (li === 23) check("no overflow: final result", await noOverflow(page));
     }
     const prog = await page.evaluate(() => { const p = EQ.S.profiles[0]; return { passed: EQ.passedCount(p), pts: EQ.totalPts(p) }; });
     check("all 24 levels passed", prog.passed === 24, prog.passed);
     check("points grow with worlds", prog.pts > 140 * 24, prog.pts);
-    await page.evaluate(() => go(showMap));
+    await page.evaluate(() => EQ.go(EQ.showMap));
     check("map rank is legend", (await page.textContent(".rank")).includes("אגדה"));
+    for (const w of [320, 430, 820]) { await page.setViewportSize({ width: w, height: 800 }); await page.waitForTimeout(100); await mapCheck(w + "px"); check(`no overflow: map at ${w}px`, await noOverflow(page)); }
+    await page.setViewportSize({ width: 375, height: 740 });
     check("no JS errors (playthrough)", page.errors.length === 0, page.errors.join("; "));
 
     // Leaderboard + sharing to a second device
@@ -231,14 +253,14 @@ const advance = page => page.evaluate(() => next());
     await p2.waitForTimeout(1000);
     const rows = await p2.$$eval(".brow .nm b", els => els.map(e => e.textContent));
     check("friend added and ranked first", rows[0] === "נועה" && rows[1] === "דני", rows.join(","));
-    check("boy profile uses masculine text", (await p2.evaluate(() => tx("נסי", "נסה"))) === "נסה");
+    check("boy profile uses masculine text", (await p2.evaluate(() => EQ.tx("נסי", "נסה"))) === "נסה");
     await p2.click(".del");
     check("friend can be removed", (await p2.$$(".brow")).length === 1);
 
     // Paywall preview: level 9 needs a code
-    await p2.evaluate(() => { EQ.setPaywall(true); const p = EQ.S.profiles[0]; for (let i = 0; i < 8; i++) p.best[i] = { pts: 100, stars: 3 }; go(showMap); });
-    check("paywalled levels show a key", (await p2.$$('.node.lock .ball')).length > 0 && (await p2.textContent('.node[data-li="8"] .ball')).includes("🔑"));
-    await p2.click('.node[data-li="8"]');
+    await p2.evaluate(() => { EQ.setPaywall(true); const p = EQ.S.profiles[0]; for (let i = 0; i < 8; i++) p.best[i] = { pts: 100, stars: 3 }; EQ.go(EQ.showMap); });
+    check("paywalled levels show a key", (await p2.$$('.mnode.lock .ball')).length > 0 && (await p2.textContent('.mnode[data-li="8"] .ball')).includes("🔑"));
+    await p2.click('.mnode[data-li="8"]');
     check("paywall sheet opens", await p2.isVisible("#sheet"));
     check("no overflow: paywall", await noOverflow(p2));
     await p2.fill("#acc", "EQ-AAAA-AAAA");
@@ -248,7 +270,7 @@ const advance = page => page.evaluate(() => next());
     await p2.fill("#acc", code.toLowerCase());
     await p2.click("#payF button[type=submit]");
     await p2.waitForTimeout(1100);
-    check("valid access code unlocks", !(await p2.isVisible("#sheet")) && !(await p2.textContent('.node[data-li="8"] .ball')).includes("🔑"));
+    check("valid access code unlocks", !(await p2.isVisible("#sheet")) && !(await p2.textContent('.mnode[data-li="8"] .ball')).includes("🔑"));
     await p2.reload();
     check("license survives reload", await p2.evaluate(() => !!EQ.S.license));
     check("no JS errors (second device)", p2.errors.length === 0, p2.errors.join("; "));
