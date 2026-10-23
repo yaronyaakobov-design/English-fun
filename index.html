@@ -397,6 +397,11 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
 @keyframes starpop{0%{transform:scale(0) rotate(-45deg);opacity:0}70%{transform:scale(1.35) rotate(8deg);opacity:1}100%{transform:scale(1)}}
 @keyframes bob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @media (prefers-reduced-motion: reduce){.pet .pe,.grow .pe,.qres .bigst i{animation:none}}
+.spk .bigq{font-size:44px}
+.swbig{width:96px;height:96px;border-radius:50%;border:4px solid #fff;box-shadow:var(--shadow)}
+.mic{display:block;margin:6px auto 0;width:96px;height:96px;border-radius:50%;border:none;background:var(--tomato);color:#fff;font-size:44px;box-shadow:0 6px 0 rgba(30,42,68,.25)}
+.mic.on{background:var(--grass);animation:pulse 1s ease-in-out infinite}
+.spk .feedback{text-align:center}
 </style>
 
 </head>
@@ -511,7 +516,7 @@ nav.tabs button.qtab[aria-selected="true"]{background:var(--sun);border-color:va
   <!-- QUEST -->
   <section id="sec-quest" hidden><div id="questScreen"></div></section>
 
-  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v13</span></span></footer>
+  <footer class="credit"><span class="en" style="display:inline-block">Made with ❤ by Yaron Y · © 2026<span id="voiceName" style="opacity:.6"></span><span style="opacity:.6"> · v14</span></span></footer>
 </div>
 
 <script>
@@ -1198,6 +1203,7 @@ const STICKERS=[
  ["chest","🎁","תיבה יומית",p=>(p.chests||0)>=1],
  ["review","🔁","10 מילים בתרגול",p=>(p.reviewed||0)>=10],
  ["friend","🤝","חבר בטבלה",()=>S.friends.length>0],
+ ["speak","🎤","10 מילים בקול",p=>(p.spoken||0)>=10],
  ["hatch","🐣","הביצה בקעה",p=>petOf(p).i>=1],
  ["dragon","🐉","דרקון אגדי",p=>petOf(p).i>=PET.length-1]
 ];
@@ -1262,7 +1268,7 @@ function boardRows(){
 /* ---------- screens ---------- */
 const screen=$("questScreen");
 let timerId=null;
-function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}stopListen()}
 function go(fn,...a){stopTimer();closeSheet();window.scrollTo(0,0);fn(...a)}
 function updateChip(){}
 
@@ -1419,6 +1425,7 @@ function showMap(scroll=true){
       <button class="btn big warm" id="qx-cont">▶ ${passed>=LEVELS.length?tx("עברת הכול! שחקי שוב","עברת הכול! שחק שוב"):"לשלב "+(fo+1)}</button>
       <button class="btn alt" id="qx-toBoard">🏆 טבלת אלופים${st.of>1?` · מקום ${st.place} מ-${st.of}`:""}</button>
       ${rv?`<button class="btn alt2" id="qx-review">🔁 תרגול טעויות (${rv})</button>`:""}
+      ${SR?`<button class="btn alt" id="qx-speak">🎤 מדברים אנגלית</button>`:""}
       <button class="btn alt2" id="qx-album">🏅 מדבקות ${stickerCount(p)}/${STICKERS.length}</button>
       <button class="btn ghost" id="qx-toProfiles">👥 החלפת שחקן</button>
     </div>
@@ -1431,6 +1438,7 @@ function showMap(scroll=true){
   $("qx-toBoard").onclick=()=>go(showBoard);
   $("qx-toProfiles").onclick=()=>go(showProfiles);
   $("qx-album").onclick=()=>go(showStickers);
+  if(SR)$("qx-speak").onclick=()=>go(startSpeak);
   if(rv)$("qx-review").onclick=()=>go(startReview);
   if($("qx-placeGo")){$("qx-placeGo").onclick=()=>go(startPlacement);$("qx-placeNo").onclick=()=>{p.placed={w:1,declined:true};save();showMap(false)}}
   // Bring the player's spot on the map into view
@@ -1725,6 +1733,113 @@ function reviewFinish(){
   R=null;
 }
 
+/* ---------- speaking practice ---------- */
+// Uses the speech recognition built into the browser (Safari on iPhone, Chrome). Hidden where it is missing.
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const SPEAK_N=6,SPEAK_TRIES=3;
+let SP=null,REC=null;
+function speakPool(){
+  return [...ANIMALS.map(a=>({en:a[0],pic:a[1],he:a[2]})),...FOOD.map(f=>({en:f[0],pic:f[1],he:f[2]})),
+    ...COLORS.map(x=>({en:x[0],sw:x[3],he:x[1]})),
+    ...WORDS.filter(w=>w.emoji&&/^[a-z]+$/i.test(w.en)).map(w=>({en:w.en,pic:w.emoji,he:w.he}))];
+}
+const normWords=s=>String(s).toLowerCase().replace(/[^a-z ]/g," ").split(/\s+/).filter(Boolean);
+function editDist(a,b){
+  const d=Array.from({length:a.length+1},(_,i)=>[i,...Array(b.length).fill(0)]);
+  for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+// Heard right if any guess contains the word; one letter off is forgiven for longer words (children's accents)
+function heardRight(word,alts){
+  const w=word.toLowerCase(),tol=w.length>=5?1:0;
+  return alts.some(a=>{const ws=normWords(a);return ws.join(" ").includes(w)||ws.some(x=>editDist(x,w)<=tol)});
+}
+function stopListen(){if(REC){const r=REC;REC=null;try{r.abort()}catch(e){}}}
+function startSpeak(){
+  SP={items:shuffle(speakPool()).slice(0,SPEAK_N),n:0,tries:0,res:[]};
+  renderSpeak();
+}
+function renderSpeak(){
+  const it=SP.items[SP.n];
+  const dots=SP.items.map((_,i)=>`<i class="${SP.res[i]===true?"ok":SP.res[i]===false?"no":i===SP.n?"now":""}"></i>`).join("");
+  screen.innerHTML=`<div class="play spk">
+    <div class="phead"><button class="x" id="qx-quit" aria-label="חזרה למפה">✕</button><span class="lt">🎤 מדברים אנגלית</span></div>
+    <div class="dots">${dots}</div>
+    <div class="prompt">
+      ${it.sw?`<div class="swbig" style="background:${it.sw}"></div>`:`<div class="pic">${it.pic}</div>`}
+      <div class="bigq en">${esc(it.en)}</div><div class="qhint">${esc(it.he)}</div>
+      <button class="say" id="qx-spHear">🔊 שמעו איך אומרים</button>
+    </div>
+    <button class="mic" id="qx-mic" aria-label="לחצו ואמרו את המילה">🎤</button>
+    <div class="feedback" id="qx-spMsg" aria-live="polite">${tx("לחצי על המיקרופון ותגידי","לחץ על המיקרופון ותגיד")} <b class="en">${esc(it.en)}</b></div>
+    <div class="foot"><button class="btn ghost" id="qx-spSkip"${SP.tries>=SPEAK_TRIES-1?"":" hidden"}>דילוג ←</button></div>
+  </div>`;
+  $("qx-quit").onclick=()=>go(showMap);
+  $("qx-spHear").onclick=()=>speak(it.en);
+  $("qx-mic").onclick=listen;
+  $("qx-spSkip").onclick=()=>speakNext(false);
+  setTimeout(()=>{if(SP&&SP.items[SP.n]===it&&!SP.tries)speak(it.en)},300);
+}
+function listen(){
+  if(!SP||REC)return;
+  const it=SP.items[SP.n],msg=$("qx-spMsg"),mic=$("qx-mic");
+  try{speechSynthesis.cancel()}catch(e){}
+  const r=new SR();REC=r;
+  r.lang="en-US";r.interimResults=false;r.maxAlternatives=5;
+  mic.classList.add("on");msg.className="feedback";msg.textContent="🎙️ מקשיב...";
+  let got=false;
+  r.onresult=e=>{
+    got=true;
+    const alts=[...e.results[0]].map(a=>a.transcript);
+    REC=null;mic.classList.remove("on");
+    if(heardRight(it.en,alts)){
+      msg.className="feedback ok";msg.innerHTML=`<span class="en">${PRAISE[rnd(PRAISE.length)]}</span> +5`;
+      sfx("ok");speakNext(true);
+    }else{
+      SP.tries++;sfx("no");
+      msg.className="feedback no";
+      msg.innerHTML=`שמעתי: <span class="en">${esc(alts[0]||"...")}</span><br>${SP.tries>=SPEAK_TRIES?"נמשיך למילה הבאה":"עוד פעם!"}`;
+      if(SP.tries>=SPEAK_TRIES)setTimeout(()=>speakNext(false),1600);
+      else{speak(it.en);$("qx-spSkip").hidden=SP.tries<SPEAK_TRIES-1}
+    }
+  };
+  r.onerror=e=>{
+    REC=null;mic.classList.remove("on");got=true;
+    msg.className="feedback no";
+    msg.textContent=e.error==="not-allowed"||e.error==="service-not-allowed"
+      ?"צריך לאשר מיקרופון. באייפון: הגדרות ← Siri ← להפעיל הכתבה, ולאשר לספארי מיקרופון."
+      :e.error==="no-speech"?"לא שמעתי. נסו שוב, קרוב יותר לטלפון.":"משהו לא עבד. נסו שוב.";
+  };
+  r.onend=()=>{if(REC===r){REC=null;mic.classList.remove("on");if(!got){msg.className="feedback";msg.textContent="לא שמעתי. לחצו שוב ודברו."}}};
+  try{r.start()}catch(e){REC=null;mic.classList.remove("on")}
+}
+function speakNext(ok){
+  SP.res[SP.n]=ok;
+  const at=SP.n;
+  setTimeout(()=>{
+    if(!SP||SP.n!==at)return;
+    if(SP.n>=SP.items.length-1)return speakFinish();
+    SP.n++;SP.tries=0;renderSpeak();
+  },ok?1100:200);
+}
+function speakFinish(){
+  const p=me(),right=SP.res.filter(x=>x).length,gain=right*5;
+  p.spoken=(p.spoken||0)+right;p.extra=(p.extra||0)+gain;
+  playedToday(p);
+  const stk=checkStickers(p);save();
+  screen.innerHTML=`<div class="play qres">
+    <h2>🎤 ${right>=SP.items.length-1?"מדהים!":right?"כל הכבוד!":"התחלה טובה!"}</h2>
+    <p style="margin:0">${tx("אמרת","אמרת")} נכון ${right} מתוך ${SP.items.length} מילים${gain?` · <b class="en">+${gain}</b> 💎`:""}</p>
+    ${stk.map(s=>`<div class="news stk">🏅 מדבקה חדשה: ${s[1]} ${s[2]}</div>`).join("")}
+    <div class="row"><button class="btn big warm" id="qx-spAgain">עוד סיבוב ▶</button><button class="btn ghost" id="qx-toMap">למפה</button></div></div>`;
+  $("qx-spAgain").onclick=()=>go(startSpeak);
+  $("qx-toMap").onclick=()=>go(showMap);
+  sfx("win");if(right>=SP.items.length-1)confetti(24);
+  speak(right?"Great speaking!":"Good try!",0.9);
+  SP=null;
+}
+
 /* ---------- sticker album ---------- */
 function showStickers(){
   const p=me();checkStickers(p);
@@ -1809,7 +1924,7 @@ function showPaywall(li){
 // Called by the tab bar each time the quest tab opens
 function open(){go(me()?showMap:showProfiles)}
 window.addEventListener("hashchange",()=>{try{const h=location.hash;if(h.startsWith("#eq=")){showTab("quest");fromLink(decodeURIComponent(h.slice(4)));history.replaceState(null,"",location.pathname+location.search)}}catch(e){}});
-window.EQ={startReview,showStickers,petOf,goalOf,addGoal,checkStickers,STICKERS,PET,open,fromLink,startPlacement,placeResult,needsHelp,totalStars,firstOpen,migrate,VER,BACKUP_KEY,streakDays,playedToday,standing,shareText,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
+window.EQ={startSpeak,heardRight,get SP(){return SP},startReview,showStickers,petOf,goalOf,addGoal,checkStickers,STICKERS,PET,open,fromLink,startPlacement,placeResult,needsHelp,totalStars,firstOpen,migrate,VER,BACKUP_KEY,streakDays,playedToday,standing,shareText,LEVELS,WORLDS,GEN,SENTENCES,makeQuestions,scoreAnswer,finishBonus,makeCode,validCode,encodeShare,parseShare,sortBoard,passedCount,totalPts,unlocked,misspell,S,
   go,startLevel,next,finish,showMap,showBoard,showProfiles,showPaywall,tx,nodeXY,get R(){return R},setPaywall:v=>{PAYWALL=v}};
 })();
 try{const h=location.hash.slice(1);if(["letters","days","numbers","colors","words","games","quest"].includes(h))showTab(h);

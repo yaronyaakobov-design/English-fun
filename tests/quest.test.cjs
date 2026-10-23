@@ -14,6 +14,18 @@ function stub() {
   const synth = { getVoices: () => list, speak: u => window.__said.push({ text: u.text, lang: u.lang }), cancel() {}, addEventListener() {} };
   Object.defineProperty(window, "speechSynthesis", { value: synth, configurable: true });
   window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+  // Speech recognition stub: window.__hear is what the "child" says (list of guesses) or { error }
+  window.__hear = null;
+  window.SpeechRecognition = window.webkitSpeechRecognition = function () {
+    const r = this;
+    r.start = () => setTimeout(() => {
+      const h = window.__hear;
+      if (h && h.error) { r.onerror && r.onerror({ error: h.error }); r.onend && r.onend(); return; }
+      if (h) r.onresult && r.onresult({ results: [h.map(transcript => ({ transcript }))] });
+      r.onend && r.onend();
+    }, 30);
+    r.abort = () => {};
+  };
 }
 
 let pass = 0, fail = 0;
@@ -489,7 +501,7 @@ const smallTargets = page => page.evaluate(() => [...document.querySelectorAll("
     check("map: practice button gone when nothing to practice", !(await pg.isVisible("#qx-review")));
     await pg.click("#qx-album");
     const album = await pg.evaluate(() => ({ got: document.querySelectorAll(".stkc.got").length, all: document.querySelectorAll(".stkc").length }));
-    check("sticker album lists all stickers, earned ones in color", album.all === 18 && album.got >= 4, JSON.stringify(album));
+    check("sticker album lists all stickers, earned ones in color", album.all === (await pg.evaluate(() => EQ.STICKERS.length)) && album.got >= 4, JSON.stringify(album));
     check("no overflow: album", await noOverflow(pg));
     // Near miss: losing on one of the last questions says how close it was
     await pg.evaluate(() => EQ.go(EQ.startLevel, 4));
@@ -497,6 +509,56 @@ const smallTargets = page => page.evaluate(() => [...document.querySelectorAll("
     check("near miss: 'so close' on a loss at the end", (await pg.textContent(".qres")).includes("כל כך קרוב"));
     check("no JS errors (v12 features)", pg.errors.length === 0, pg.errors.join("; "));
     await pg.context().close();
+  }
+
+  // ---------- v14: speaking practice with the built-in speech recognition ----------
+  {
+    const pg = await withSave({ ver: 3, cur: "h8", friends: [], profiles: [{ id: "h8", name: "תום", av: "🐯", g: "m", placed: { w: 1 }, best: {} }] });
+    const hr = await pg.evaluate(() => [EQ.heardRight("elephant", ["elephent"]), EQ.heardRight("red", ["I said red"]), EQ.heardRight("cat", ["cut"]), EQ.heardRight("dog", ["", "Dog."]), EQ.heardRight("ice cream", ["ice cream please"]), EQ.heardRight("monkey", ["donkey"])]);
+    check("speaking: matching forgives one letter in long words only", hr.join() === "true,true,false,true,true,true", hr.join());
+    check("speaking: button on the map", await pg.isVisible("#qx-speak"));
+    await pg.evaluate(() => window.__said.splice(0));
+    await pg.click("#qx-speak");
+    await pg.waitForTimeout(400);
+    const w0 = await pg.evaluate(() => EQ.SP.items[0].en);
+    check("speaking: word shown and spoken to copy", (await pg.textContent(".spk .bigq")).trim() === w0 && (await pg.evaluate(w => window.__said.some(u => u.text === w && u.lang === "en-US"), w0)));
+    check("touch targets >= 44px: speaking", (await smallTargets(pg)).length === 0, (await smallTargets(pg)).join(","));
+    await pg.evaluate(w => { window.__hear = [w]; }, w0);
+    await pg.click("#qx-mic"); await pg.waitForTimeout(150);
+    check("speaking: right word praised", (await pg.getAttribute("#qx-spMsg", "class")).includes("ok"));
+    await pg.waitForTimeout(1200);
+    check("speaking: moves to the next word", (await pg.evaluate(() => EQ.SP.n)) === 1);
+    await pg.evaluate(() => { window.__hear = ["zzz"]; });
+    await pg.click("#qx-mic"); await pg.waitForTimeout(150);
+    check("speaking: wrong word -> shows what it heard, try again", (await pg.textContent("#qx-spMsg")).includes("zzz") && (await pg.evaluate(() => EQ.SP.tries)) === 1 && !(await pg.isVisible("#qx-spSkip")));
+    await pg.click("#qx-mic"); await pg.waitForTimeout(150);
+    check("speaking: skip offered after 2 tries", await pg.isVisible("#qx-spSkip"));
+    await pg.evaluate(() => { window.__hear = { error: "not-allowed" }; });
+    await pg.click("#qx-mic"); await pg.waitForTimeout(150);
+    check("speaking: microphone blocked -> explains how to allow", (await pg.textContent("#qx-spMsg")).includes("מיקרופון"));
+    await pg.evaluate(() => { window.__hear = ["zzz"]; });
+    await pg.click("#qx-mic"); await pg.waitForTimeout(1900);
+    check("speaking: after 3 tries goes on by itself", (await pg.evaluate(() => EQ.SP.n)) === 2);
+    for (let k = 2; k < 6; k++) {
+      await pg.evaluate(() => { window.__hear = [EQ.SP.items[EQ.SP.n].en]; });
+      await pg.click("#qx-mic"); await pg.waitForTimeout(1350);
+    }
+    check("speaking: result 5 of 6", (await pg.textContent(".qres")).includes("5 מתוך 6"));
+    const sp = await pg.evaluate(() => ({ spoken: EQ.S.profiles[0].spoken, extra: EQ.S.profiles[0].extra }));
+    check("speaking: words counted, +5 each", sp.spoken === 5 && sp.extra === 25, JSON.stringify(sp));
+    check("no JS errors (speaking)", pg.errors.length === 0, pg.errors.join("; "));
+    await pg.context().close();
+  }
+  {
+    // A browser without speech recognition simply has no speaking button
+    const ctx = await browser.newContext({ viewport: { width: 375, height: 740 } });
+    const pg = await ctx.newPage(); pg.errors = [];
+    await pg.addInitScript(stub);
+    await pg.addInitScript(() => { delete window.webkitSpeechRecognition; delete window.SpeechRecognition; });
+    await pg.goto(URL); await pg.click("#tab-quest");
+    await createPlayer(pg, "נגה");
+    check("no speech recognition -> no speaking button", !(await pg.isVisible("#qx-speak")) && await pg.isVisible("#qx-album"));
+    await ctx.close();
   }
 
   // ---------- Upgrades keep saved progress ----------

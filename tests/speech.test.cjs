@@ -59,7 +59,7 @@ function check(name, ok, detail) {
     const chosen = await page.evaluate(() => voice && voice.name);
     check(`${dev}: picks ${cfg.expect}`, chosen === cfg.expect, "got " + chosen);
     check(`${dev}: footer shows voice`, (await page.textContent("#voiceName")).includes(cfg.expect));
-    check(`${dev}: build tag v13`, (await page.textContent("footer")).includes("v13"));
+    check(`${dev}: build tag v14`, (await page.textContent("footer")).includes("v14"));
 
     // Narrator picker: woman / man / robot / squirrel, remembered after reload
     await said();
